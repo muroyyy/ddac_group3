@@ -65,6 +65,7 @@ This system addresses that problem by creating a digital bridge between **donors
 
 ## ⚙️ Repository Structure
 
+```
 blood-bank-management-system/
 │
 ├── frontend/ # ReactJS + Tailwind CSS source code
@@ -89,7 +90,7 @@ blood-bank-management-system/
 ├── .gitignore
 ├── README.md
 └── LICENSE (optional)
-
+```
 
 ---
 
