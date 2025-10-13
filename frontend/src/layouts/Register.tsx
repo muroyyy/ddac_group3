@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Droplet, 
   Mail, 
@@ -26,6 +27,7 @@ interface FormData {
 }
 
 const RegisterPage: React.FC = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
     fullName: '',
     email: '',
@@ -575,20 +577,25 @@ const RegisterPage: React.FC = () => {
           <div className="mt-8 text-center">
             <p className="text-gray-600">
               Already have an account?{' '}
-              <a href="#login" className="text-red-600 hover:text-red-700 font-semibold">
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                className="text-red-600 hover:text-red-700 font-semibold cursor-pointer"
+              >
                 Sign in
-              </a>
+              </button>
             </p>
           </div>
 
           <div className="mt-6 text-center">
-            <a 
-              href="#landing" 
-              className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to home
-            </a>
+            </button>
           </div>
         </div>
       </div>
