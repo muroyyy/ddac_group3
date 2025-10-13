@@ -170,17 +170,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
               </p>
             </div>
 
-            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex gap-2">
-                <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-blue-900 mb-1">Demo Admin Credentials</p>
-                  <p className="text-xs text-blue-700">Email: admin@bloodline.com</p>
-                  <p className="text-xs text-blue-700">Password: admin123</p>
-                </div>
-              </div>
-            </div>
-
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -199,7 +188,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                     className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
                       errors.email ? 'border-red-500 bg-red-50' : 'border-gray-300'
                     }`}
-                    placeholder="admin@bloodline.com"
+                    placeholder="Enter your email"
                   />
                 </div>
                 {errors.email && (
