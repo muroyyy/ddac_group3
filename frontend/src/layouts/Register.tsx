@@ -233,7 +233,6 @@ const RegisterPage: React.FC = () => {
                       className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
                         errors.fullName ? 'border-red-500 bg-red-50' : 'border-gray-300'
                       }`}
-                      placeholder="John Doe"
                     />
                   </div>
                   {errors.fullName && (
@@ -261,7 +260,6 @@ const RegisterPage: React.FC = () => {
                       className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
                         errors.email ? 'border-red-500 bg-red-50' : 'border-gray-300'
                       }`}
-                      placeholder="john@example.com"
                     />
                   </div>
                   {errors.email && (
@@ -289,7 +287,6 @@ const RegisterPage: React.FC = () => {
                       className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
                         errors.phone ? 'border-red-500 bg-red-50' : 'border-gray-300'
                       }`}
-                      placeholder="+60 12-345 6789"
                     />
                   </div>
                   {errors.phone && (
