@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BloodLine")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+171119ffd0f38406458929b1de2a3f687785aaea")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1782b0494490e166d00352580c94c83b686bdf57")]
 [assembly: System.Reflection.AssemblyProductAttribute("BloodLine")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BloodLine")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
