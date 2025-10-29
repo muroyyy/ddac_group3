@@ -45,10 +45,40 @@ resource "aws_instance" "main" {
   user_data = base64encode(<<-EOF
     #!/bin/bash
     apt-get update
-    apt-get install -y awscli
+    apt-get install -y awscli dotnet-runtime-8.0
+    
+    # Setup SSM Agent
     snap install amazon-ssm-agent --classic
     systemctl enable snap.amazon-ssm-agent.amazon-ssm-agent.service
     systemctl start snap.amazon-ssm-agent.amazon-ssm-agent.service
+    
+    # Create bloodline user and directories
+    useradd -r -s /bin/false bloodline
+    mkdir -p /opt/bloodline/app
+    chown bloodline:bloodline /opt/bloodline/app
+    
+    # Create systemd service
+    cat > /etc/systemd/system/bloodline-api.service << 'EOL'
+[Unit]
+Description=BloodLine API
+After=network.target
+
+[Service]
+Type=notify
+User=bloodline
+WorkingDirectory=/opt/bloodline/app
+ExecStart=/usr/bin/dotnet BloodLine.dll
+Restart=always
+RestartSec=10
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=ASPNETCORE_URLS=http://0.0.0.0:5000
+
+[Install]
+WantedBy=multi-user.target
+EOL
+    
+    systemctl daemon-reload
+    systemctl enable bloodline-api
   EOF
   )
 
