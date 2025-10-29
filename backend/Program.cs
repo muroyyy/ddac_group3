@@ -21,13 +21,17 @@ builder.Services.AddCors(options =>
 });
 
 // Add services to the container.
-builder.Services.AddDbContext<ApplicationDbContext>(async (serviceProvider, options) =>
+builder.Services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
 {
-    var databaseService = serviceProvider.GetRequiredService<DatabaseService>();
-    var credentials = await databaseService.GetDatabaseCredentialsAsync();
-    
-    var connectionString = $"Server={credentials.endpoint};Database={credentials.database};User={credentials.username};Password={credentials.password};";
+    // Use a simple connection string for now - will be updated at runtime
+    var connectionString = "Server=localhost;Database=bloodline;User=admin;Password=temp;";
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+});
+
+// Configure database connection at runtime
+builder.Services.AddScoped<IDbContextFactory<ApplicationDbContext>>(provider =>
+{
+    return new DbContextFactory(provider.GetRequiredService<DatabaseService>());
 });
 
 builder.Services.AddControllersWithViews();
