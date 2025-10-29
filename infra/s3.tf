@@ -6,13 +6,7 @@ resource "aws_s3_bucket" "frontend" {
   }
 }
 
-resource "aws_s3_bucket" "deployment" {
-  bucket = "${var.environment}-${var.project_name}-deployment-${random_id.bucket_suffix.hex}"
 
-  tags = {
-    Name = "${var.environment}-${var.project_name}-deployment"
-  }
-}
 
 resource "random_id" "bucket_suffix" {
   byte_length = 4

@@ -38,9 +38,9 @@ output "s3_website_url" {
   value       = aws_s3_bucket_website_configuration.frontend.website_endpoint
 }
 
-output "deployment_bucket_name" {
-  description = "S3 deployment bucket name"
-  value       = aws_s3_bucket.deployment.bucket
+output "ecr_repository_url" {
+  description = "ECR repository URL"
+  value       = aws_ecr_repository.backend.repository_url
 }
 
 output "github_actions_access_key_id" {

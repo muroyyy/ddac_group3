@@ -30,6 +30,29 @@ resource "aws_iam_role_policy_attachment" "ec2_ssm_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
+resource "aws_iam_role_policy_attachment" "ec2_ecr_policy" {
+  role       = aws_iam_role.ec2_ssm_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+}
+
+resource "aws_iam_role_policy" "ec2_secrets_policy" {
+  name = "${var.environment}-${var.project_name}-ec2-secrets-policy"
+  role = aws_iam_role.ec2_ssm_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ]
+        Resource = aws_secretsmanager_secret.db_credentials.arn
+      }
+    ]
+  })
+}
+
 resource "aws_iam_instance_profile" "ec2_profile" {
   name = "${var.environment}-${var.project_name}-ec2-profile"
   role = aws_iam_role.ec2_ssm_role.name
@@ -45,40 +68,23 @@ resource "aws_instance" "main" {
   user_data = base64encode(<<-EOF
     #!/bin/bash
     apt-get update
-    apt-get install -y awscli dotnet-runtime-8.0 mysql-client
+    apt-get install -y awscli mysql-client docker.io
+    
+    # Setup Docker
+    systemctl start docker
+    systemctl enable docker
+    usermod -aG docker ubuntu
     
     # Setup SSM Agent
     snap install amazon-ssm-agent --classic
     systemctl enable snap.amazon-ssm-agent.amazon-ssm-agent.service
     systemctl start snap.amazon-ssm-agent.amazon-ssm-agent.service
     
-    # Create bloodline user and directories
-    useradd -r -s /bin/false bloodline
-    mkdir -p /opt/bloodline/app
-    chown bloodline:bloodline /opt/bloodline/app
-    
-    # Create systemd service
-    cat > /etc/systemd/system/bloodline-api.service << 'EOL'
-[Unit]
-Description=BloodLine API
-After=network.target
-
-[Service]
-Type=notify
-User=bloodline
-WorkingDirectory=/opt/bloodline/app
-ExecStart=/usr/bin/dotnet BloodLine.dll
-Restart=always
-RestartSec=10
-Environment=ASPNETCORE_ENVIRONMENT=Production
-Environment=ASPNETCORE_URLS=http://0.0.0.0:5000
-
-[Install]
-WantedBy=multi-user.target
-EOL
-    
-    systemctl daemon-reload
-    systemctl enable bloodline-api
+    # Install AWS CLI v2
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    apt install unzip -y
+    unzip awscliv2.zip
+    ./aws/install
   EOF
   )
 

@@ -22,9 +22,24 @@ resource "aws_iam_policy" "github_actions" {
         ]
         Resource = [
           aws_s3_bucket.frontend.arn,
-          "${aws_s3_bucket.frontend.arn}/*",
-          aws_s3_bucket.deployment.arn,
-          "${aws_s3_bucket.deployment.arn}/*"
+          "${aws_s3_bucket.frontend.arn}/*"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload",
+          "ecr:PutImage"
+        ]
+        Resource = [
+          aws_ecr_repository.backend.arn,
+          "*"
         ]
       },
       {
