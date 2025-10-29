@@ -51,61 +51,59 @@ jobs:
         
         echo "🚀 Deploying to EC2..."
         
-        # Create deployment script
-        cat > deploy-script.sh << 'EOF'
-#!/bin/bash
-set -e
-echo "🔍 === DEPENDENCY CHECK PHASE ==="
-sudo apt update -qq
-if ! command -v docker &> /dev/null; then echo "Installing Docker..."; sudo apt install -y docker.io; sudo systemctl start docker; sudo systemctl enable docker; fi
-if ! command -v aws &> /dev/null; then echo "Installing AWS CLI v2..."; curl -s https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip; sudo apt install -y unzip; unzip -q awscliv2.zip; sudo ./aws/install; fi
-if ! command -v curl &> /dev/null; then sudo apt install -y curl; fi
-echo "✅ Dependencies verified"
-echo
-echo "🔑 === ECR LOGIN PHASE ==="
-aws ecr get-login-password --region ap-southeast-1 | sudo docker login --username AWS --password-stdin $ECR_REGISTRY || (echo "ECR login failed" && exit 1)
-echo "✅ ECR login successful"
-echo
-echo "📥 === IMAGE PULL PHASE ==="
-echo "Pulling image: $ECR_REGISTRY/$ECR_REPOSITORY:latest"
-sudo docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest || (echo "Image pull failed" && exit 1)
-echo "✅ Image pulled successfully"
-echo
-echo "🛑 === CONTAINER CLEANUP PHASE ==="
-if sudo docker ps -q -f name=bloodline-api; then echo "Stopping existing container..."; sudo docker stop bloodline-api; fi
-if sudo docker ps -aq -f name=bloodline-api; then echo "Removing existing container..."; sudo docker rm bloodline-api; fi
-echo "✅ Cleanup completed"
-echo
-echo "🚀 === CONTAINER START PHASE ==="
-echo "Starting container with image: $ECR_REGISTRY/$ECR_REPOSITORY:latest"
-CONTAINER_ID=$(sudo docker run -d --name bloodline-api --restart unless-stopped -p 5000:5000 -e ASPNETCORE_ENVIRONMENT=Production $ECR_REGISTRY/$ECR_REPOSITORY:latest)
-echo "Container ID: $CONTAINER_ID"
-echo "Waiting for container to start..."
-sleep 10
-echo
-echo "🔍 === CONTAINER VERIFICATION PHASE ==="
-CONTAINER_STATUS=$(sudo docker inspect --format="{{.State.Status}}" bloodline-api)
-echo "Container status: $CONTAINER_STATUS"
-if [ "$CONTAINER_STATUS" != "running" ]; then echo "Container failed to start" && sudo docker logs bloodline-api && exit 1; fi
-echo "✅ Container is running"
-echo
-echo "🌡️ === HEALTH CHECK PHASE ==="
-echo "Testing port connectivity..."
-netstat -tlnp | grep :5000 || (echo "Port 5000 not listening" && exit 1)
-echo "Waiting for application startup..."
-for i in {1..30}; do if curl -f -s http://localhost:5000/api/health > /dev/null; then break; fi; echo "Attempt $i/30..."; sleep 2; done
-HEALTH_RESPONSE=$(curl -f -s http://localhost:5000/api/health)
-echo "Health response: $HEALTH_RESPONSE"
-if ! echo "$HEALTH_RESPONSE" | grep -q "healthy"; then echo "Health check failed" && sudo docker logs --tail 50 bloodline-api && exit 1; fi
-echo "✅ Health check passed"
-echo
-echo "📊 === DEPLOYMENT SUMMARY ==="
-echo "Container name: bloodline-api"
-echo "Container status: $(sudo docker inspect --format="{{.State.Status}}" bloodline-api)"
-echo "Image: $ECR_REGISTRY/$ECR_REPOSITORY:latest"
-echo "Port mapping: $(sudo docker port bloodline-api)"
-echo "✅ DEPLOYMENT COMPLETED SUCCESSFULLY!"
-EOF
+        # Create deployment script using echo
+        echo '#!/bin/bash' > deploy-script.sh
+        echo 'set -e' >> deploy-script.sh
+        echo 'echo "🔍 === DEPENDENCY CHECK PHASE ==="' >> deploy-script.sh
+        echo 'sudo apt update -qq' >> deploy-script.sh
+        echo 'if ! command -v docker &> /dev/null; then echo "Installing Docker..."; sudo apt install -y docker.io; sudo systemctl start docker; sudo systemctl enable docker; fi' >> deploy-script.sh
+        echo 'if ! command -v aws &> /dev/null; then echo "Installing AWS CLI v2..."; curl -s https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip; sudo apt install -y unzip; unzip -q awscliv2.zip; sudo ./aws/install; fi' >> deploy-script.sh
+        echo 'if ! command -v curl &> /dev/null; then sudo apt install -y curl; fi' >> deploy-script.sh
+        echo 'echo "✅ Dependencies verified"' >> deploy-script.sh
+        echo 'echo' >> deploy-script.sh
+        echo 'echo "🔑 === ECR LOGIN PHASE ==="' >> deploy-script.sh
+        echo 'aws ecr get-login-password --region ap-southeast-1 | sudo docker login --username AWS --password-stdin $ECR_REGISTRY || (echo "ECR login failed" && exit 1)' >> deploy-script.sh
+        echo 'echo "✅ ECR login successful"' >> deploy-script.sh
+        echo 'echo' >> deploy-script.sh
+        echo 'echo "📥 === IMAGE PULL PHASE ==="' >> deploy-script.sh
+        echo 'echo "Pulling image: $ECR_REGISTRY/$ECR_REPOSITORY:latest"' >> deploy-script.sh
+        echo 'sudo docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest || (echo "Image pull failed" && exit 1)' >> deploy-script.sh
+        echo 'echo "✅ Image pulled successfully"' >> deploy-script.sh
+        echo 'echo' >> deploy-script.sh
+        echo 'echo "🛑 === CONTAINER CLEANUP PHASE ==="' >> deploy-script.sh
+        echo 'if sudo docker ps -q -f name=bloodline-api; then echo "Stopping existing container..."; sudo docker stop bloodline-api; fi' >> deploy-script.sh
+        echo 'if sudo docker ps -aq -f name=bloodline-api; then echo "Removing existing container..."; sudo docker rm bloodline-api; fi' >> deploy-script.sh
+        echo 'echo "✅ Cleanup completed"' >> deploy-script.sh
+        echo 'echo' >> deploy-script.sh
+        echo 'echo "🚀 === CONTAINER START PHASE ==="' >> deploy-script.sh
+        echo 'echo "Starting container with image: $ECR_REGISTRY/$ECR_REPOSITORY:latest"' >> deploy-script.sh
+        echo 'CONTAINER_ID=$(sudo docker run -d --name bloodline-api --restart unless-stopped -p 5000:5000 -e ASPNETCORE_ENVIRONMENT=Production $ECR_REGISTRY/$ECR_REPOSITORY:latest)' >> deploy-script.sh
+        echo 'echo "Container ID: $CONTAINER_ID"' >> deploy-script.sh
+        echo 'echo "Waiting for container to start..."' >> deploy-script.sh
+        echo 'sleep 10' >> deploy-script.sh
+        echo 'echo' >> deploy-script.sh
+        echo 'echo "🔍 === CONTAINER VERIFICATION PHASE ==="' >> deploy-script.sh
+        echo 'CONTAINER_STATUS=$(sudo docker inspect --format="{{.State.Status}}" bloodline-api)' >> deploy-script.sh
+        echo 'echo "Container status: $CONTAINER_STATUS"' >> deploy-script.sh
+        echo 'if [ "$CONTAINER_STATUS" != "running" ]; then echo "Container failed to start" && sudo docker logs bloodline-api && exit 1; fi' >> deploy-script.sh
+        echo 'echo "✅ Container is running"' >> deploy-script.sh
+        echo 'echo' >> deploy-script.sh
+        echo 'echo "🌡️ === HEALTH CHECK PHASE ==="' >> deploy-script.sh
+        echo 'echo "Testing port connectivity..."' >> deploy-script.sh
+        echo 'netstat -tlnp | grep :5000 || (echo "Port 5000 not listening" && exit 1)' >> deploy-script.sh
+        echo 'echo "Waiting for application startup..."' >> deploy-script.sh
+        echo 'for i in {1..30}; do if curl -f -s http://localhost:5000/api/health > /dev/null; then break; fi; echo "Attempt $i/30..."; sleep 2; done' >> deploy-script.sh
+        echo 'HEALTH_RESPONSE=$(curl -f -s http://localhost:5000/api/health)' >> deploy-script.sh
+        echo 'echo "Health response: $HEALTH_RESPONSE"' >> deploy-script.sh
+        echo 'if ! echo "$HEALTH_RESPONSE" | grep -q "healthy"; then echo "Health check failed" && sudo docker logs --tail 50 bloodline-api && exit 1; fi' >> deploy-script.sh
+        echo 'echo "✅ Health check passed"' >> deploy-script.sh
+        echo 'echo' >> deploy-script.sh
+        echo 'echo "📊 === DEPLOYMENT SUMMARY ==="' >> deploy-script.sh
+        echo 'echo "Container name: bloodline-api"' >> deploy-script.sh
+        echo 'echo "Container status: $(sudo docker inspect --format=\"{{.State.Status}}\" bloodline-api)"' >> deploy-script.sh
+        echo 'echo "Image: $ECR_REGISTRY/$ECR_REPOSITORY:latest"' >> deploy-script.sh
+        echo 'echo "Port mapping: $(sudo docker port bloodline-api)"' >> deploy-script.sh
+        echo 'echo "✅ DEPLOYMENT COMPLETED SUCCESSFULLY!"' >> deploy-script.sh
 
         # Upload and execute script
         aws s3 cp deploy-script.sh s3://${{ secrets.S3_BUCKET_NAME }}/deploy-script.sh
