@@ -47,8 +47,8 @@ public class AuthController : ControllerBase
                     FullName = user.FullName,
                     Email = user.Email,
                     Role = user.Role.ToString(),
-                    BloodType = user.BloodType,
-                    Location = user.Location
+                    BloodType = null,
+                    Location = ""
                 }
             });
         }
@@ -91,8 +91,6 @@ public class AuthController : ControllerBase
                 FullName = request.FullName,
                 Email = request.Email,
                 Phone = request.Phone,
-                BloodType = request.BloodType,
-                Location = request.Location,
                 PasswordHash = HashPassword(request.Password),
                 Role = userRole
             };
@@ -110,8 +108,8 @@ public class AuthController : ControllerBase
                     FullName = user.FullName,
                     Email = user.Email,
                     Role = user.Role.ToString(),
-                    BloodType = user.BloodType,
-                    Location = user.Location
+                    BloodType = request.BloodType,
+                    Location = request.Location
                 }
             });
         }
