@@ -367,7 +367,7 @@ const RegisterPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleNextStep}
-                  className="w-full py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 font-semibold transition-all"
+                  className="w-full py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 font-semibold transition-all cursor-pointer"
                 >
                   Next Step
                 </button>
