@@ -143,27 +143,22 @@ const RegisterPage: React.FC = () => {
       setIsLoading(true);
       
       try {
-        const response = await fetch('http://localhost:5000/api/auth/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            fullName: formData.fullName,
-            email: formData.email,
-            phone: formData.phone,
-            bloodType: formData.bloodType,
-            location: formData.location,
-            password: formData.password,
-            role: formData.role
-          })
+        const { authAPI } = await import('../utils/apiClient');
+        const response = await authAPI.register({
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          bloodType: formData.bloodType,
+          location: formData.location,
+          password: formData.password,
+          role: formData.role
         });
 
-        if (response.ok) {
-          alert('Registration successful! Please check your email to verify your account.');
+        if (response.success) {
+          alert('Registration successful! You can now sign in.');
+          navigate('/login');
         } else {
-          const error = await response.json();
-          alert(error.message || 'Registration failed');
+          alert(response.message || 'Registration failed');
         }
       } catch (error) {
         alert('Network error. Please try again.');

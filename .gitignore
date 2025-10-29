@@ -42,6 +42,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# Backend
+bloodline-db-dump.sql
+
 # React build
 /frontend/build
 /frontend/dist
@@ -63,10 +66,22 @@ Thumbs.db
 
 # Personal Notes
 run-local-notes.txt
+
 # Terraform
 **/.terraform/
 **/.terraform.lock.hcl
 **/terraform.tfstate
 **/terraform.tfstate.backup
+**/terraform.tfstate.*.backup
 **/*.tfvars
-*/*.tfvars.example
+!**/*.tfvars.example
+**/terraform.tfplan
+**/terraform.tfplan.json
+**/.terraformrc
+**/terraform.rc
+**/crash.log
+**/crash.*.log
+**/override.tf
+**/override.tf.json
+**/*_override.tf
+**/*_override.tf.json

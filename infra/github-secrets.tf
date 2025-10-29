@@ -7,6 +7,7 @@ resource "local_file" "github_secrets_script" {
     s3_bucket_name        = aws_s3_bucket.frontend.bucket
     deployment_bucket     = aws_s3_bucket.deployment.bucket
     ec2_instance_id       = aws_instance.main.id
+    ec2_public_ip         = aws_instance.main.public_ip
   })
   file_permission = "0755"
 }
