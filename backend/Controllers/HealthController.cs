@@ -12,9 +12,10 @@ public class HealthController : ControllerBase
         return Ok(new { 
             status = "healthy", 
             timestamp = DateTime.UtcNow,
-            version = "1.0.2",
+            version = "1.0.3",
             environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development",
-            deployment = "docker-enhanced"
+            deployment = "docker-script-fixed",
+            uptime = Environment.TickCount64
         });
     }
 }
