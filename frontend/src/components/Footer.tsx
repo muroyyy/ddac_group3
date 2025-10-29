@@ -6,10 +6,7 @@ const Footer: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleNavigation = (path: string) => {
-    navigate(path);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+
 
   const scrollToSection = (sectionId: string) => {
     // If not on landing page, navigate there first
