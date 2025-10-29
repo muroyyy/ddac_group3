@@ -71,8 +71,8 @@ jobs:
         echo 'echo "✅ Image pulled successfully"' >> deploy-script.sh
         echo 'echo' >> deploy-script.sh
         echo 'echo "🛑 === CONTAINER CLEANUP PHASE ==="' >> deploy-script.sh
-        echo 'if sudo docker ps -q -f name=bloodline-api; then echo "Stopping existing container..."; sudo docker stop bloodline-api; fi' >> deploy-script.sh
-        echo 'if sudo docker ps -aq -f name=bloodline-api; then echo "Removing existing container..."; sudo docker rm bloodline-api; fi' >> deploy-script.sh
+        echo 'if sudo docker ps -q -f name=bloodline-api; then echo "Stopping existing container..."; sudo docker stop bloodline-api || true; fi' >> deploy-script.sh
+        echo 'if sudo docker ps -aq -f name=bloodline-api; then echo "Removing existing container..."; sudo docker rm bloodline-api || true; fi' >> deploy-script.sh
         echo 'echo "✅ Cleanup completed"' >> deploy-script.sh
         echo 'echo' >> deploy-script.sh
         echo 'echo "🚀 === CONTAINER START PHASE ==="' >> deploy-script.sh
