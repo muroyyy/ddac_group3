@@ -7,16 +7,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add AWS Services
 builder.Services.AddAWSService<IAmazonSecretsManager>();
-builder.Services.AddScoped<SecretsManagerService>();
+builder.Services.AddScoped<DatabaseService>();
 
 // Add services to the container.
-builder.Services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
+builder.Services.AddDbContext<ApplicationDbContext>(async (serviceProvider, options) =>
 {
-    var secretsService = serviceProvider.GetRequiredService<SecretsManagerService>();
-    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-    var secretName = configuration["AWS:SecretName"]!;
-    var connectionString = secretsService.GetConnectionStringAsync(secretName).Result;
+    var databaseService = serviceProvider.GetRequiredService<DatabaseService>();
+    var credentials = await databaseService.GetDatabaseCredentialsAsync();
     
+    var connectionString = $"Server={credentials.endpoint};Database={credentials.database};User={credentials.username};Password={credentials.password};";
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
 

@@ -1,0 +1,63 @@
+name: Deploy Backend to EC2
+
+on:
+  push:
+    branches: [main]
+    paths: ['backend/**']
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: backend
+    
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+      working-directory: backend
+    
+    - name: Publish
+      run: dotnet publish --no-build --configuration Release --output ./publish
+      working-directory: backend
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-southeast-1
+    
+    - name: Deploy to EC2
+      run: |
+        # Create deployment package
+        cd backend/publish
+        tar -czf ../deployment.tar.gz .
+        
+        # Upload to S3 for transfer
+        aws s3 cp ../deployment.tar.gz s3://${{ secrets.DEPLOYMENT_BUCKET }}/backend/
+        
+        # Execute deployment on EC2 via SSM
+        aws ssm send-command \
+          --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
+          --document-name "AWS-RunShellScript" \
+          --parameters 'commands=[
+            "sudo systemctl stop bloodline-api || true",
+            "cd /opt/bloodline",
+            "aws s3 cp s3://${{ secrets.DEPLOYMENT_BUCKET }}/backend/deployment.tar.gz .",
+            "sudo rm -rf app/*",
+            "sudo tar -xzf deployment.tar.gz -C app/",
+            "sudo chown -R bloodline:bloodline app/",
+            "sudo systemctl start bloodline-api",
+            "sudo systemctl enable bloodline-api"
+          ]' \
+          --region ap-southeast-1
