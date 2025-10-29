@@ -13,8 +13,11 @@ public class ApplicationDbContext : DbContext
     {
         modelBuilder.Entity<User>(entity =>
         {
+            entity.ToTable("users");
+            entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.Email).IsUnique();
-            entity.Property(e => e.Role).HasConversion<int>();
+            entity.Property(e => e.Role).HasConversion<string>();
+            entity.Property(e => e.Status).HasConversion<string>();
         });
     }
 }

@@ -45,7 +45,7 @@ resource "aws_instance" "main" {
   user_data = base64encode(<<-EOF
     #!/bin/bash
     apt-get update
-    apt-get install -y awscli dotnet-runtime-8.0
+    apt-get install -y awscli dotnet-runtime-8.0 mysql-client
     
     # Setup SSM Agent
     snap install amazon-ssm-agent --classic

@@ -1,13 +1,16 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BloodLine.Models;
 
 public class User
 {
+    [Column("user_id")]
     public int Id { get; set; }
     
     [Required]
     [StringLength(100)]
+    [Column("full_name")]
     public string FullName { get; set; } = string.Empty;
     
     [Required]
@@ -15,26 +18,19 @@ public class User
     public string Email { get; set; } = string.Empty;
     
     [Required]
-    [Phone]
-    public string Phone { get; set; } = string.Empty;
-    
-    public string? BloodType { get; set; }
+    public string? Phone { get; set; }
     
     [Required]
-    [StringLength(200)]
-    public string Location { get; set; } = string.Empty;
-    
-    [Required]
+    [Column("password_hash")]
     public string PasswordHash { get; set; } = string.Empty;
     
     [Required]
     public UserRole Role { get; set; }
     
-    public bool IsEmailVerified { get; set; } = false;
-    
+    [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public UserStatus Status { get; set; } = UserStatus.Active;
 }
 
 public enum UserRole
@@ -43,4 +39,10 @@ public enum UserRole
     Patient = 2,
     Hospital = 3,
     Admin = 4
+}
+
+public enum UserStatus
+{
+    Active = 1,
+    Suspended = 2
 }
