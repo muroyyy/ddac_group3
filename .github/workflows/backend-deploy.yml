@@ -120,13 +120,13 @@ SCRIPT_EOF
         COMMAND_ID=$(aws ssm send-command \
           --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
           --document-name "AWS-RunShellScript" \
-          --parameters "commands=[
-            'export ECR_REGISTRY=$ECR_REGISTRY',
-            'export ECR_REPOSITORY=$ECR_REPOSITORY',
-            'aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/deploy-script.sh /tmp/deploy-script.sh',
-            'chmod +x /tmp/deploy-script.sh',
-            '/tmp/deploy-script.sh'
-          ]" \
+          --parameters 'commands=[
+            "export ECR_REGISTRY='$ECR_REGISTRY'",
+            "export ECR_REPOSITORY='$ECR_REPOSITORY'",
+            "aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/deploy-script.sh /tmp/deploy-script.sh",
+            "chmod +x /tmp/deploy-script.sh",
+            "/tmp/deploy-script.sh"
+          ]' \
           --region ap-southeast-1 \
           --query 'Command.CommandId' \
           --output text)
