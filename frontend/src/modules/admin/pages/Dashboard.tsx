@@ -8,7 +8,8 @@ import {
   ChevronRight,
   RefreshCw
 } from 'lucide-react';
-import { adminAPI, DashboardStats, SystemAlert, ActivityLog, BloodInventoryItem } from '../services/adminAPI';
+import { adminAPI } from '../services/adminAPI';
+import type { DashboardStats, SystemAlert, ActivityLog, BloodInventoryItem } from '../services/adminAPI';
 
 interface AdminDashboardProps {
   user: {
@@ -129,7 +130,7 @@ const ActivityItem: React.FC<ActivityLog> = ({ userName, action, timestamp, user
   );
 };
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
+const AdminDashboard: React.FC<AdminDashboardProps> = ({ user: _ }) => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [alerts, setAlerts] = useState<SystemAlert[]>([]);
   const [activities, setActivities] = useState<ActivityLog[]>([]);

@@ -7,11 +7,11 @@ import {
   UserCheck,
   UserX,
   Mail,
-  Phone,
   Calendar,
   RefreshCw
 } from 'lucide-react';
-import { adminAPI, User } from '../services/adminAPI';
+import { adminAPI } from '../services/adminAPI';
+import type { User } from '../services/adminAPI';
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);

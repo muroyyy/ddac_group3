@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Droplet, RefreshCw, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
-import { adminAPI, BloodInventoryItem } from '../services/adminAPI';
+import { adminAPI } from '../services/adminAPI';
+import type { BloodInventoryItem } from '../services/adminAPI';
 
 const BloodInventory: React.FC = () => {
   const [inventory, setInventory] = useState<BloodInventoryItem[]>([]);
