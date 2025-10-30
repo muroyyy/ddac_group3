@@ -78,7 +78,7 @@ jobs:
         echo 'echo' >> deploy-script.sh
         echo 'echo "🚀 === CONTAINER START PHASE ==="' >> deploy-script.sh
         echo 'echo "Starting container with image: $ECR_REGISTRY/$ECR_REPOSITORY:latest"' >> deploy-script.sh
-        echo 'CONTAINER_ID=$(sudo docker run -d --name bloodline-api --restart unless-stopped -p 5000:8080 -e ASPNETCORE_ENVIRONMENT=Production $ECR_REGISTRY/$ECR_REPOSITORY:latest)' >> deploy-script.sh
+        echo 'CONTAINER_ID=$(sudo docker run -d --name bloodline-api --restart unless-stopped -p 5000:8080 -e ASPNETCORE_ENVIRONMENT=Production -e AWS_DEFAULT_REGION=ap-southeast-1 $ECR_REGISTRY/$ECR_REPOSITORY:latest)' >> deploy-script.sh
         echo 'echo "Container ID: $CONTAINER_ID"' >> deploy-script.sh
         echo 'echo "Waiting for container to start..."' >> deploy-script.sh
         echo 'sleep 10' >> deploy-script.sh
@@ -100,6 +100,12 @@ jobs:
         echo 'echo "✅ Health check passed"' >> deploy-script.sh
         echo 'echo' >> deploy-script.sh
         echo 'echo "🗄️ === DATABASE CONNECTIVITY TEST ==="' >> deploy-script.sh
+        echo 'echo "Testing AWS credentials in container..."' >> deploy-script.sh
+        echo 'AWS_TEST=$(sudo docker exec bloodline-api aws sts get-caller-identity 2>/dev/null || echo "AWS_FAILED")' >> deploy-script.sh
+        echo 'if echo "$AWS_TEST" | grep -q "UserId"; then echo "✅ AWS credentials working"; else echo "❌ AWS credentials failed" && echo "$AWS_TEST"; fi' >> deploy-script.sh
+        echo 'echo "Testing Secrets Manager access..."' >> deploy-script.sh
+        echo 'SECRET_TEST=$(sudo docker exec bloodline-api aws secretsmanager get-secret-value --secret-id dev-bloodline-db-credentials --region ap-southeast-1 --query SecretString --output text 2>/dev/null || echo "SECRET_FAILED")' >> deploy-script.sh
+        echo 'if echo "$SECRET_TEST" | grep -q "endpoint"; then echo "✅ Secrets Manager access working"; else echo "❌ Secrets Manager access failed" && echo "$SECRET_TEST"; fi' >> deploy-script.sh
         echo 'echo "Testing database connection from container..."' >> deploy-script.sh
         echo 'DB_LOGS=$(sudo docker logs --tail 20 bloodline-api 2>&1)' >> deploy-script.sh
         echo 'if echo "$DB_LOGS" | grep -q "Unable to connect.*MySQL"; then echo "❌ Database connection failed" && echo "$DB_LOGS" && exit 1; else echo "✅ No database connection errors found"; fi' >> deploy-script.sh
