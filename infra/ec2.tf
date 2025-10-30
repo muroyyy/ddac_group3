@@ -106,6 +106,10 @@ resource "aws_instance" "main" {
   tags = {
     Name = "${var.environment}-${var.project_name}-ec2"
   }
+  
+  lifecycle {
+    ignore_changes = [public_ip]
+  }
 }
 
 resource "aws_eip" "main" {

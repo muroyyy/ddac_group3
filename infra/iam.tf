@@ -45,13 +45,19 @@ resource "aws_iam_policy" "github_actions" {
       {
         Effect = "Allow"
         Action = [
-          "ssm:SendCommand",
-          "ssm:GetCommandInvocation"
+          "ssm:SendCommand"
         ]
         Resource = [
           "arn:aws:ec2:${var.aws_region}:*:instance/${aws_instance.main.id}",
           "arn:aws:ssm:${var.aws_region}:*:document/AWS-RunShellScript"
         ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ssm:GetCommandInvocation"
+        ]
+        Resource = "*"
       }
     ]
   })

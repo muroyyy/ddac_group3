@@ -129,8 +129,8 @@ jobs:
         rm -f deploy-script.sh
         echo "⏳ Waiting for deployment..."
         
-        # Wait for command completion
-        for i in {1..40}; do
+        # Wait for command completion (max 150 seconds)
+        for i in {1..15}; do
           STATUS=$(aws ssm get-command-invocation \
             --command-id $COMMAND_ID \
             --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
@@ -138,7 +138,7 @@ jobs:
             --query 'Status' \
             --output text 2>/dev/null || echo "InProgress")
           
-          echo "Status: $STATUS (attempt $i/40)"
+          echo "Status: $STATUS (attempt $i/15)"
           
           if [ "$STATUS" = "Success" ]; then
             echo "✅ Deployment successful!"
@@ -172,7 +172,7 @@ jobs:
         done
         
         # Handle timeout
-        echo "⚠️ Deployment timed out after 400 seconds"
+        echo "⚠️ Deployment timed out after 150 seconds"
         echo "Final status: $STATUS"
         echo "=== STDOUT ==="
         aws ssm get-command-invocation \
