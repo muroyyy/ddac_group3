@@ -67,13 +67,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const login = (userData: UserData): void => {
-    console.log('Logging in user:', userData.email);
     setUser(userData);
     saveSession(userData);
   };
 
   const logout = (): void => {
-    console.log('Logging out user');
     setUser(null);
     clearSession();
   };
@@ -81,27 +79,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Check session on mount and set up auto-logout
   useEffect(() => {
     const checkSession = () => {
-      console.log('Checking session...');
       const session = getStoredSession();
       
       if (!session) {
-        console.log('No session found');
         setUser(null);
         setIsLoading(false);
         return;
       }
-
-      console.log('Session found:', { user: session.user.email, expiresAt: new Date(session.expiresAt) });
       
       if (Date.now() > session.expiresAt) {
-        console.log('Session expired');
         clearSession();
         setUser(null);
         setIsLoading(false);
         return;
       }
 
-      console.log('Session valid, restoring user');
       setUser(session.user);
       setIsLoading(false);
     };

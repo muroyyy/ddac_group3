@@ -16,7 +16,7 @@ const Notifications: React.FC = () => {
             <h3 className="text-lg font-semibold">System Alerts</h3>
           </div>
           <p className="text-gray-600 mb-4">Configure system-wide alerts and notifications.</p>
-          <button className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          <button className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
             Configure
           </button>
         </div>
@@ -27,7 +27,7 @@ const Notifications: React.FC = () => {
             <h3 className="text-lg font-semibold">Email Notifications</h3>
           </div>
           <p className="text-gray-600 mb-4">Manage email notification settings and templates.</p>
-          <button className="w-full py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+          <button className="w-full py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors cursor-pointer">
             Configure
           </button>
         </div>
@@ -38,7 +38,7 @@ const Notifications: React.FC = () => {
             <h3 className="text-lg font-semibold">SMS Alerts</h3>
           </div>
           <p className="text-gray-600 mb-4">Set up SMS notifications for critical alerts.</p>
-          <button className="w-full py-2 px-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+          <button className="w-full py-2 px-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors cursor-pointer">
             Configure
           </button>
         </div>
@@ -49,7 +49,7 @@ const Notifications: React.FC = () => {
           <Settings className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Notification Center</h3>
           <p className="text-gray-500 mb-4">Advanced notification management features coming soon.</p>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
             Configure Notifications
           </button>
         </div>

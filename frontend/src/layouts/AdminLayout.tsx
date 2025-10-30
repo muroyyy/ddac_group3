@@ -12,7 +12,6 @@ import {
   X,
   LogOut
 } from 'lucide-react';
-import SessionStatus from '../components/SessionStatus';
 
 // Import admin components
 import AdminDashboard from '../modules/admin/pages/Dashboard';
@@ -51,7 +50,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <AdminDashboard user={user} />;
+        return <AdminDashboard user={user} onNavigate={setActiveTab} />;
       case 'users':
         return <UserManagement />;
       case 'analytics':
@@ -67,7 +66,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
       case 'audit':
         return <AuditLogs />;
       default:
-        return <AdminDashboard user={user} />;
+        return <AdminDashboard user={user} onNavigate={setActiveTab} />;
     }
   };
 
@@ -141,7 +140,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
                 <p className="text-sm text-gray-500">Welcome back, {user.name}</p>
               </div>
             </div>
-            <SessionStatus />
           </div>
         </header>
 

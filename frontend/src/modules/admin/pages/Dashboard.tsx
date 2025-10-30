@@ -17,6 +17,7 @@ interface AdminDashboardProps {
     name: string;
     role: string;
   };
+  onNavigate: (tab: string) => void;
 }
 
 interface StatCardProps {
@@ -130,7 +131,7 @@ const ActivityItem: React.FC<ActivityLog> = ({ userName, action, timestamp, user
   );
 };
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ user: _ }) => {
+const AdminDashboard: React.FC<AdminDashboardProps> = ({ user: _, onNavigate }) => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [alerts, setAlerts] = useState<SystemAlert[]>([]);
   const [activities, setActivities] = useState<ActivityLog[]>([]);
@@ -285,7 +286,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user: _ }) => {
               <p className="text-gray-500 text-center py-4">No inventory data</p>
             )}
           </div>
-          <button className="w-full mt-4 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium cursor-pointer">
+          <button 
+            onClick={() => onNavigate('inventory')}
+            className="w-full mt-4 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium cursor-pointer"
+          >
             View Full Inventory
           </button>
         </div>

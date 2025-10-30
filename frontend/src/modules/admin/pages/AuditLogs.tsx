@@ -9,7 +9,7 @@ const AuditLogs: React.FC = () => {
           <h2 className="text-xl font-semibold text-gray-900">Audit Logs</h2>
           <p className="text-sm text-gray-500">System activity logs and audit trail</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
           <Download className="w-4 h-4" />
           Export Logs
         </button>
@@ -54,7 +54,7 @@ const AuditLogs: React.FC = () => {
           <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Audit Log System</h3>
           <p className="text-gray-500 mb-4">Comprehensive audit logging and monitoring features coming soon.</p>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
             Configure Audit Logs
           </button>
         </div>
