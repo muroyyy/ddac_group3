@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 // Import page components
@@ -13,6 +13,9 @@ import AdminLayout from './layouts/AdminLayout';
 // Import layout components
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+
+// Import auth context
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Types
 interface UserData {
@@ -48,29 +51,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   );
 };
 
-// Main App Component
-const App: React.FC = () => {
-  const [user, setUser] = useState<UserData | null>(null);
-
-  const handleLogin = (userData: UserData) => {
-    setUser(userData);
-    localStorage.setItem('bloodline_user', JSON.stringify(userData));
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('bloodline_user');
-  };
-
-  const isAuthenticated = user !== null;
-
-  // Check for existing user session on mount
-  React.useEffect(() => {
-    const storedUser = localStorage.getItem('bloodline_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+// App Routes Component
+const AppRoutes: React.FC = () => {
+  const { user, isAuthenticated, login, logout } = useAuth();
 
   return (
     <Router>
@@ -89,7 +72,7 @@ const App: React.FC = () => {
           path="/login"
           element={
             <Layout>
-              <LoginPage onLogin={handleLogin} />
+              <LoginPage onLogin={login} />
             </Layout>
           }
         />
@@ -135,7 +118,7 @@ const App: React.FC = () => {
           path="/admin/dashboard"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <AdminLayout user={user!} onLogout={handleLogout} />
+              <AdminLayout user={user!} onLogout={logout} />
             </ProtectedRoute>
           }
         />
@@ -144,6 +127,15 @@ const App: React.FC = () => {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
+  );
+};
+
+// Main App Component with AuthProvider
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   );
 };
 
