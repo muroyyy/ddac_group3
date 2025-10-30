@@ -89,7 +89,7 @@ const UserManagement: React.FC = () => {
         <button
           onClick={loadUsers}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 cursor-pointer"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           Refresh
@@ -232,7 +232,7 @@ const UserManagement: React.FC = () => {
                         {user.status === 'Active' ? (
                           <button
                             onClick={() => handleStatusChange(user.id, 'Suspended')}
-                            className="p-1 text-red-600 hover:bg-red-50 rounded"
+                            className="p-1 text-red-600 hover:bg-red-50 rounded cursor-pointer"
                             title="Suspend User"
                           >
                             <UserX className="w-4 h-4" />
@@ -240,13 +240,13 @@ const UserManagement: React.FC = () => {
                         ) : (
                           <button
                             onClick={() => handleStatusChange(user.id, 'Active')}
-                            className="p-1 text-green-600 hover:bg-green-50 rounded"
+                            className="p-1 text-green-600 hover:bg-green-50 rounded cursor-pointer"
                             title="Activate User"
                           >
                             <UserCheck className="w-4 h-4" />
                           </button>
                         )}
-                        <button className="p-1 text-gray-600 hover:bg-gray-50 rounded">
+                        <button className="p-1 text-gray-600 hover:bg-gray-50 rounded cursor-pointer">
                           <MoreVertical className="w-4 h-4" />
                         </button>
                       </div>

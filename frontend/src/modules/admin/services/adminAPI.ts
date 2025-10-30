@@ -16,6 +16,7 @@ export interface User {
   role: string;
   status: string;
   createdAt: string;
+  phone?: string;
 }
 
 export interface BloodInventoryItem {
@@ -43,13 +44,14 @@ export interface ActivityLog {
 export const adminAPI = {
   // Dashboard Stats
   getDashboardStats: async (): Promise<DashboardStats> => {
-    const response = await fetch(`${API_BASE_URL}/admin/dashboard/stats`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-    if (!response.ok) {
-      // Return mock data for now
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/dashboard/stats`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch stats');
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
       return {
         totalUsers: 0,
         activeDonors: 0,
@@ -57,70 +59,77 @@ export const adminAPI = {
         systemHealth: 'Unknown'
       };
     }
-    return response.json();
   },
 
   // User Management
   getUsers: async (): Promise<User[]> => {
-    const response = await fetch(`${API_BASE_URL}/admin/users`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-    if (!response.ok) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/users`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching users:', error);
       return [];
     }
-    return response.json();
   },
 
   updateUserStatus: async (userId: number, status: string): Promise<boolean> => {
-    const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/status`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      },
-      body: JSON.stringify({ status }),
-    });
-    return response.ok;
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      return false;
+    }
   },
 
   // Blood Inventory
   getBloodInventory: async (): Promise<BloodInventoryItem[]> => {
-    const response = await fetch(`${API_BASE_URL}/admin/blood-inventory`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-    if (!response.ok) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/blood-inventory`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch blood inventory');
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching blood inventory:', error);
       return [];
     }
-    return response.json();
   },
 
   // System Alerts
   getSystemAlerts: async (): Promise<SystemAlert[]> => {
-    const response = await fetch(`${API_BASE_URL}/admin/alerts`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-    if (!response.ok) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/alerts`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch alerts');
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching alerts:', error);
       return [];
     }
-    return response.json();
   },
 
   // Activity Logs
   getActivityLogs: async (): Promise<ActivityLog[]> => {
-    const response = await fetch(`${API_BASE_URL}/admin/activity-logs`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-    if (!response.ok) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/activity-logs`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch activity logs');
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching activity logs:', error);
       return [];
     }
-    return response.json();
   },
 };

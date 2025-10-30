@@ -80,7 +80,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
             <Droplet className="w-8 h-8 text-red-600" />
             <span className="text-xl font-bold text-gray-900">BloodLine</span>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="lg:hidden">
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden cursor-pointer">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -90,7 +90,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors cursor-pointer ${
                 activeTab === item.id
                   ? 'bg-blue-50 text-blue-600 font-medium' 
                   : 'text-gray-700 hover:bg-gray-100'
@@ -114,7 +114,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
           </div>
           <button
             onClick={onLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             <span>Logout</span>
@@ -130,7 +130,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
             <div className="flex items-center gap-4">
               <button 
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden"
+                className="lg:hidden cursor-pointer"
               >
                 <Menu className="w-6 h-6" />
               </button>
