@@ -99,6 +99,14 @@ jobs:
         echo 'if [ "$HEALTH_RESPONSE" = "FAILED" ] || ! echo "$HEALTH_RESPONSE" | grep -q "healthy"; then echo "❌ Health check failed after 30 attempts" && echo "=== CONTAINER LOGS ===" && sudo docker logs --tail 100 bloodline-api && exit 1; fi' >> deploy-script.sh
         echo 'echo "✅ Health check passed"' >> deploy-script.sh
         echo 'echo' >> deploy-script.sh
+        echo 'echo "🗄️ === DATABASE CONNECTIVITY TEST ==="' >> deploy-script.sh
+        echo 'echo "Testing database connection from container..."' >> deploy-script.sh
+        echo 'DB_LOGS=$(sudo docker logs --tail 20 bloodline-api 2>&1)' >> deploy-script.sh
+        echo 'if echo "$DB_LOGS" | grep -q "Unable to connect.*MySQL"; then echo "❌ Database connection failed" && echo "$DB_LOGS" && exit 1; else echo "✅ No database connection errors found"; fi' >> deploy-script.sh
+        echo 'echo "Testing API endpoint that requires database..."' >> deploy-script.sh
+        echo 'AUTH_TEST_RESPONSE=$(curl -f -s -X POST http://localhost:5000/api/auth/login -H "Content-Type: application/json" -d "{\"email\":\"test@test.com\",\"password\":\"test\"}" 2>/dev/null || echo "AUTH_FAILED")' >> deploy-script.sh
+        echo 'if echo "$AUTH_TEST_RESPONSE" | grep -q "success\|Invalid"; then echo "✅ Database connectivity verified (API responds)"; else echo "⚠️ Database connectivity uncertain - API may have issues" && echo "Response: $AUTH_TEST_RESPONSE"; fi' >> deploy-script.sh
+        echo 'echo' >> deploy-script.sh
         echo 'echo "📊 === DEPLOYMENT SUMMARY ==="' >> deploy-script.sh
         echo 'echo "Container name: bloodline-api"' >> deploy-script.sh
         echo 'echo "Container status: $(sudo docker inspect --format=\"{{.State.Status}}\" bloodline-api)"' >> deploy-script.sh
