@@ -27,7 +27,12 @@ builder.Services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =
     var databaseService = serviceProvider.GetRequiredService<DatabaseService>();
     var credentials = databaseService.GetDatabaseCredentialsAsync().GetAwaiter().GetResult();
     
-    var connectionString = $"Server={credentials.endpoint};Database={credentials.database};User={credentials.username};Password={credentials.password};";
+    // Parse endpoint to separate hostname and port
+    var endpointParts = credentials.endpoint.Split(':');
+    var server = endpointParts[0];
+    var port = endpointParts.Length > 1 ? endpointParts[1] : "3306";
+    
+    var connectionString = $"Server={server};Port={port};Database={credentials.database};User={credentials.username};Password={credentials.password};";
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
 
