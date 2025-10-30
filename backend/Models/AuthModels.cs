@@ -62,7 +62,6 @@ public class ResetPasswordRequest
     public string Email { get; set; } = string.Empty;
     
     [Required]
-    [StringLength(6, MinimumLength = 6)]
     public string ResetToken { get; set; } = string.Empty;
     
     [Required]

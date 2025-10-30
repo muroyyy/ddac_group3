@@ -37,9 +37,9 @@ const ForgotPassword: React.FC = () => {
       const response = await authAPI.forgotPassword({ email });
 
       if (response.success) {
-        setSuccess(response.message);
+        setSuccess('Reset email sent! Redirecting to your inbox...');
         setTimeout(() => {
-          navigate('/reset-password', { state: { email } });
+          navigate('/mock-email', { state: response.mockEmailData });
         }, 2000);
       } else {
         setError(response.message);

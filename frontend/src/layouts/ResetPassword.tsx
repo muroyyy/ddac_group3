@@ -15,10 +15,11 @@ const ResetPassword: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const emailFromState = location.state?.email || '';
+  const tokenFromState = location.state?.token || '';
   
   const [formData, setFormData] = useState({
     email: emailFromState,
-    resetToken: '',
+    resetToken: tokenFromState,
     newPassword: '',
     confirmPassword: ''
   });
@@ -52,9 +53,7 @@ const ResetPassword: React.FC = () => {
     }
 
     if (!formData.resetToken) {
-      newErrors.resetToken = 'Reset code is required';
-    } else if (formData.resetToken.length !== 6) {
-      newErrors.resetToken = 'Reset code must be 6 digits';
+      newErrors.resetToken = 'Reset token is required';
     }
 
     if (!formData.newPassword) {
@@ -120,7 +119,7 @@ const ResetPassword: React.FC = () => {
               Reset Password
             </h2>
             <p className="text-gray-600">
-              Enter the 6-digit code sent to your email and your new password
+              Enter your reset token and new password
             </p>
           </div>
 
@@ -150,7 +149,7 @@ const ResetPassword: React.FC = () => {
 
             <div>
               <label htmlFor="resetToken" className="block text-sm font-medium text-gray-700 mb-2">
-                Reset Code
+                Reset Token
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -162,11 +161,10 @@ const ResetPassword: React.FC = () => {
                   name="resetToken"
                   value={formData.resetToken}
                   onChange={handleChange}
-                  maxLength={6}
-                  className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all text-center text-lg tracking-widest ${
+                  className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
                     errors.resetToken ? 'border-red-500 bg-red-50' : 'border-gray-300'
                   }`}
-                  placeholder="000000"
+                  placeholder="Enter reset token"
                 />
               </div>
               {errors.resetToken && (
