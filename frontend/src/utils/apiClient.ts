@@ -39,6 +39,11 @@ export interface AuthResponse {
     location: string;
   };
   token?: string;
+  mockEmailData?: {
+    email: string;
+    resetToken: string;
+    expiresAt: string;
+  };
 }
 
 export const authAPI = {
