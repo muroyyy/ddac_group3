@@ -268,7 +268,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                   />
                   <span className="ml-2 text-sm text-gray-700">Remember me</span>
                 </label>
-                <button type="button" className="text-sm text-red-600 hover:text-red-700 font-medium cursor-pointer">
+                <button 
+                  type="button" 
+                  onClick={() => navigate('/forgot-password')}
+                  className="text-sm text-red-600 hover:text-red-700 font-medium cursor-pointer"
+                >
                   Forgot password?
                 </button>
               </div>

@@ -48,6 +48,28 @@ public class AuthResponse
     public string? Token { get; set; }
 }
 
+public class ForgotPasswordRequest
+{
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
+}
+
+public class ResetPasswordRequest
+{
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
+    
+    [Required]
+    [StringLength(6, MinimumLength = 6)]
+    public string ResetToken { get; set; } = string.Empty;
+    
+    [Required]
+    [MinLength(8)]
+    public string NewPassword { get; set; } = string.Empty;
+}
+
 public class UserData
 {
     public int Id { get; set; }

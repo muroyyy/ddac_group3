@@ -132,4 +132,125 @@ public class AuthController : ControllerBase
     {
         return BCrypt.Net.BCrypt.Verify(password, hash);
     }
+
+    [HttpPost("forgot-password")]
+    public async Task<ActionResult<AuthResponse>> ForgotPassword([FromBody] ForgotPasswordRequest request)
+    {
+        try
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == request.Email);
+
+            if (user == null)
+            {
+                // Don't reveal if email exists for security
+                return Ok(new AuthResponse
+                {
+                    Success = true,
+                    Message = "If the email exists, a reset link has been sent"
+                });
+            }
+
+            // Generate reset token (6-digit code)
+            var resetToken = new Random().Next(100000, 999999).ToString();
+            var resetExpiry = DateTime.UtcNow.AddMinutes(15); // 15 minutes expiry
+
+            // Store reset token in user record (you might want a separate table for this)
+            user.PasswordHash = $"{user.PasswordHash}|{resetToken}|{resetExpiry:yyyy-MM-dd HH:mm:ss}";
+            await _context.SaveChangesAsync();
+
+            // In a real app, send email here
+            _logger.LogInformation($"Password reset token for {request.Email}: {resetToken}");
+
+            return Ok(new AuthResponse
+            {
+                Success = true,
+                Message = "If the email exists, a reset code has been sent"
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Forgot password error");
+            return StatusCode(500, new AuthResponse
+            {
+                Success = false,
+                Message = "Internal server error"
+            });
+        }
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<ActionResult<AuthResponse>> ResetPassword([FromBody] ResetPasswordRequest request)
+    {
+        try
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == request.Email);
+
+            if (user == null)
+            {
+                return Ok(new AuthResponse
+                {
+                    Success = false,
+                    Message = "Invalid reset request"
+                });
+            }
+
+            // Parse reset token from password hash
+            var hashParts = user.PasswordHash.Split('|');
+            if (hashParts.Length != 3)
+            {
+                return Ok(new AuthResponse
+                {
+                    Success = false,
+                    Message = "Invalid or expired reset token"
+                });
+            }
+
+            var originalHash = hashParts[0];
+            var storedToken = hashParts[1];
+            var expiryString = hashParts[2];
+
+            if (!DateTime.TryParse(expiryString, out var expiry) || DateTime.UtcNow > expiry)
+            {
+                // Clean up expired token
+                user.PasswordHash = originalHash;
+                await _context.SaveChangesAsync();
+                
+                return Ok(new AuthResponse
+                {
+                    Success = false,
+                    Message = "Reset token has expired"
+                });
+            }
+
+            if (storedToken != request.ResetToken)
+            {
+                return Ok(new AuthResponse
+                {
+                    Success = false,
+                    Message = "Invalid reset token"
+                });
+            }
+
+            // Reset password
+            user.PasswordHash = HashPassword(request.NewPassword);
+            await _context.SaveChangesAsync();
+
+            return Ok(new AuthResponse
+            {
+                Success = true,
+                Message = "Password reset successful"
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Reset password error");
+            return StatusCode(500, new AuthResponse
+            {
+                Success = false,
+                Message = "Internal server error"
+            });
+        }
+    }
 }
