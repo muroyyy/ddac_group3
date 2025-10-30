@@ -19,14 +19,24 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     const stored = localStorage.getItem('bloodline_theme');
     const prefersDark = stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches);
     setIsDark(prefersDark);
-    document.documentElement.classList.toggle('dark', prefersDark);
+    
+    if (prefersDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }, []);
 
   const toggleTheme = () => {
     const newTheme = !isDark;
     setIsDark(newTheme);
     localStorage.setItem('bloodline_theme', newTheme ? 'dark' : 'light');
-    document.documentElement.classList.toggle('dark', newTheme);
+    
+    if (newTheme) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   };
 
   return (
