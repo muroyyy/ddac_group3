@@ -2,7 +2,7 @@ name: Deploy Backend to EC2
 
 on:
   push:
-    branches: [dev]
+    branches: [feature/admin]
     paths: ['backend/**']
   workflow_dispatch:
 

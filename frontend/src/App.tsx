@@ -8,7 +8,7 @@ import RegisterPage from './layouts/Register';
 import ForgotPassword from './layouts/ForgotPassword';
 import ResetPassword from './layouts/ResetPassword';
 import MockEmail from './layouts/MockEmail';
-import AdminDashboard from './layouts/AdminLayout';
+import AdminLayout from './layouts/AdminLayout';
 
 // Import layout components
 import Navbar from './components/Navbar';
@@ -135,7 +135,7 @@ const App: React.FC = () => {
           path="/admin/dashboard"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <AdminDashboard user={user!} onLogout={handleLogout} />
+              <AdminLayout user={user!} onLogout={handleLogout} />
             </ProtectedRoute>
           }
         />
