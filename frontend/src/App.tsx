@@ -51,10 +51,10 @@ const AppRoutes: React.FC = () => {
   // Show loading spinner while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
         </div>
       </div>
     );
@@ -135,7 +135,7 @@ const AppRoutes: React.FC = () => {
   );
 };
 
-// Main App Component with AuthProvider
+// Main App Component
 const App: React.FC = () => {
   return (
     <AuthProvider>
