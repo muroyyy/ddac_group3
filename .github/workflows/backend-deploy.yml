@@ -78,7 +78,7 @@ jobs:
         echo 'echo' >> deploy-script.sh
         echo 'echo "🚀 === CONTAINER START PHASE ==="' >> deploy-script.sh
         echo 'echo "Starting container with image: $ECR_REGISTRY/$ECR_REPOSITORY:latest"' >> deploy-script.sh
-        echo 'CONTAINER_ID=$(sudo docker run -d --name bloodline-api --restart unless-stopped -p 5000:5000 -e ASPNETCORE_ENVIRONMENT=Production $ECR_REGISTRY/$ECR_REPOSITORY:latest)' >> deploy-script.sh
+        echo 'CONTAINER_ID=$(sudo docker run -d --name bloodline-api --restart unless-stopped -p 5000:8080 -e ASPNETCORE_ENVIRONMENT=Production $ECR_REGISTRY/$ECR_REPOSITORY:latest)' >> deploy-script.sh
         echo 'echo "Container ID: $CONTAINER_ID"' >> deploy-script.sh
         echo 'echo "Waiting for container to start..."' >> deploy-script.sh
         echo 'sleep 10' >> deploy-script.sh
