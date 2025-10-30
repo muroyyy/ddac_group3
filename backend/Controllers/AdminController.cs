@@ -46,6 +46,64 @@ public class AdminController : ControllerBase
         }
     }
 
+    [HttpGet("users/{id}")]
+    public async Task<ActionResult<object>> GetUser(int id)
+    {
+        try
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found" });
+            }
+
+            return Ok(new
+            {
+                id = user.Id,
+                fullName = user.FullName,
+                email = user.Email,
+                role = user.Role.ToString(),
+                status = user.Status.ToString(),
+                phone = user.Phone,
+                createdAt = user.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving user");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPut("users/{id}")]
+    public async Task<ActionResult> UpdateUser(int id, [FromBody] UpdateUserRequest request)
+    {
+        try
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found" });
+            }
+
+            user.FullName = request.FullName;
+            user.Phone = request.Phone;
+            
+            if (Enum.TryParse<UserRole>(request.Role, true, out var role))
+            {
+                user.Role = role;
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "User updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating user");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
     [HttpPut("users/{id}/status")]
     public async Task<ActionResult> UpdateUserStatus(int id, [FromBody] UpdateUserStatusRequest request)
     {
@@ -103,6 +161,13 @@ public class AdminController : ControllerBase
             });
         }
     }
+}
+
+public class UpdateUserRequest
+{
+    public string FullName { get; set; } = string.Empty;
+    public string Phone { get; set; } = string.Empty;
+    public string Role { get; set; } = string.Empty;
 }
 
 public class UpdateUserStatusRequest

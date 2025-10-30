@@ -3,7 +3,7 @@ import {
   Users, 
   Search, 
   Filter, 
-  MoreVertical,
+  Edit,
   UserCheck,
   UserX,
   Mail,
@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { adminAPI } from '../services/adminAPI';
 import type { User } from '../services/adminAPI';
+import EditUserModal from '../components/EditUserModal';
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -19,6 +20,7 @@ const UserManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [editingUserId, setEditingUserId] = useState<number | null>(null);
 
   const loadUsers = async () => {
     try {
@@ -43,6 +45,12 @@ const UserManagement: React.FC = () => {
     } catch (error) {
       console.error('Failed to update user status:', error);
     }
+  };
+
+  const handleUserUpdated = (updatedUser: User) => {
+    setUsers(users.map(user => 
+      user.id === updatedUser.id ? updatedUser : user
+    ));
   };
 
   useEffect(() => {
@@ -246,8 +254,12 @@ const UserManagement: React.FC = () => {
                             <UserCheck className="w-4 h-4" />
                           </button>
                         )}
-                        <button className="p-1 text-gray-600 hover:bg-gray-50 rounded cursor-pointer">
-                          <MoreVertical className="w-4 h-4" />
+                        <button 
+                          onClick={() => setEditingUserId(user.id)}
+                          className="p-1 text-blue-600 hover:bg-blue-50 rounded cursor-pointer"
+                          title="Edit User"
+                        >
+                          <Edit className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -278,6 +290,16 @@ const UserManagement: React.FC = () => {
             <span>Suspended: {users.filter(u => u.status === 'Suspended').length}</span>
           </div>
         </div>
+      )}
+
+      {/* Edit User Modal */}
+      {editingUserId && (
+        <EditUserModal
+          userId={editingUserId}
+          isOpen={editingUserId !== null}
+          onClose={() => setEditingUserId(null)}
+          onUserUpdated={handleUserUpdated}
+        />
       )}
     </div>
   );

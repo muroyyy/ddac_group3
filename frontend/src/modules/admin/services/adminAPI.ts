@@ -75,6 +75,35 @@ export const adminAPI = {
     }
   },
 
+  getUser: async (userId: number): Promise<User | null> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/users/${userId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch user');
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      return null;
+    }
+  },
+
+  updateUser: async (userId: number, userData: Partial<User>): Promise<boolean> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('Error updating user:', error);
+      return false;
+    }
+  },
+
   updateUserStatus: async (userId: number, status: string): Promise<boolean> => {
     try {
       const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/status`, {
