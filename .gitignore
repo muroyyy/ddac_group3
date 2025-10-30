@@ -85,3 +85,6 @@ run-local-notes.txt
 **/override.tf.json
 **/*_override.tf
 **/*_override.tf.json
+
+# GitHub secrets setup script (contains sensitive data)
+infra/setup-github-secrets.sh

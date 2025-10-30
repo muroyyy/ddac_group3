@@ -9,8 +9,8 @@ output "ec2_instance_id" {
 }
 
 output "ec2_public_ip" {
-  description = "EC2 Public IP"
-  value       = aws_instance.main.public_ip
+  description = "EC2 Elastic IP"
+  value       = aws_eip.main.public_ip
 }
 
 output "rds_endpoint" {
