@@ -59,6 +59,7 @@ jobs:
         echo 'if ! command -v docker &> /dev/null; then echo "Installing Docker..."; sudo apt install -y docker.io; sudo systemctl start docker; sudo systemctl enable docker; fi' >> deploy-script.sh
         echo 'if ! command -v aws &> /dev/null; then echo "Installing AWS CLI v2..."; curl -s https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip; sudo apt install -y unzip; unzip -q awscliv2.zip; sudo ./aws/install; fi' >> deploy-script.sh
         echo 'if ! command -v curl &> /dev/null; then sudo apt install -y curl; fi' >> deploy-script.sh
+        echo 'if ! command -v netstat &> /dev/null; then sudo apt install -y net-tools; fi' >> deploy-script.sh
         echo 'echo "✅ Dependencies verified"' >> deploy-script.sh
         echo 'echo' >> deploy-script.sh
         echo 'echo "🔑 === ECR LOGIN PHASE ==="' >> deploy-script.sh
@@ -90,7 +91,7 @@ jobs:
         echo 'echo' >> deploy-script.sh
         echo 'echo "🌡️ === HEALTH CHECK PHASE ==="' >> deploy-script.sh
         echo 'echo "Testing port connectivity..."' >> deploy-script.sh
-        echo 'netstat -tlnp | grep :5000 || (echo "Port 5000 not listening" && exit 1)' >> deploy-script.sh
+        echo 'for i in {1..10}; do if ss -tlnp | grep :5000; then echo "Port 5000 is listening"; break; elif [ $i -eq 10 ]; then echo "Port 5000 not listening after 10 attempts" && sudo docker logs --tail 20 bloodline-api && exit 1; else echo "Attempt $i/10: Port not ready, waiting..."; sleep 2; fi; done' >> deploy-script.sh
         echo 'echo "Waiting for application startup..."' >> deploy-script.sh
         echo 'for i in {1..30}; do if curl -f -s http://localhost:5000/api/health > /dev/null; then break; fi; echo "Attempt $i/30..."; sleep 2; done' >> deploy-script.sh
         echo 'HEALTH_RESPONSE=$(curl -f -s http://localhost:5000/api/health)' >> deploy-script.sh
