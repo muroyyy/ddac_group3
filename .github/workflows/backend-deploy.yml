@@ -105,6 +105,7 @@ jobs:
         echo 'echo "Image: $ECR_REGISTRY/$ECR_REPOSITORY:latest"' >> deploy-script.sh
         echo 'echo "Port mapping: $(sudo docker port bloodline-api)"' >> deploy-script.sh
         echo 'echo "✅ DEPLOYMENT COMPLETED SUCCESSFULLY!"' >> deploy-script.sh
+        echo 'exit 0' >> deploy-script.sh
 
         # Upload and execute script
         aws s3 cp deploy-script.sh s3://${{ secrets.S3_BUCKET_NAME }}/deploy-script.sh
