@@ -131,6 +131,7 @@ jobs:
         echo "⏳ Waiting for deployment..."
         
         # Wait for command completion (max 150 seconds)
+        DEPLOYMENT_SUCCESS=false
         for i in {1..15}; do
           STATUS=$(aws ssm get-command-invocation \
             --command-id $COMMAND_ID \
@@ -149,6 +150,7 @@ jobs:
               --region ap-southeast-1 \
               --query 'StandardOutputContent' \
               --output text
+            DEPLOYMENT_SUCCESS=true
             break
           elif [ "$STATUS" = "Failed" ]; then
             echo "❌ Deployment failed!"
@@ -172,21 +174,23 @@ jobs:
           sleep 10
         done
         
-        # Handle timeout
-        echo "⚠️ Deployment timed out after 150 seconds"
-        echo "Final status: $STATUS"
-        echo "=== STDOUT ==="
-        aws ssm get-command-invocation \
-          --command-id $COMMAND_ID \
-          --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
-          --region ap-southeast-1 \
-          --query 'StandardOutputContent' \
-          --output text || echo "No output available"
-        echo "=== STDERR ==="
-        aws ssm get-command-invocation \
-          --command-id $COMMAND_ID \
-          --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
-          --region ap-southeast-1 \
-          --query 'StandardErrorContent' \
-          --output text || echo "No error output available"
-        exit 1
+        # Handle timeout only if deployment didn't succeed
+        if [ "$DEPLOYMENT_SUCCESS" = "false" ]; then
+          echo "⚠️ Deployment timed out after 150 seconds"
+          echo "Final status: $STATUS"
+          echo "=== STDOUT ==="
+          aws ssm get-command-invocation \
+            --command-id $COMMAND_ID \
+            --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
+            --region ap-southeast-1 \
+            --query 'StandardOutputContent' \
+            --output text || echo "No output available"
+          echo "=== STDERR ==="
+          aws ssm get-command-invocation \
+            --command-id $COMMAND_ID \
+            --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
+            --region ap-southeast-1 \
+            --query 'StandardErrorContent' \
+            --output text || echo "No error output available"
+          exit 1
+        fi
