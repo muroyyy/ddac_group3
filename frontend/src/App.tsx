@@ -17,13 +17,6 @@ import Footer from './components/Footer';
 // Import auth context
 import { AuthProvider, useAuth } from './context/AuthContext';
 
-// Types
-interface UserData {
-  email: string;
-  name: string;
-  role: string;
-}
-
 // Protected Route Component
 interface ProtectedRouteProps {
   children: React.ReactNode;
