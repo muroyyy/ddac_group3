@@ -94,9 +94,9 @@ jobs:
         echo 'for i in {1..10}; do if ss -tlnp | grep :5000; then echo "Port 5000 is listening"; break; elif [ $i -eq 10 ]; then echo "Port 5000 not listening after 10 attempts" && sudo docker logs --tail 20 bloodline-api && exit 1; else echo "Attempt $i/10: Port not ready, waiting..."; sleep 2; fi; done' >> deploy-script.sh
         echo 'echo "Waiting for application startup..."' >> deploy-script.sh
         echo 'for i in {1..30}; do if curl -f -s http://localhost:5000/api/health > /dev/null; then break; fi; echo "Attempt $i/30..."; sleep 2; done' >> deploy-script.sh
-        echo 'HEALTH_RESPONSE=$(curl -f -s http://localhost:5000/api/health)' >> deploy-script.sh
+        echo 'HEALTH_RESPONSE=$(curl -f -s http://localhost:5000/api/health 2>/dev/null || echo "FAILED")' >> deploy-script.sh
         echo 'echo "Health response: $HEALTH_RESPONSE"' >> deploy-script.sh
-        echo 'if ! echo "$HEALTH_RESPONSE" | grep -q "healthy"; then echo "Health check failed" && sudo docker logs --tail 50 bloodline-api && exit 1; fi' >> deploy-script.sh
+        echo 'if [ "$HEALTH_RESPONSE" = "FAILED" ] || ! echo "$HEALTH_RESPONSE" | grep -q "healthy"; then echo "❌ Health check failed after 30 attempts" && echo "=== CONTAINER LOGS ===" && sudo docker logs --tail 100 bloodline-api && exit 1; fi' >> deploy-script.sh
         echo 'echo "✅ Health check passed"' >> deploy-script.sh
         echo 'echo' >> deploy-script.sh
         echo 'echo "📊 === DEPLOYMENT SUMMARY ==="' >> deploy-script.sh
