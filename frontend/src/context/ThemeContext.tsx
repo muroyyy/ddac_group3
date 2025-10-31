@@ -16,25 +16,29 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
+    // Force reset theme for debugging - remove this line after testing
+    // localStorage.removeItem('bloodline_theme');
+    
     const stored = localStorage.getItem('bloodline_theme');
-    if (stored) {
-      const prefersDark = stored === 'dark';
-      setIsDark(prefersDark);
-      if (prefersDark) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
+    console.log('Stored theme:', stored);
+    
+    const shouldBeDark = stored === 'dark';
+    console.log('Should be dark:', shouldBeDark);
+    
+    setIsDark(shouldBeDark);
+    
+    if (shouldBeDark) {
+      document.documentElement.classList.add('dark');
+      console.log('Added dark class');
     } else {
-      // Default to light mode if no preference stored
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setIsDark(prefersDark);
-      localStorage.setItem('bloodline_theme', prefersDark ? 'dark' : 'light');
-      if (prefersDark) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
+      document.documentElement.classList.remove('dark');
+      console.log('Removed dark class');
+    }
+    
+    // Set default to light if no preference exists
+    if (!stored) {
+      localStorage.setItem('bloodline_theme', 'light');
+      console.log('Set default to light');
     }
   }, []);
 
@@ -48,6 +52,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     } else {
       document.documentElement.classList.remove('dark');
     }
+    
+    console.log('Theme toggled:', newIsDark ? 'dark' : 'light');
   };
 
   return (
