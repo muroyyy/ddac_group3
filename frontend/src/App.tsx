@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 // Import page components
@@ -8,18 +8,14 @@ import RegisterPage from './layouts/Register';
 import ForgotPassword from './layouts/ForgotPassword';
 import ResetPassword from './layouts/ResetPassword';
 import MockEmail from './layouts/MockEmail';
-import AdminDashboard from './layouts/AdminLayout';
+import AdminLayout from './layouts/AdminLayout';
 
 // Import layout components
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
-// Types
-interface UserData {
-  email: string;
-  name: string;
-  role: string;
-}
+// Import auth context
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Protected Route Component
 interface ProtectedRouteProps {
@@ -48,29 +44,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   );
 };
 
-// Main App Component
-const App: React.FC = () => {
-  const [user, setUser] = useState<UserData | null>(null);
+// App Routes Component
+const AppRoutes: React.FC = () => {
+  const { user, isAuthenticated, isLoading, login, logout } = useAuth();
 
-  const handleLogin = (userData: UserData) => {
-    setUser(userData);
-    localStorage.setItem('bloodline_user', JSON.stringify(userData));
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('bloodline_user');
-  };
-
-  const isAuthenticated = user !== null;
-
-  // Check for existing user session on mount
-  React.useEffect(() => {
-    const storedUser = localStorage.getItem('bloodline_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+  // Show loading spinner while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Router>
@@ -89,7 +77,7 @@ const App: React.FC = () => {
           path="/login"
           element={
             <Layout>
-              <LoginPage onLogin={handleLogin} />
+              <LoginPage onLogin={login} />
             </Layout>
           }
         />
@@ -135,7 +123,7 @@ const App: React.FC = () => {
           path="/admin/dashboard"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <AdminDashboard user={user!} onLogout={handleLogout} />
+              <AdminLayout user={user!} onLogout={logout} />
             </ProtectedRoute>
           }
         />
@@ -144,6 +132,15 @@ const App: React.FC = () => {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
+  );
+};
+
+// Main App Component
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   );
 };
 
