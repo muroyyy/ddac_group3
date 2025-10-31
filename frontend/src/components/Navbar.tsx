@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Droplet, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
+import bloodlineLogo from '../assets/bloodline_logo.jpg';
 
 const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -43,9 +44,11 @@ const Navbar: React.FC = () => {
             className="flex items-center gap-2 cursor-pointer" 
             onClick={() => handleNavigation('/')}
           >
-            <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
-              <Droplet className="w-6 h-6 text-white" />
-            </div>
+            <img 
+              src={bloodlineLogo} 
+              alt="BloodLine Logo" 
+              className="w-10 h-10 rounded-lg object-cover"
+            />
             <span className="text-2xl font-bold text-gray-900">BloodLine</span>
           </div>
 
