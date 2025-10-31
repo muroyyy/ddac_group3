@@ -161,4 +161,50 @@ export const adminAPI = {
       return [];
     }
   },
+
+  // Profile Management
+  getProfile: async (): Promise<{ success: boolean; data?: any; message?: string }> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/profile`);
+      const data = await response.json();
+      return { success: response.ok, data: response.ok ? data : null, message: data.message };
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      return { success: false, message: 'Network error' };
+    }
+  },
+
+  updateProfile: async (profileData: any): Promise<{ success: boolean; message?: string }> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profileData),
+      });
+      const data = await response.json();
+      return { success: response.ok, message: data.message };
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      return { success: false, message: 'Network error' };
+    }
+  },
+
+  updatePassword: async (passwordData: { currentPassword: string; newPassword: string }): Promise<{ success: boolean; message?: string }> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/profile/password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(passwordData),
+      });
+      const data = await response.json();
+      return { success: response.ok, message: data.message };
+    } catch (error) {
+      console.error('Error updating password:', error);
+      return { success: false, message: 'Network error' };
+    }
+  },
 };

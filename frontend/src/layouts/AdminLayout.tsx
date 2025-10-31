@@ -12,9 +12,11 @@ import {
   X,
   LogOut,
   Moon,
-  Sun
+  Sun,
+  Settings
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import bloodlineLogo from '../assets/bloodline_logo.jpg';
 
 // Import admin components
 import AdminDashboard from '../modules/admin/pages/Dashboard';
@@ -25,6 +27,7 @@ import SystemMonitoring from '../modules/admin/pages/SystemMonitoring';
 import BloodInventory from '../modules/admin/pages/BloodInventory';
 import Notifications from '../modules/admin/pages/Notifications';
 import AuditLogs from '../modules/admin/pages/AuditLogs';
+import ProfileSettings from '../modules/admin/pages/ProfileSettings';
 
 interface AdminLayoutProps {
   user: {
@@ -48,7 +51,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
     { id: 'monitoring', icon: <Server className="w-5 h-5" />, label: 'System Monitoring' },
     { id: 'inventory', icon: <Droplet className="w-5 h-5" />, label: 'Blood Inventory' },
     { id: 'notifications', icon: <Bell className="w-5 h-5" />, label: 'Notifications' },
-    { id: 'audit', icon: <FileText className="w-5 h-5" />, label: 'Audit Logs' }
+    { id: 'audit', icon: <FileText className="w-5 h-5" />, label: 'Audit Logs' },
+    { id: 'settings', icon: <Settings className="w-5 h-5" />, label: 'Profile Settings' }
   ];
 
   const renderContent = () => {
@@ -69,6 +73,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
         return <Notifications />;
       case 'audit':
         return <AuditLogs />;
+      case 'settings':
+        return <ProfileSettings />;
       default:
         return <AdminDashboard user={user} onNavigate={setActiveTab} />;
     }
@@ -79,12 +85,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
       {/* Sidebar */}
       <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-transform duration-300 ease-in-out`}>
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-2">
-            <Droplet className="w-8 h-8 text-red-600" />
-            <span className="text-xl font-bold text-gray-900 dark:text-white">BloodLine</span>
-          </div>
+          <img 
+            src={bloodlineLogo} 
+            alt="BloodLine Logo" 
+            className="w-8 h-8 rounded-lg object-cover"
+          />
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden cursor-pointer">
-            <X className="w-6 h-6" />
+            <X className="w-6 h-6 text-gray-500 dark:text-gray-400" />
           </button>
         </div>
         

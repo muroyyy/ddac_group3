@@ -17,22 +17,33 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const stored = localStorage.getItem('bloodline_theme');
-    const prefersDark = stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    setIsDark(prefersDark);
-    
-    if (prefersDark) {
-      document.documentElement.classList.add('dark');
+    if (stored) {
+      const prefersDark = stored === 'dark';
+      setIsDark(prefersDark);
+      if (prefersDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
     } else {
-      document.documentElement.classList.remove('dark');
+      // Default to light mode if no preference stored
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setIsDark(prefersDark);
+      localStorage.setItem('bloodline_theme', prefersDark ? 'dark' : 'light');
+      if (prefersDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
     }
   }, []);
 
   const toggleTheme = () => {
-    const newTheme = !isDark;
-    setIsDark(newTheme);
-    localStorage.setItem('bloodline_theme', newTheme ? 'dark' : 'light');
+    const newIsDark = !isDark;
+    setIsDark(newIsDark);
+    localStorage.setItem('bloodline_theme', newIsDark ? 'dark' : 'light');
     
-    if (newTheme) {
+    if (newIsDark) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
