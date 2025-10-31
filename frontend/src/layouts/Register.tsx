@@ -47,13 +47,46 @@ const RegisterPage: React.FC = () => {
 
   const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
 
+  const formatMalaysianPhone = (value: string): string => {
+    // Remove all non-digits
+    const digits = value.replace(/\D/g, '');
+    
+    // If starts with 60, keep it; if starts with 1, add 60; otherwise add 601
+    let formattedDigits = digits;
+    if (digits.startsWith('60')) {
+      formattedDigits = digits;
+    } else if (digits.startsWith('1')) {
+      formattedDigits = '60' + digits;
+    } else if (digits.length > 0) {
+      formattedDigits = '601' + digits;
+    }
+    
+    // Limit to 12 digits (60 + 10 digits)
+    formattedDigits = formattedDigits.substring(0, 12);
+    
+    // Format as +601x xxx xxxx
+    if (formattedDigits.length >= 4) {
+      const formatted = '+' + formattedDigits.substring(0, 2) + formattedDigits.substring(2, 4) + ' ' + 
+                       formattedDigits.substring(4, 7) + ' ' + formattedDigits.substring(7, 11);
+      return formatted.trim();
+    } else if (formattedDigits.length > 0) {
+      return '+' + formattedDigits;
+    }
+    return '';
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
     
+    let processedValue = value;
+    if (name === 'phone') {
+      processedValue = formatMalaysianPhone(value);
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : processedValue
     }));
     
     if (errors[name as keyof FormData]) {
@@ -79,8 +112,8 @@ const RegisterPage: React.FC = () => {
 
     if (!formData.phone) {
       newErrors.phone = 'Phone number is required';
-    } else if (!/^\+?[\d\s-()]+$/.test(formData.phone)) {
-      newErrors.phone = 'Phone number is invalid';
+    } else if (!/^\+601[0-9] \d{3} \d{4}$/.test(formData.phone)) {
+      newErrors.phone = 'Phone number must be in format +601x xxx xxxx';
     }
 
     if (!formData.role) {
@@ -143,27 +176,22 @@ const RegisterPage: React.FC = () => {
       setIsLoading(true);
       
       try {
-        const response = await fetch('http://localhost:5000/api/auth/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            fullName: formData.fullName,
-            email: formData.email,
-            phone: formData.phone,
-            bloodType: formData.bloodType,
-            location: formData.location,
-            password: formData.password,
-            role: formData.role
-          })
+        const { authAPI } = await import('../utils/apiClient');
+        const response = await authAPI.register({
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          bloodType: formData.bloodType,
+          location: formData.location,
+          password: formData.password,
+          role: formData.role
         });
 
-        if (response.ok) {
-          alert('Registration successful! Please check your email to verify your account.');
+        if (response.success) {
+          alert('Registration successful! You can now sign in.');
+          navigate('/login');
         } else {
-          const error = await response.json();
-          alert(error.message || 'Registration failed');
+          alert(response.message || 'Registration failed');
         }
       } catch (error) {
         alert('Network error. Please try again.');
@@ -286,6 +314,7 @@ const RegisterPage: React.FC = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
+                      placeholder="+601x xxx xxxx"
                       className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
                         errors.phone ? 'border-red-500 bg-red-50' : 'border-gray-300'
                       }`}
@@ -372,7 +401,7 @@ const RegisterPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleNextStep}
-                  className="w-full py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 font-semibold transition-all"
+                  className="w-full py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 font-semibold transition-all cursor-pointer"
                 >
                   Next Step
                 </button>

@@ -1,0 +1,210 @@
+name: Deploy Backend to EC2
+
+on:
+  push:
+    branches: [dev]
+    paths: ['backend/**']
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-southeast-1
+    
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+    
+    - name: Build and push Docker image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        echo "🐳 Building Docker image..."
+        cd backend
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+        
+        echo "📤 Pushing to ECR..."
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        
+        echo "✅ Image pushed: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+    
+    - name: Deploy to EC2
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        set -e
+        
+        echo "🚀 Deploying to EC2..."
+        
+        # Create deployment script using echo
+        echo '#!/bin/bash' > deploy-script.sh
+        echo 'set -e' >> deploy-script.sh
+        echo 'echo "🔍 === DEPENDENCY CHECK PHASE ==="' >> deploy-script.sh
+        echo 'sudo apt update -qq' >> deploy-script.sh
+        echo 'if ! command -v docker &> /dev/null; then echo "Installing Docker..."; sudo apt install -y docker.io; sudo systemctl start docker; sudo systemctl enable docker; fi' >> deploy-script.sh
+        echo 'if ! command -v aws &> /dev/null; then echo "Installing AWS CLI v2..."; curl -s https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip; sudo apt install -y unzip; unzip -q awscliv2.zip; sudo ./aws/install; fi' >> deploy-script.sh
+        echo 'if ! command -v curl &> /dev/null; then sudo apt install -y curl; fi' >> deploy-script.sh
+        echo 'if ! command -v netstat &> /dev/null; then sudo apt install -y net-tools; fi' >> deploy-script.sh
+        echo 'echo "✅ Dependencies verified"' >> deploy-script.sh
+        echo 'echo' >> deploy-script.sh
+        echo 'echo "🔑 === ECR LOGIN PHASE ==="' >> deploy-script.sh
+        echo 'aws ecr get-login-password --region ap-southeast-1 | sudo docker login --username AWS --password-stdin $ECR_REGISTRY || (echo "ECR login failed" && exit 1)' >> deploy-script.sh
+        echo 'echo "✅ ECR login successful"' >> deploy-script.sh
+        echo 'echo' >> deploy-script.sh
+        echo 'echo "📥 === IMAGE PULL PHASE ==="' >> deploy-script.sh
+        echo 'echo "Pulling image: $ECR_REGISTRY/$ECR_REPOSITORY:latest"' >> deploy-script.sh
+        echo 'sudo docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest || (echo "Image pull failed" && exit 1)' >> deploy-script.sh
+        echo 'echo "✅ Image pulled successfully"' >> deploy-script.sh
+        echo 'echo' >> deploy-script.sh
+        echo 'echo "🛑 === CONTAINER CLEANUP PHASE ==="' >> deploy-script.sh
+        echo 'if sudo docker ps -q -f name=bloodline-api; then echo "Stopping existing container..."; sudo docker stop bloodline-api || true; fi' >> deploy-script.sh
+        echo 'if sudo docker ps -aq -f name=bloodline-api; then echo "Removing existing container..."; sudo docker rm bloodline-api || true; fi' >> deploy-script.sh
+        echo 'echo "✅ Cleanup completed"' >> deploy-script.sh
+        echo 'echo' >> deploy-script.sh
+        echo 'echo "🚀 === CONTAINER START PHASE ==="' >> deploy-script.sh
+        echo 'echo "Starting container with image: $ECR_REGISTRY/$ECR_REPOSITORY:latest"' >> deploy-script.sh
+        echo 'CONTAINER_ID=$(sudo docker run -d --name bloodline-api --restart unless-stopped -p 5000:8080 -e ASPNETCORE_ENVIRONMENT=Production -e AWS_DEFAULT_REGION=ap-southeast-1 $ECR_REGISTRY/$ECR_REPOSITORY:latest)' >> deploy-script.sh
+        echo 'echo "Container ID: $CONTAINER_ID"' >> deploy-script.sh
+        echo 'echo "Waiting for container to start..."' >> deploy-script.sh
+        echo 'sleep 10' >> deploy-script.sh
+        echo 'echo' >> deploy-script.sh
+        echo 'echo "🔍 === CONTAINER VERIFICATION PHASE ==="' >> deploy-script.sh
+        echo 'CONTAINER_STATUS=$(sudo docker inspect --format="{{.State.Status}}" bloodline-api)' >> deploy-script.sh
+        echo 'echo "Container status: $CONTAINER_STATUS"' >> deploy-script.sh
+        echo 'if [ "$CONTAINER_STATUS" != "running" ]; then echo "Container failed to start" && sudo docker logs bloodline-api && exit 1; fi' >> deploy-script.sh
+        echo 'echo "✅ Container is running"' >> deploy-script.sh
+        echo 'echo' >> deploy-script.sh
+        echo 'echo "🌡️ === HEALTH CHECK PHASE ==="' >> deploy-script.sh
+        echo 'echo "Testing port connectivity..."' >> deploy-script.sh
+        echo 'for i in {1..10}; do if ss -tlnp | grep :5000; then echo "Port 5000 is listening"; break; elif [ $i -eq 10 ]; then echo "Port 5000 not listening after 10 attempts" && sudo docker logs --tail 20 bloodline-api && exit 1; else echo "Attempt $i/10: Port not ready, waiting..."; sleep 2; fi; done' >> deploy-script.sh
+        echo 'echo "Waiting for application startup..."' >> deploy-script.sh
+        echo 'for i in {1..30}; do if curl -f -s http://localhost:5000/api/health > /dev/null; then break; fi; echo "Attempt $i/30..."; sleep 2; done' >> deploy-script.sh
+        echo 'HEALTH_RESPONSE=$(curl -f -s http://localhost:5000/api/health 2>/dev/null || echo "FAILED")' >> deploy-script.sh
+        echo 'echo "Health response: $HEALTH_RESPONSE"' >> deploy-script.sh
+        echo 'if [ "$HEALTH_RESPONSE" = "FAILED" ] || ! echo "$HEALTH_RESPONSE" | grep -q "healthy"; then echo "❌ Health check failed after 30 attempts" && echo "=== CONTAINER LOGS ===" && sudo docker logs --tail 100 bloodline-api && exit 1; fi' >> deploy-script.sh
+        echo 'echo "✅ Health check passed"' >> deploy-script.sh
+        echo 'echo' >> deploy-script.sh
+        echo 'echo "🗄️ === DATABASE CONNECTIVITY TEST ==="' >> deploy-script.sh
+        echo 'echo "Testing AWS credentials in container..."' >> deploy-script.sh
+        echo 'AWS_TEST=$(sudo docker exec bloodline-api aws sts get-caller-identity 2>/dev/null || echo "AWS_FAILED")' >> deploy-script.sh
+        echo 'if echo "$AWS_TEST" | grep -q "UserId"; then echo "✅ AWS credentials working"; else echo "❌ AWS credentials failed" && echo "$AWS_TEST"; fi' >> deploy-script.sh
+        echo 'echo "Testing Secrets Manager access..."' >> deploy-script.sh
+        echo 'SECRET_TEST=$(sudo docker exec bloodline-api aws secretsmanager get-secret-value --secret-id dev-bloodline-db-credentials --region ap-southeast-1 --query SecretString --output text 2>/dev/null || echo "SECRET_FAILED")' >> deploy-script.sh
+        echo 'if echo "$SECRET_TEST" | grep -q "endpoint"; then echo "✅ Secrets Manager access working"; else echo "❌ Secrets Manager access failed" && echo "$SECRET_TEST"; fi' >> deploy-script.sh
+        echo 'echo "Testing database connection from container..."' >> deploy-script.sh
+        echo 'DB_LOGS=$(sudo docker logs --tail 20 bloodline-api 2>&1)' >> deploy-script.sh
+        echo 'if echo "$DB_LOGS" | grep -q "Unable to connect.*MySQL"; then echo "❌ Database connection failed" && echo "$DB_LOGS" && exit 1; else echo "✅ No database connection errors found"; fi' >> deploy-script.sh
+        echo 'echo "Testing API endpoint that requires database..."' >> deploy-script.sh
+        echo 'AUTH_TEST_RESPONSE=$(curl -f -s -X POST http://localhost:5000/api/auth/login -H "Content-Type: application/json" -d "{\"email\":\"test@test.com\",\"password\":\"test\"}" 2>/dev/null || echo "AUTH_FAILED")' >> deploy-script.sh
+        echo 'if echo "$AUTH_TEST_RESPONSE" | grep -q "success\|Invalid"; then echo "✅ Database connectivity verified (API responds)"; else echo "⚠️ Database connectivity uncertain - API may have issues" && echo "Response: $AUTH_TEST_RESPONSE"; fi' >> deploy-script.sh
+        echo 'echo' >> deploy-script.sh
+        echo 'echo "📊 === DEPLOYMENT SUMMARY ==="' >> deploy-script.sh
+        echo 'echo "Container name: bloodline-api"' >> deploy-script.sh
+        echo 'echo "Container status: $(sudo docker inspect --format=\"{{.State.Status}}\" bloodline-api)"' >> deploy-script.sh
+        echo 'echo "Image: $ECR_REGISTRY/$ECR_REPOSITORY:latest"' >> deploy-script.sh
+        echo 'echo "Port mapping: $(sudo docker port bloodline-api)"' >> deploy-script.sh
+        echo 'echo "✅ DEPLOYMENT COMPLETED SUCCESSFULLY!"' >> deploy-script.sh
+        echo 'exit 0' >> deploy-script.sh
+
+        # Upload and execute script
+        aws s3 cp deploy-script.sh s3://${{ secrets.S3_BUCKET_NAME }}/deploy-script.sh
+        
+        COMMAND_ID=$(aws ssm send-command \
+          --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
+          --document-name "AWS-RunShellScript" \
+          --parameters 'commands=[
+            "export ECR_REGISTRY='$ECR_REGISTRY'",
+            "export ECR_REPOSITORY='$ECR_REPOSITORY'",
+            "aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/deploy-script.sh /tmp/deploy-script.sh",
+            "chmod +x /tmp/deploy-script.sh",
+            "/tmp/deploy-script.sh"
+          ]' \
+          --region ap-southeast-1 \
+          --query 'Command.CommandId' \
+          --output text)
+        
+        echo "📋 Command ID: $COMMAND_ID"
+        
+        # Clean up local script
+        rm -f deploy-script.sh
+        echo "⏳ Waiting for deployment..."
+        
+        # Wait for command completion (max 150 seconds)
+        DEPLOYMENT_SUCCESS=false
+        for i in {1..15}; do
+          STATUS=$(aws ssm get-command-invocation \
+            --command-id $COMMAND_ID \
+            --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
+            --region ap-southeast-1 \
+            --query 'Status' \
+            --output text 2>/dev/null || echo "InProgress")
+          
+          echo "Status: $STATUS (attempt $i/15)"
+          
+          if [ "$STATUS" = "Success" ]; then
+            echo "✅ Deployment successful!"
+            aws ssm get-command-invocation \
+              --command-id $COMMAND_ID \
+              --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
+              --region ap-southeast-1 \
+              --query 'StandardOutputContent' \
+              --output text
+            DEPLOYMENT_SUCCESS=true
+            break
+          elif [ "$STATUS" = "Failed" ]; then
+            echo "❌ Deployment failed!"
+            echo "=== STDOUT ==="
+            aws ssm get-command-invocation \
+              --command-id $COMMAND_ID \
+              --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
+              --region ap-southeast-1 \
+              --query 'StandardOutputContent' \
+              --output text
+            echo "=== STDERR ==="
+            aws ssm get-command-invocation \
+              --command-id $COMMAND_ID \
+              --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
+              --region ap-southeast-1 \
+              --query 'StandardErrorContent' \
+              --output text
+            exit 1
+          fi
+          
+          sleep 10
+        done
+        
+        # Handle timeout only if deployment didn't succeed
+        if [ "$DEPLOYMENT_SUCCESS" = "false" ]; then
+          echo "⚠️ Deployment timed out after 150 seconds"
+          echo "Final status: $STATUS"
+          echo "=== STDOUT ==="
+          aws ssm get-command-invocation \
+            --command-id $COMMAND_ID \
+            --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
+            --region ap-southeast-1 \
+            --query 'StandardOutputContent' \
+            --output text || echo "No output available"
+          echo "=== STDERR ==="
+          aws ssm get-command-invocation \
+            --command-id $COMMAND_ID \
+            --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
+            --region ap-southeast-1 \
+            --query 'StandardErrorContent' \
+            --output text || echo "No error output available"
+          exit 1
+        fi

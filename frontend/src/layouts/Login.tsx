@@ -63,31 +63,51 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (validateForm()) {
       setIsLoading(true);
       
-      setTimeout(() => {
-        setIsLoading(false);
-        
-        if (formData.email === 'admin@bloodline.com' && formData.password === 'admin123') {
+      try {
+        const { authAPI } = await import('../utils/apiClient');
+        const response = await authAPI.login({
+          email: formData.email,
+          password: formData.password
+        });
+
+        if (response.success && response.user) {
           const userData = {
-            email: formData.email,
-            name: 'Amirul',
-            role: 'Admin'
+            email: response.user.email,
+            name: response.user.fullName,
+            role: response.user.role
           };
           
           onLogin(userData);
-          navigate('/admin/dashboard');
+          
+          // Navigate based on role
+          const roleRoutes = {
+            'Admin': '/admin/dashboard',
+            'Donor': '/donor/dashboard',
+            'Patient': '/patient/dashboard',
+            'Hospital': '/hospital/dashboard'
+          };
+          
+          navigate(roleRoutes[response.user.role as keyof typeof roleRoutes] || '/dashboard');
         } else {
           setErrors({
-            email: 'Invalid email or password',
-            password: 'Invalid email or password'
+            email: response.message,
+            password: response.message
           });
         }
-      }, 1500);
+      } catch (error) {
+        setErrors({
+          email: 'Network error. Please try again.',
+          password: 'Network error. Please try again.'
+        });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -248,7 +268,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                   />
                   <span className="ml-2 text-sm text-gray-700">Remember me</span>
                 </label>
-                <button type="button" className="text-sm text-red-600 hover:text-red-700 font-medium cursor-pointer">
+                <button 
+                  type="button" 
+                  onClick={() => navigate('/forgot-password')}
+                  className="text-sm text-red-600 hover:text-red-700 font-medium cursor-pointer"
+                >
                   Forgot password?
                 </button>
               </div>

@@ -5,6 +5,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import LandingPage from './layouts/Landing';
 import LoginPage from './layouts/Login';
 import RegisterPage from './layouts/Register';
+import ForgotPassword from './layouts/ForgotPassword';
+import ResetPassword from './layouts/ResetPassword';
+import MockEmail from './layouts/MockEmail';
 import AdminDashboard from './layouts/AdminLayout';
 
 // Import layout components
@@ -96,6 +99,33 @@ const App: React.FC = () => {
           element={
             <Layout>
               <RegisterPage />
+            </Layout>
+          }
+        />
+        
+        <Route
+          path="/forgot-password"
+          element={
+            <Layout>
+              <ForgotPassword />
+            </Layout>
+          }
+        />
+        
+        <Route
+          path="/reset-password"
+          element={
+            <Layout>
+              <ResetPassword />
+            </Layout>
+          }
+        />
+        
+        <Route
+          path="/mock-email"
+          element={
+            <Layout>
+              <MockEmail />
             </Layout>
           }
         />
