@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Droplet, 
   Mail, 
   Lock, 
   Eye, 
@@ -9,6 +8,7 @@ import {
   AlertCircle,
   ArrowLeft
 } from 'lucide-react';
+import bloodlineLogo from '../assets/bloodline_logo.jpg';
 
 interface LoginPageProps {
   onLogin: (userData: { email: string; name: string; role: string }) => void;
@@ -117,11 +117,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         
         <div className="hidden lg:block">
           <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-3xl p-12 text-white shadow-2xl">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center">
-                <Droplet className="w-8 h-8 text-red-600" />
-              </div>
-              <span className="text-3xl font-bold">BloodLine</span>
+            <div className="mb-8">
+              <img 
+                src={bloodlineLogo} 
+                alt="BloodLine Logo" 
+                className="w-14 h-14 rounded-xl object-cover"
+              />
             </div>
             
             <h2 className="text-4xl font-bold mb-4">
@@ -174,11 +175,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
         <div className="w-full">
           <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
-            <div className="lg:hidden flex items-center justify-center gap-2 mb-8">
-              <div className="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center">
-                <Droplet className="w-7 h-7 text-white" />
-              </div>
-              <span className="text-2xl font-bold text-gray-900">BloodLine</span>
+            <div className="lg:hidden flex items-center justify-center mb-8">
+              <img 
+                src={bloodlineLogo} 
+                alt="BloodLine Logo" 
+                className="w-12 h-12 rounded-xl object-cover"
+              />
             </div>
 
             <div className="mb-8">

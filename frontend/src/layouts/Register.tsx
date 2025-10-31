@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Droplet, 
   Mail, 
   Lock, 
   Eye, 
@@ -13,6 +12,7 @@ import {
   MapPin,
   Check
 } from 'lucide-react';
+import bloodlineLogo from '../assets/bloodline_logo.jpg';
 
 interface FormData {
   fullName: string;
@@ -205,11 +205,12 @@ const RegisterPage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex items-center justify-center p-4 py-12">
       <div className="w-full max-w-2xl">
         <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
-          <div className="flex items-center justify-center gap-2 mb-8">
-            <div className="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center">
-              <Droplet className="w-7 h-7 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-gray-900">BloodLine</span>
+          <div className="flex items-center justify-center mb-8">
+            <img 
+              src={bloodlineLogo} 
+              alt="BloodLine Logo" 
+              className="w-12 h-12 rounded-xl object-cover"
+            />
           </div>
 
           <div className="text-center mb-8">

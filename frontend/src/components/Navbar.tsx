@@ -41,7 +41,7 @@ const Navbar: React.FC = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div 
-            className="flex items-center gap-2 cursor-pointer" 
+            className="cursor-pointer" 
             onClick={() => handleNavigation('/')}
           >
             <img 
@@ -49,7 +49,6 @@ const Navbar: React.FC = () => {
               alt="BloodLine Logo" 
               className="w-10 h-10 rounded-lg object-cover"
             />
-            <span className="text-2xl font-bold text-gray-900">BloodLine</span>
           </div>
 
           {/* Desktop Navigation */}

@@ -34,13 +34,12 @@ const Footer: React.FC = () => {
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           {/* Brand Section */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
+            <div className="mb-4">
               <img 
                 src={bloodlineLogo} 
                 alt="BloodLine Logo" 
                 className="w-10 h-10 rounded-lg object-cover"
               />
-              <span className="text-xl font-bold">BloodLine</span>
             </div>
             <p className="text-gray-400">
               Connecting donors and saving lives through cloud technology.
