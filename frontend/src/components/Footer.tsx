@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Droplet } from 'lucide-react';
+import bloodlineLogo from '../assets/bloodline_logo.jpg';
 
 const Footer: React.FC = () => {
   const navigate = useNavigate();
@@ -38,9 +38,11 @@ const Footer: React.FC = () => {
           {/* Brand Section */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
-                <Droplet className="w-6 h-6 text-white" />
-              </div>
+              <img 
+                src={bloodlineLogo} 
+                alt="BloodLine Logo" 
+                className="w-10 h-10 rounded-lg object-cover"
+              />
               <span className="text-xl font-bold">BloodLine</span>
             </div>
             <p className="text-gray-400">
