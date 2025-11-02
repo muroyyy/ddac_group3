@@ -47,7 +47,7 @@ resource "aws_iam_role_policy" "ec2_secrets_policy" {
         Action = [
           "secretsmanager:GetSecretValue"
         ]
-        Resource = aws_secretsmanager_secret.db_credentials.arn
+        Resource = var.secrets_manager_secret_arn
       }
     ]
   })
@@ -60,55 +60,22 @@ resource "aws_iam_instance_profile" "ec2_profile" {
 
 resource "aws_instance" "main" {
   ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t3.micro"
-  subnet_id              = aws_subnet.public[0].id
-  vpc_security_group_ids = [aws_security_group.ec2.id]
+  instance_type          = var.instance_type
+  subnet_id              = var.public_subnet_id
+  vpc_security_group_ids = [var.ec2_security_group_id]
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
 
-  user_data = base64encode(<<-EOF
-    #!/bin/bash
-    set -e
-    
-    # Update system
-    apt-get update
-    
-    # Install essential packages
-    apt-get install -y curl unzip mysql-client
-    
-    # Install Docker
-    apt-get install -y docker.io
-    systemctl start docker
-    systemctl enable docker
-    usermod -aG docker ubuntu
-    
-    # Install AWS CLI v2
-    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-    unzip awscliv2.zip
-    ./aws/install
-    rm -rf awscliv2.zip aws/
-    
-    # Setup SSM Agent
-    snap install amazon-ssm-agent --classic
-    systemctl enable snap.amazon-ssm-agent.amazon-ssm-agent.service
-    systemctl start snap.amazon-ssm-agent.amazon-ssm-agent.service
-    
-    # Verify installations
-    docker --version
-    aws --version
-    
-    # Create log file for debugging
-    echo "EC2 setup completed at $(date)" > /var/log/ec2-setup.log
-    echo "Docker: $(docker --version)" >> /var/log/ec2-setup.log
-    echo "AWS CLI: $(aws --version)" >> /var/log/ec2-setup.log
-  EOF
-  )
+  user_data = base64encode(templatefile("${path.module}/user_data.sh", {
+    environment    = var.environment
+    project_name   = var.project_name
+  }))
 
   tags = {
     Name = "${var.environment}-${var.project_name}-ec2"
   }
   
   lifecycle {
-    ignore_changes = [public_ip]
+    ignore_changes = [ami]
   }
 }
 

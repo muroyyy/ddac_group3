@@ -1,15 +1,13 @@
+resource "random_id" "bucket_suffix" {
+  byte_length = 4
+}
+
 resource "aws_s3_bucket" "frontend" {
   bucket = "${var.environment}-${var.project_name}-frontend-${random_id.bucket_suffix.hex}"
 
   tags = {
     Name = "${var.environment}-${var.project_name}-frontend"
   }
-}
-
-
-
-resource "random_id" "bucket_suffix" {
-  byte_length = 4
 }
 
 resource "aws_s3_bucket_website_configuration" "frontend" {
@@ -20,7 +18,7 @@ resource "aws_s3_bucket_website_configuration" "frontend" {
   }
 
   error_document {
-    key = "error.html"
+    key = "index.html"
   }
 }
 

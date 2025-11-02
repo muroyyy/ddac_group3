@@ -1,9 +1,9 @@
 resource "aws_ecr_repository" "backend" {
   name                 = "${var.environment}-${var.project_name}-backend"
-  image_tag_mutability = "MUTABLE"
+  image_tag_mutability = var.image_tag_mutability
 
   image_scanning_configuration {
-    scan_on_push = true
+    scan_on_push = var.scan_on_push
   }
 
   tags = {
@@ -18,12 +18,12 @@ resource "aws_ecr_lifecycle_policy" "backend" {
     rules = [
       {
         rulePriority = 1
-        description  = "Keep last 10 images"
+        description  = "Keep last ${var.image_count} images"
         selection = {
           tagStatus     = "tagged"
           tagPrefixList = ["v"]
           countType     = "imageCountMoreThan"
-          countNumber   = 10
+          countNumber   = var.image_count
         }
         action = {
           type = "expire"

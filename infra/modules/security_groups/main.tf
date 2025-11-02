@@ -1,6 +1,6 @@
 resource "aws_security_group" "ec2" {
   name_prefix = "${var.environment}-${var.project_name}-ec2-"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = var.vpc_id
 
   ingress {
     from_port   = 80
@@ -37,7 +37,7 @@ resource "aws_security_group" "ec2" {
 
 resource "aws_security_group" "rds" {
   name_prefix = "${var.environment}-${var.project_name}-rds-"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = var.vpc_id
 
   ingress {
     from_port       = 3306

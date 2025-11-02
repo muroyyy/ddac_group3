@@ -21,8 +21,8 @@ resource "aws_iam_policy" "github_actions" {
           "s3:ListBucket"
         ]
         Resource = [
-          aws_s3_bucket.frontend.arn,
-          "${aws_s3_bucket.frontend.arn}/*"
+          var.s3_bucket_arn,
+          "${var.s3_bucket_arn}/*"
         ]
       },
       {
@@ -38,7 +38,7 @@ resource "aws_iam_policy" "github_actions" {
           "ecr:PutImage"
         ]
         Resource = [
-          aws_ecr_repository.backend.arn,
+          var.ecr_repository_arn,
           "*"
         ]
       },
@@ -48,7 +48,7 @@ resource "aws_iam_policy" "github_actions" {
           "ssm:SendCommand"
         ]
         Resource = [
-          "arn:aws:ec2:${var.aws_region}:*:instance/${aws_instance.main.id}",
+          "arn:aws:ec2:${var.aws_region}:*:instance/${var.ec2_instance_id}",
           "arn:aws:ssm:${var.aws_region}:*:document/AWS-RunShellScript"
         ]
       },
