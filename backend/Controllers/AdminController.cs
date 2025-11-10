@@ -179,7 +179,14 @@ public class AdminController : ControllerBase
             {
                 bloodType = i.BloodType,
                 units = i.QuantityUnits,
-                status = i.StockStatus
+                status = i.StockStatus.ToLower() switch
+                {
+                    "critical" => "critical",
+                    "low" => "warning",
+                    "moderate" => "warning",
+                    "sufficient" => "good",
+                    _ => "good"
+                }
             });
 
             return Ok(result);
