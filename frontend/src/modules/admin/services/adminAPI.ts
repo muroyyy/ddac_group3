@@ -17,6 +17,7 @@ export interface User {
   status: string;
   createdAt: string;
   phone?: string;
+  location?: string;
 }
 
 export interface BloodInventoryItem {
