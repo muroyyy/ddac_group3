@@ -161,4 +161,50 @@ export const adminAPI = {
       return [];
     }
   },
+
+  // Profile Management
+  getProfile: async (): Promise<User | null> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/profile`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch profile');
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      return null;
+    }
+  },
+
+  updateProfile: async (profileData: Partial<User>): Promise<boolean> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profileData),
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      return false;
+    }
+  },
+
+  updatePassword: async (passwordData: { currentPassword: string; newPassword: string }): Promise<boolean> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/profile/password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(passwordData),
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('Error updating password:', error);
+      return false;
+    }
+  },
 };
