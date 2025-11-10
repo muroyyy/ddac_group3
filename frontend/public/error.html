@@ -3,7 +3,10 @@
 <head>
     <script>
         // Redirect all 404s to index.html for client-side routing
-        window.location.href = '/index.html' + window.location.pathname + window.location.search;
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/' && currentPath !== '/index.html') {
+            window.location.replace('/');
+        }
     </script>
 </head>
 <body></body>
