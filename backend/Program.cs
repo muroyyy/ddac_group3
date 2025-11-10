@@ -2,11 +2,13 @@ using BloodLine.Data;
 using BloodLine.Services;
 using Microsoft.EntityFrameworkCore;
 using Amazon.SecretsManager;
+using Amazon.CloudWatch;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add AWS Services
 builder.Services.AddAWSService<IAmazonSecretsManager>();
+builder.Services.AddAWSService<IAmazonCloudWatch>();
 builder.Services.AddScoped<DatabaseService>();
 
 // Add CORS
