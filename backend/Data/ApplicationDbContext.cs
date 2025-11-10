@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using BloodLine.Models;
 
-// Model version: 2.1 - Merged from feature/admin
+// Model version: 2.2 - Testing deployment
 namespace BloodLine.Data;
 
 public class ApplicationDbContext : DbContext
