@@ -6,31 +6,17 @@ const LineChart = () => <div className="bg-gray-100 rounded p-4 text-center">Lin
 const PieChart = () => <div className="bg-gray-100 rounded p-4 text-center">Pie Chart Placeholder</div>;
 const BarChart = () => <div className="bg-gray-100 rounded p-4 text-center">Bar Chart Placeholder</div>;
 import { analyticsAPI } from '../services/analyticsAPI';
-import type { AnalyticsOverview, UserGrowthData, UserDistribution, BloodTypeDistribution } from '../services/analyticsAPI';
-
-const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
+import type { AnalyticsOverview } from '../services/analyticsAPI';
 
 const Analytics: React.FC = () => {
   const [overview, setOverview] = useState<AnalyticsOverview | null>(null);
-  const [userGrowth, setUserGrowth] = useState<UserGrowthData[]>([]);
-  const [userDistribution, setUserDistribution] = useState<UserDistribution[]>([]);
-  const [bloodTypeDistribution, setBloodTypeDistribution] = useState<BloodTypeDistribution[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const [overviewData, growthData, distributionData, bloodTypeData] = await Promise.all([
-          analyticsAPI.getOverview(),
-          analyticsAPI.getUserGrowth(),
-          analyticsAPI.getUserDistribution(),
-          analyticsAPI.getBloodTypeDistribution()
-        ]);
-        
+        const overviewData = await analyticsAPI.getOverview();
         setOverview(overviewData);
-        setUserGrowth(growthData);
-        setUserDistribution(distributionData);
-        setBloodTypeDistribution(bloodTypeData);
       } catch (error) {
         console.error('Failed to fetch analytics:', error);
       } finally {
