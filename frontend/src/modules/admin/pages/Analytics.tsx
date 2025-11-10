@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Users, UserPlus, Activity, Heart } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
+// Placeholder components for charts
+const ResponsiveContainer = ({ children }: any) => <div className="w-full h-full">{children}</div>;
+const LineChart = () => <div className="bg-gray-100 rounded p-4 text-center">Line Chart Placeholder</div>;
+const PieChart = () => <div className="bg-gray-100 rounded p-4 text-center">Pie Chart Placeholder</div>;
+const BarChart = () => <div className="bg-gray-100 rounded p-4 text-center">Bar Chart Placeholder</div>;
 import { analyticsAPI } from '../services/analyticsAPI';
 import type { AnalyticsOverview, UserGrowthData, UserDistribution, BloodTypeDistribution } from '../services/analyticsAPI';
 
@@ -108,13 +112,7 @@ const Analytics: React.FC = () => {
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-lg font-semibold mb-4">User Growth (Last 30 Days)</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={userGrowth}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="count" stroke="#3B82F6" strokeWidth={2} />
-            </LineChart>
+            <LineChart />
           </ResponsiveContainer>
         </div>
 
@@ -122,23 +120,7 @@ const Analytics: React.FC = () => {
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-lg font-semibold mb-4">User Distribution by Role</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={userDistribution as any[]}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ role, percent }: any) => `${role} ${((percent as number) * 100).toFixed(0)}%`}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="count"
-              >
-                {userDistribution.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
+            <PieChart />
           </ResponsiveContainer>
         </div>
       </div>
@@ -147,13 +129,7 @@ const Analytics: React.FC = () => {
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
         <h3 className="text-lg font-semibold mb-4">Blood Type Distribution (Donors)</h3>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={bloodTypeDistribution}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="bloodType" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="count" fill="#EF4444" />
-          </BarChart>
+          <BarChart />
         </ResponsiveContainer>
       </div>
     </div>
