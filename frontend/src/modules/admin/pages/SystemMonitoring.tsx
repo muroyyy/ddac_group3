@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Server, Cpu, Database, Network, RefreshCw } from 'lucide-react';
+import { Server, Database, RefreshCw } from 'lucide-react';
 
 interface Metrics {
   ec2: {
