@@ -161,6 +161,44 @@ public class AdminController : ControllerBase
             });
         }
     }
+
+    [HttpGet("blood-inventory")]
+    public async Task<ActionResult<IEnumerable<object>>> GetBloodInventory()
+    {
+        try
+        {
+            var inventory = await _context.Database
+                .SqlQueryRaw<BloodInventorySummary>(
+                    @"SELECT hospital_name as HospitalName, blood_type as BloodType, 
+                      quantity_units as QuantityUnits, stock_status as StockStatus, 
+                      last_updated as LastUpdated 
+                      FROM blood_inventory_summary")
+                .ToListAsync();
+
+            var result = inventory.Select(i => new
+            {
+                bloodType = i.BloodType,
+                units = i.QuantityUnits,
+                status = i.StockStatus
+            });
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving blood inventory");
+            return Ok(new List<object>());
+        }
+    }
+}
+
+public class BloodInventorySummary
+{
+    public string HospitalName { get; set; } = string.Empty;
+    public string BloodType { get; set; } = string.Empty;
+    public int QuantityUnits { get; set; }
+    public string StockStatus { get; set; } = string.Empty;
+    public DateTime LastUpdated { get; set; }
 }
 
 public class UpdateUserRequest
