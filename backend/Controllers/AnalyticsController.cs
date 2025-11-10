@@ -30,7 +30,7 @@ namespace BloodLine.Controllers
                 totalDonors,
                 totalPatients,
                 totalHospitals,
-                activeUsers = await _context.Users.CountAsync(u => u.IsActive),
+                activeUsers = await _context.Users.CountAsync(u => u.Status == UserStatus.Active),
                 newUsersToday = await _context.Users.CountAsync(u => u.CreatedAt.Date == DateTime.Today)
             });
         }
@@ -71,9 +71,8 @@ namespace BloodLine.Controllers
         [HttpGet("blood-type-distribution")]
         public async Task<IActionResult> GetBloodTypeDistribution()
         {
-            var distribution = await _context.Users
-                .Where(u => u.Role == UserRole.Donor && !string.IsNullOrEmpty(u.BloodType))
-                .GroupBy(u => u.BloodType)
+            var distribution = await _context.DonorProfiles
+                .GroupBy(d => d.BloodType)
                 .Select(g => new
                 {
                     bloodType = g.Key,
