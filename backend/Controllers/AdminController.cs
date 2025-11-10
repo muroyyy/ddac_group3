@@ -197,6 +197,84 @@ public class AdminController : ControllerBase
             return Ok(new List<object>());
         }
     }
+
+    [HttpGet("profile")]
+    public async Task<ActionResult<object>> GetProfile([FromQuery] int userId)
+    {
+        try
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found" });
+            }
+
+            return Ok(new
+            {
+                id = user.Id,
+                fullName = user.FullName,
+                email = user.Email,
+                phone = user.Phone ?? "",
+                location = ""
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving profile");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPut("profile")]
+    public async Task<ActionResult> UpdateProfile([FromQuery] int userId, [FromBody] UpdateProfileRequest request)
+    {
+        try
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found" });
+            }
+
+            user.FullName = request.FullName;
+            user.Phone = request.Phone;
+
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Profile updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating profile");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPut("profile/password")]
+    public async Task<ActionResult> UpdatePassword([FromQuery] int userId, [FromBody] UpdatePasswordRequest request)
+    {
+        try
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found" });
+            }
+
+            if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash))
+            {
+                return BadRequest(new { message = "Current password is incorrect" });
+            }
+
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword, 12);
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Password updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating password");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
 }
 
 public class BloodInventorySummary
@@ -218,4 +296,16 @@ public class UpdateUserRequest
 public class UpdateUserStatusRequest
 {
     public string Status { get; set; } = string.Empty;
+}
+
+public class UpdateProfileRequest
+{
+    public string FullName { get; set; } = string.Empty;
+    public string Phone { get; set; } = string.Empty;
+}
+
+public class UpdatePasswordRequest
+{
+    public string CurrentPassword { get; set; } = string.Empty;
+    public string NewPassword { get; set; } = string.Empty;
 }

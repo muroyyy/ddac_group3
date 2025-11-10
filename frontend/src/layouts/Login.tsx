@@ -11,7 +11,7 @@ import {
 import bloodlineLogo from '../assets/bloodline_logo.jpg';
 
 interface LoginPageProps {
-  onLogin: (userData: { email: string; name: string; role: string }) => void;
+  onLogin: (userData: { id: number; email: string; name: string; role: string }) => void;
 }
 
 interface FormData {
@@ -87,6 +87,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           console.log('✅ Login successful, user data:', response.user);
           
           const userData = {
+            id: response.user.id,
             email: response.user.email,
             name: response.user.fullName,
             role: response.user.role

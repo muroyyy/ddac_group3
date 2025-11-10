@@ -103,10 +103,6 @@ const ProfileSettings: React.FC = () => {
       newErrors.phone = 'Phone number is required';
     }
 
-    if (!profileData.location.trim()) {
-      newErrors.location = 'Location is required';
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -271,28 +267,6 @@ const ProfileSettings: React.FC = () => {
               </div>
               {errors.phone && (
                 <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.phone}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Location
-              </label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  name="location"
-                  value={profileData.location}
-                  onChange={handleProfileChange}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                    errors.location ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                  }`}
-                  placeholder="Enter your location"
-                />
-              </div>
-              {errors.location && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.location}</p>
               )}
             </div>
 

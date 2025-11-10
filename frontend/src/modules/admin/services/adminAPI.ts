@@ -166,7 +166,13 @@ export const adminAPI = {
   // Profile Management
   getProfile: async (): Promise<{ success: boolean; data?: User; message?: string }> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/profile`);
+      const stored = localStorage.getItem('bloodline_session');
+      if (!stored) return { success: false, message: 'Not authenticated' };
+      const session = JSON.parse(stored);
+      const userId = session.user?.id;
+      if (!userId) return { success: false, message: 'User ID not found' };
+
+      const response = await fetch(`${API_BASE_URL}/admin/profile?userId=${userId}`);
       if (!response.ok) {
         return { success: false, message: 'Failed to fetch profile' };
       }
@@ -180,7 +186,13 @@ export const adminAPI = {
 
   updateProfile: async (profileData: Partial<User>): Promise<{ success: boolean; message?: string }> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/profile`, {
+      const stored = localStorage.getItem('bloodline_session');
+      if (!stored) return { success: false, message: 'Not authenticated' };
+      const session = JSON.parse(stored);
+      const userId = session.user?.id;
+      if (!userId) return { success: false, message: 'User ID not found' };
+
+      const response = await fetch(`${API_BASE_URL}/admin/profile?userId=${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -199,7 +211,13 @@ export const adminAPI = {
 
   updatePassword: async (passwordData: { currentPassword: string; newPassword: string }): Promise<{ success: boolean; message?: string }> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/profile/password`, {
+      const stored = localStorage.getItem('bloodline_session');
+      if (!stored) return { success: false, message: 'Not authenticated' };
+      const session = JSON.parse(stored);
+      const userId = session.user?.id;
+      if (!userId) return { success: false, message: 'User ID not found' };
+
+      const response = await fetch(`${API_BASE_URL}/admin/profile/password?userId=${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -207,7 +225,8 @@ export const adminAPI = {
         body: JSON.stringify(passwordData),
       });
       if (!response.ok) {
-        return { success: false, message: 'Failed to update password' };
+        const errorData = await response.json();
+        return { success: false, message: errorData.message || 'Failed to update password' };
       }
       return { success: true, message: 'Password updated successfully' };
     } catch (error) {

@@ -20,10 +20,10 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     const prefersDark = stored === 'dark';
     setIsDark(prefersDark);
     
+    // Always ensure dark class is removed for light mode
+    document.documentElement.classList.remove('dark');
     if (prefersDark) {
       document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
     }
   }, []);
 
