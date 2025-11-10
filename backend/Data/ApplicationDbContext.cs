@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using BloodLine.Models;
 
-// Model version: 2.0 - Fixed blood_type schema mismatch
+// Model version: 2.1 - Merged from feature/admin
 namespace BloodLine.Data;
 
 public class ApplicationDbContext : DbContext
