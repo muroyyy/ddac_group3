@@ -2,7 +2,7 @@ name: Deploy Frontend to S3
 
 on:
   push:
-    branches: [dev]
+    branches: [feature/admin]
     paths: ['frontend/**']
   workflow_dispatch:
 

@@ -88,3 +88,7 @@ run-local-notes.txt
 
 # GitHub secrets setup script (contains sensitive data)
 infra/setup-github-secrets.sh
+
+# GitHub Actions workflows (feature/admin branch only)
+.github/workflows/backend-deploy.yml
+.github/workflows/frontend-deploy.yml
