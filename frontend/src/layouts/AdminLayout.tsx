@@ -11,10 +11,8 @@ import {
   Menu,
   X,
   LogOut,
-  Moon,
-  Sun
+  Settings
 } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
 
 // Import admin components
 import AdminDashboard from '../modules/admin/pages/Dashboard';
@@ -25,6 +23,7 @@ import SystemMonitoring from '../modules/admin/pages/SystemMonitoring';
 import BloodInventory from '../modules/admin/pages/BloodInventory';
 import Notifications from '../modules/admin/pages/Notifications';
 import AuditLogs from '../modules/admin/pages/AuditLogs';
+import ProfileSettings from '../modules/admin/pages/ProfileSettings';
 
 interface AdminLayoutProps {
   user: {
@@ -38,7 +37,6 @@ interface AdminLayoutProps {
 const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
-  const { isDark, toggleTheme } = useTheme();
 
   const navItems = [
     { id: 'dashboard', icon: <Activity className="w-5 h-5" />, label: 'Dashboard' },
@@ -48,7 +46,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
     { id: 'monitoring', icon: <Server className="w-5 h-5" />, label: 'System Monitoring' },
     { id: 'inventory', icon: <Droplet className="w-5 h-5" />, label: 'Blood Inventory' },
     { id: 'notifications', icon: <Bell className="w-5 h-5" />, label: 'Notifications' },
-    { id: 'audit', icon: <FileText className="w-5 h-5" />, label: 'Audit Logs' }
+    { id: 'audit', icon: <FileText className="w-5 h-5" />, label: 'Audit Logs' },
+    { id: 'profile', icon: <Settings className="w-5 h-5" />, label: 'Profile Settings' }
   ];
 
   const renderContent = () => {
@@ -69,6 +68,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
         return <Notifications />;
       case 'audit':
         return <AuditLogs />;
+      case 'profile':
+        return <ProfileSettings />;
       default:
         return <AdminDashboard user={user} onNavigate={setActiveTab} />;
     }
@@ -115,22 +116,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
               <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.role}</p>
             </div>
           </div>
-          <div className="space-y-2">
-            <button
-              onClick={toggleTheme}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium cursor-pointer"
-            >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              <span>{isDark ? 'Light' : 'Dark'} Mode</span>
-            </button>
-            <button
-              onClick={onLogout}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/50 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/70 transition-colors font-medium cursor-pointer"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>Logout</span>
-            </button>
-          </div>
+          <button
+            onClick={onLogout}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/50 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/70 transition-colors font-medium cursor-pointer"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Logout</span>
+          </button>
         </div>
       </aside>
 
