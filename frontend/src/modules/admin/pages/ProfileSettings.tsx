@@ -3,7 +3,6 @@ import {
   User, 
   Mail, 
   Phone, 
-  MapPin, 
   Lock, 
   Save, 
   AlertCircle,
