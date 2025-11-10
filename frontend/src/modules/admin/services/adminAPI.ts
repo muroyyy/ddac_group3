@@ -163,20 +163,21 @@ export const adminAPI = {
   },
 
   // Profile Management
-  getProfile: async (): Promise<User | null> => {
+  getProfile: async (): Promise<{ success: boolean; data?: User; message?: string }> => {
     try {
       const response = await fetch(`${API_BASE_URL}/admin/profile`);
       if (!response.ok) {
-        throw new Error('Failed to fetch profile');
+        return { success: false, message: 'Failed to fetch profile' };
       }
-      return response.json();
+      const data = await response.json();
+      return { success: true, data };
     } catch (error) {
       console.error('Error fetching profile:', error);
-      return null;
+      return { success: false, message: 'Network error' };
     }
   },
 
-  updateProfile: async (profileData: Partial<User>): Promise<boolean> => {
+  updateProfile: async (profileData: Partial<User>): Promise<{ success: boolean; message?: string }> => {
     try {
       const response = await fetch(`${API_BASE_URL}/admin/profile`, {
         method: 'PUT',
@@ -185,14 +186,17 @@ export const adminAPI = {
         },
         body: JSON.stringify(profileData),
       });
-      return response.ok;
+      if (!response.ok) {
+        return { success: false, message: 'Failed to update profile' };
+      }
+      return { success: true, message: 'Profile updated successfully' };
     } catch (error) {
       console.error('Error updating profile:', error);
-      return false;
+      return { success: false, message: 'Network error' };
     }
   },
 
-  updatePassword: async (passwordData: { currentPassword: string; newPassword: string }): Promise<boolean> => {
+  updatePassword: async (passwordData: { currentPassword: string; newPassword: string }): Promise<{ success: boolean; message?: string }> => {
     try {
       const response = await fetch(`${API_BASE_URL}/admin/profile/password`, {
         method: 'PUT',
@@ -201,10 +205,13 @@ export const adminAPI = {
         },
         body: JSON.stringify(passwordData),
       });
-      return response.ok;
+      if (!response.ok) {
+        return { success: false, message: 'Failed to update password' };
+      }
+      return { success: true, message: 'Password updated successfully' };
     } catch (error) {
       console.error('Error updating password:', error);
-      return false;
+      return { success: false, message: 'Network error' };
     }
   },
 };
