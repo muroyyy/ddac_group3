@@ -31,12 +31,6 @@ public class User
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     public UserStatus Status { get; set; } = UserStatus.Active;
-    
-    [Column("blood_type")]
-    public string? BloodType { get; set; }
-    
-    [Column("is_active")]
-    public bool IsActive => Status == UserStatus.Active;
 }
 
 public enum UserRole
