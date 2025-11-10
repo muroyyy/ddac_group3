@@ -58,7 +58,12 @@ const ProfileSettings: React.FC = () => {
     try {
       const response = await adminAPI.getProfile();
       if (response.success && response.data) {
-        setProfileData(response.data);
+        setProfileData({
+          fullName: response.data.fullName,
+          email: response.data.email,
+          phone: response.data.phone || '',
+          location: response.data.location || ''
+        });
       }
     } catch (error) {
       console.error('Failed to load profile:', error);
