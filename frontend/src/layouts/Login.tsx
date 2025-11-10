@@ -70,13 +70,22 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
       setIsLoading(true);
       
       try {
+        console.log('🚀 Starting login process...', {
+          email: formData.email,
+          timestamp: new Date().toISOString()
+        });
+        
         const { authAPI } = await import('../utils/apiClient');
         const response = await authAPI.login({
           email: formData.email,
           password: formData.password
         });
 
+        console.log('📝 Login response received:', response);
+
         if (response.success && response.user) {
+          console.log('✅ Login successful, user data:', response.user);
+          
           const userData = {
             email: response.user.email,
             name: response.user.fullName,
@@ -93,17 +102,27 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             'Hospital': '/hospital/dashboard'
           };
           
-          navigate(roleRoutes[response.user.role as keyof typeof roleRoutes] || '/dashboard');
+          const targetRoute = roleRoutes[response.user.role as keyof typeof roleRoutes] || '/dashboard';
+          console.log('📍 Navigating to:', targetRoute);
+          
+          navigate(targetRoute);
         } else {
+          console.log('❌ Login failed:', response.message);
           setErrors({
             email: response.message,
             password: response.message
           });
         }
       } catch (error) {
+        console.error('🚨 Login error caught:', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+          formData: { email: formData.email }
+        });
+        
         setErrors({
-          email: 'Network error. Please try again.',
-          password: 'Network error. Please try again.'
+          email: `Network error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          password: 'Please check console for details'
         });
       } finally {
         setIsLoading(false);
