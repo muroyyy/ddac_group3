@@ -177,213 +177,215 @@ const ProfileSettings: React.FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Profile Settings</h2>
-        <p className="text-gray-600 dark:text-gray-400">Manage your account information and security settings</p>
-      </div>
-
-      {message && (
-        <div className={`mb-6 p-4 rounded-lg flex items-center gap-2 ${
-          message.type === 'success' 
-            ? 'bg-green-50 dark:bg-green-900/50 text-green-700 dark:text-green-400' 
-            : 'bg-red-50 dark:bg-red-900/50 text-red-700 dark:text-red-400'
-        }`}>
-          {message.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-          {message.text}
-        </div>
-      )}
-
-      <div className="grid lg:grid-cols-2 gap-8">
-        {/* Profile Information */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Profile Information</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Update your personal information</p>
-          </div>
-          
-          <form onSubmit={handleProfileSubmit} className="p-6 space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Full Name
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  name="fullName"
-                  value={profileData.fullName}
-                  onChange={handleProfileChange}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                    errors.fullName ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                  }`}
-                  placeholder="Enter your full name"
-                />
-              </div>
-              {errors.fullName && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.fullName}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="email"
-                  name="email"
-                  value={profileData.email}
-                  onChange={handleProfileChange}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                    errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                  }`}
-                  placeholder="Enter your email"
-                />
-              </div>
-              {errors.email && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.email}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Phone Number
-              </label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="tel"
-                  name="phone"
-                  value={profileData.phone}
-                  onChange={handleProfileChange}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                    errors.phone ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                  }`}
-                  placeholder="Enter your phone number"
-                />
-              </div>
-              {errors.phone && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.phone}</p>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Save className="w-5 h-5" />
-              {loading ? 'Updating...' : 'Update Profile'}
-            </button>
-          </form>
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Profile Settings</h2>
+          <p className="text-gray-600">Manage your account information and security settings</p>
         </div>
 
-        {/* Change Password */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Change Password</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Update your account password</p>
+        {message && (
+          <div className={`mb-6 p-4 rounded-lg flex items-center gap-2 ${
+            message.type === 'success' 
+              ? 'bg-green-50 text-green-700 border border-green-200' 
+              : 'bg-red-50 text-red-700 border border-red-200'
+          }`}>
+            {message.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+            <span className="font-medium">{message.text}</span>
           </div>
-          
-          <form onSubmit={handlePasswordSubmit} className="p-6 space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Current Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type={showPasswords.current ? 'text' : 'password'}
-                  name="currentPassword"
-                  value={passwordData.currentPassword}
-                  onChange={handlePasswordChange}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                    errors.currentPassword ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                  }`}
-                  placeholder="Enter current password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPasswords(prev => ({ ...prev, current: !prev.current }))}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPasswords.current ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-              {errors.currentPassword && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.currentPassword}</p>
-              )}
-            </div>
+        )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                New Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type={showPasswords.new ? 'text' : 'password'}
-                  name="newPassword"
-                  value={passwordData.newPassword}
-                  onChange={handlePasswordChange}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                    errors.newPassword ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                  }`}
-                  placeholder="Enter new password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPasswords.new ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-              {errors.newPassword && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.newPassword}</p>
-              )}
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Profile Information */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-xl font-semibold text-gray-900">Profile Information</h3>
+              <p className="text-sm text-gray-600 mt-1">Update your personal information</p>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Confirm New Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type={showPasswords.confirm ? 'text' : 'password'}
-                  name="confirmPassword"
-                  value={passwordData.confirmPassword}
-                  onChange={handlePasswordChange}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                    errors.confirmPassword ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                  }`}
-                  placeholder="Confirm new password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPasswords.confirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
+            
+            <form onSubmit={handleProfileSubmit} className="p-6 space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Full Name
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    name="fullName"
+                    value={profileData.fullName}
+                    onChange={handleProfileChange}
+                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white ${
+                      errors.fullName ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="Enter your full name"
+                  />
+                </div>
+                {errors.fullName && (
+                  <p className="mt-2 text-sm text-red-600">{errors.fullName}</p>
+                )}
               </div>
-              {errors.confirmPassword && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.confirmPassword}</p>
-              )}
-            </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Lock className="w-5 h-5" />
-              {loading ? 'Updating...' : 'Update Password'}
-            </button>
-          </form>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="email"
+                    name="email"
+                    value={profileData.email}
+                    onChange={handleProfileChange}
+                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white ${
+                      errors.email ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="Enter your email"
+                  />
+                </div>
+                {errors.email && (
+                  <p className="mt-2 text-sm text-red-600">{errors.email}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Phone Number
+                </label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={profileData.phone}
+                    onChange={handleProfileChange}
+                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white ${
+                      errors.phone ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="Enter your phone number"
+                  />
+                </div>
+                {errors.phone && (
+                  <p className="mt-2 text-sm text-red-600">{errors.phone}</p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              >
+                <Save className="w-5 h-5" />
+                {loading ? 'Updating...' : 'Update Profile'}
+              </button>
+            </form>
+          </div>
+
+          {/* Change Password */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-xl font-semibold text-gray-900">Change Password</h3>
+              <p className="text-sm text-gray-600 mt-1">Update your account password</p>
+            </div>
+            
+            <form onSubmit={handlePasswordSubmit} className="p-6 space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Current Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type={showPasswords.current ? 'text' : 'password'}
+                    name="currentPassword"
+                    value={passwordData.currentPassword}
+                    onChange={handlePasswordChange}
+                    className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white ${
+                      errors.currentPassword ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="Enter current password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswords(prev => ({ ...prev, current: !prev.current }))}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                  >
+                    {showPasswords.current ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+                {errors.currentPassword && (
+                  <p className="mt-2 text-sm text-red-600">{errors.currentPassword}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  New Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type={showPasswords.new ? 'text' : 'password'}
+                    name="newPassword"
+                    value={passwordData.newPassword}
+                    onChange={handlePasswordChange}
+                    className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white ${
+                      errors.newPassword ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="Enter new password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                  >
+                    {showPasswords.new ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+                {errors.newPassword && (
+                  <p className="mt-2 text-sm text-red-600">{errors.newPassword}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Confirm New Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type={showPasswords.confirm ? 'text' : 'password'}
+                    name="confirmPassword"
+                    value={passwordData.confirmPassword}
+                    onChange={handlePasswordChange}
+                    className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white ${
+                      errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="Confirm new password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                  >
+                    {showPasswords.confirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+                {errors.confirmPassword && (
+                  <p className="mt-2 text-sm text-red-600">{errors.confirmPassword}</p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              >
+                <Lock className="w-5 h-5" />
+                {loading ? 'Updating...' : 'Update Password'}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
