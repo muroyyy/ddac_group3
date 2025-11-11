@@ -96,7 +96,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
               onClick={() => setActiveTab(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors cursor-pointer ${
                 activeTab === item.id
-                  ? 'bg-blue-50 text-blue-600 font-medium' 
+                  ? 'bg-red-50 text-red-600 font-medium' 
                   : 'text-gray-700 hover:bg-gray-50'
               }`}
             >
@@ -108,7 +108,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-white">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium">
+            <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center text-white font-medium">
               {user.name.charAt(0)}
             </div>
             <div className="flex-1 min-w-0">

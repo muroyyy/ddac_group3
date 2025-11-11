@@ -97,7 +97,7 @@ const UserManagement: React.FC = () => {
         <button
           onClick={loadUsers}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           Refresh
@@ -207,7 +207,7 @@ const UserManagement: React.FC = () => {
                   <tr key={user.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium">
+                        <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center text-white font-medium">
                           {user.fullName.charAt(0)}
                         </div>
                         <div className="ml-4">
@@ -256,7 +256,7 @@ const UserManagement: React.FC = () => {
                         )}
                         <button 
                           onClick={() => setEditingUserId(user.id)}
-                          className="p-1 text-blue-600 hover:bg-blue-50 rounded cursor-pointer transition-colors"
+                          className="p-1 text-red-600 hover:bg-red-50 rounded cursor-pointer transition-colors"
                           title="Edit User"
                         >
                           <Edit className="w-4 h-4" />
@@ -283,7 +283,7 @@ const UserManagement: React.FC = () => {
       {!loading && (
         <div className="mt-6 flex items-center justify-between text-sm text-gray-600 bg-white rounded-lg shadow-sm border border-gray-200 px-6 py-4">
           <p className="font-medium">
-            Showing <span className="text-blue-600">{filteredUsers.length}</span> of <span className="text-blue-600">{users.length}</span> users
+            Showing <span className="text-red-600">{filteredUsers.length}</span> of <span className="text-red-600">{users.length}</span> users
           </p>
           <div className="flex items-center gap-6">
             <span className="flex items-center gap-2">

@@ -46,7 +46,7 @@ const SystemMonitoring: React.FC = () => {
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center h-64">
-        <RefreshCw className="w-8 h-8 text-blue-600 animate-spin" />
+        <RefreshCw className="w-8 h-8 text-red-600 animate-spin" />
       </div>
     );
   }
@@ -59,7 +59,7 @@ const SystemMonitoring: React.FC = () => {
           <p className="text-sm text-gray-500">Real-time AWS CloudWatch metrics</p>
         </div>
         <div className="text-right">
-          <button onClick={fetchMetrics} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
+          <button onClick={fetchMetrics} className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer">
             <RefreshCw className="w-4 h-4" />
             Refresh
           </button>

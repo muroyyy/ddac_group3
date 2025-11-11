@@ -220,7 +220,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user: _, onNavigate }) 
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
         >
           <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
           Refresh
@@ -240,7 +240,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user: _, onNavigate }) 
         <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">System Alerts</h2>
-            <button className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 cursor-pointer">
+            <button className="text-sm text-red-600 hover:text-red-700 font-medium flex items-center gap-1 cursor-pointer">
               View All
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -294,7 +294,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user: _, onNavigate }) 
           </div>
           <button 
             onClick={() => onNavigate('inventory')}
-            className="w-full mt-4 py-2.5 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium cursor-pointer shadow-sm"
+            className="w-full mt-4 py-2.5 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium cursor-pointer shadow-sm"
           >
             View Full Inventory
           </button>
@@ -305,7 +305,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user: _, onNavigate }) 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
-          <button className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 cursor-pointer">
+          <button className="text-sm text-red-600 hover:text-red-700 font-medium flex items-center gap-1 cursor-pointer">
             View All
             <ChevronRight className="w-4 h-4" />
           </button>

@@ -81,7 +81,7 @@ const Analytics: React.FC = () => {
             <FileText className="w-4 h-4" />
             Export CSV
           </a>
-          <button onClick={fetchAnalytics} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
+          <button onClick={fetchAnalytics} className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer">
             <RefreshCw className="w-4 h-4" />
             Refresh
           </button>
@@ -134,7 +134,7 @@ const Analytics: React.FC = () => {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Users by Role</h3>
           {loading ? (
             <div className="h-64 flex items-center justify-center">
-              <RefreshCw className="w-8 h-8 text-blue-600 animate-spin" />
+              <RefreshCw className="w-8 h-8 text-red-600 animate-spin" />
             </div>
           ) : usersByRole.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
@@ -160,7 +160,7 @@ const Analytics: React.FC = () => {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Blood Type Distribution</h3>
           {loading ? (
             <div className="h-64 flex items-center justify-center">
-              <RefreshCw className="w-8 h-8 text-blue-600 animate-spin" />
+              <RefreshCw className="w-8 h-8 text-red-600 animate-spin" />
             </div>
           ) : bloodTypes.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
@@ -192,7 +192,7 @@ const Analytics: React.FC = () => {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Request Status Breakdown</h3>
           {loading ? (
             <div className="h-64 flex items-center justify-center">
-              <RefreshCw className="w-8 h-8 text-blue-600 animate-spin" />
+              <RefreshCw className="w-8 h-8 text-red-600 animate-spin" />
             </div>
           ) : requestStatus.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
