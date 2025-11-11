@@ -138,7 +138,12 @@ public class AdminController : ControllerBase
         {
             var totalUsers = await _context.Users.CountAsync();
             var activeDonors = await _context.Users.CountAsync(u => u.Role == UserRole.Donor && u.Status == UserStatus.Active);
-            var bloodRequests = 0; // Placeholder - implement when blood_requests table is ready
+            
+            // Query blood_requests table for total count
+            var bloodRequests = await _context.Database
+                .SqlQuery<int>($"SELECT COUNT(*) as Value FROM blood_requests")
+                .FirstOrDefaultAsync();
+            
             var systemHealth = "99.8%";
 
             return Ok(new

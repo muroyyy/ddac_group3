@@ -37,14 +37,14 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, change, icon, trend =
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{title}</p>
+          <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
           {loading ? (
-            <div className="w-16 h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2"></div>
+            <div className="w-16 h-8 bg-gray-200 rounded animate-pulse mb-2"></div>
           ) : (
-            <p className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{value}</p>
+            <p className="text-3xl font-bold text-gray-900 mb-2">{value}</p>
           )}
           {change && !loading && (
             <p className={`text-sm font-medium ${trendColors[trend]}`}>
@@ -52,7 +52,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, change, icon, trend =
             </p>
           )}
         </div>
-        <div className="p-3 bg-blue-50 dark:bg-blue-900/50 rounded-lg">
+        <div className="p-3 bg-blue-50 rounded-lg">
           {icon}
         </div>
       </div>
@@ -80,7 +80,7 @@ const AlertItem: React.FC<SystemAlert> = ({ type, message, timestamp }) => {
   };
 
   return (
-    <div className={`p-4 rounded-lg border ${alertStyles[type]} dark:bg-opacity-20 dark:border-opacity-30 mb-3`}>
+    <div className={`p-4 rounded-lg border ${alertStyles[type]} mb-3`}>
       <div className="flex items-start gap-3">
         <AlertTriangle className="w-5 h-5 mt-0.5 flex-shrink-0" />
         <div className="flex-1">
@@ -113,18 +113,18 @@ const ActivityItem: React.FC<ActivityLog> = ({ userName, action, timestamp, user
   };
 
   return (
-    <div className="flex items-start gap-3 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
-      <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-        <Users className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+    <div className="flex items-start gap-3 py-3 border-b border-gray-100 last:border-0">
+      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+        <Users className="w-5 h-5 text-gray-600" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900 dark:text-white">{userName}</p>
-        <p className="text-sm text-gray-600 dark:text-gray-400">{action}</p>
+        <p className="text-sm font-medium text-gray-900">{userName}</p>
+        <p className="text-sm text-gray-600">{action}</p>
         <div className="flex items-center gap-2 mt-1">
           <span className={`text-xs px-2 py-0.5 rounded-full ${roleColors[userRole] || roleColors.Admin}`}>
             {userRole}
           </span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">{formatTime(timestamp)}</span>
+          <span className="text-xs text-gray-500">{formatTime(timestamp)}</span>
         </div>
       </div>
     </div>
@@ -182,21 +182,21 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user: _, onNavigate }) 
     {
       title: 'Total Users',
       value: stats?.totalUsers || 0,
-      change: '+12.5% from last month',
+      change: stats?.totalUsers ? `${stats.totalUsers} registered users` : undefined,
       icon: <Users className="w-6 h-6 text-blue-600" />,
-      trend: 'up' as const
+      trend: 'neutral' as const
     },
     {
       title: 'Active Donors',
       value: stats?.activeDonors || 0,
-      change: '+8.2% from last month',
+      change: stats?.activeDonors ? `${stats.activeDonors} donors available` : undefined,
       icon: <Droplet className="w-6 h-6 text-red-600" />,
-      trend: 'up' as const
+      trend: 'neutral' as const
     },
     {
       title: 'Blood Requests',
       value: stats?.bloodRequests || 0,
-      change: '23 pending approval',
+      change: stats?.bloodRequests ? `${stats.bloodRequests} total requests` : undefined,
       icon: <Activity className="w-6 h-6 text-orange-600" />,
       trend: 'neutral' as const
     },
@@ -210,17 +210,17 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user: _, onNavigate }) 
   ];
 
   return (
-    <div className="p-6">
+    <div className="p-6 bg-gray-50 min-h-screen">
       {/* Header with Refresh */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Dashboard Overview</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Real-time system metrics and activity</p>
+          <h2 className="text-2xl font-semibold text-gray-900">Dashboard Overview</h2>
+          <p className="text-sm text-gray-600 mt-1">Real-time system metrics and activity</p>
         </div>
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
         >
           <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
           Refresh
@@ -237,9 +237,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user: _, onNavigate }) 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Alerts */}
-        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">System Alerts</h2>
+            <h2 className="text-lg font-semibold text-gray-900">System Alerts</h2>
             <button className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 cursor-pointer">
               View All
               <ChevronRight className="w-4 h-4" />
@@ -249,7 +249,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user: _, onNavigate }) 
             {loading ? (
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-16 bg-gray-200 rounded animate-pulse"></div>
+                  <div key={i} className="h-16 bg-gray-100 rounded animate-pulse"></div>
                 ))}
               </div>
             ) : alerts.length > 0 ? (
@@ -257,38 +257,44 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user: _, onNavigate }) 
                 <AlertItem key={alert.id} {...alert} />
               ))
             ) : (
-              <p className="text-gray-500 dark:text-gray-400 text-center py-8">No alerts at this time</p>
+              <div className="text-center py-12">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                  <AlertTriangle className="w-8 h-8 text-green-600" />
+                </div>
+                <p className="text-gray-600 font-medium">No alerts at this time</p>
+                <p className="text-sm text-gray-500 mt-1">All systems are running smoothly</p>
+              </div>
             )}
           </div>
         </div>
 
         {/* Blood Inventory Summary */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Blood Inventory</h2>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Blood Inventory</h2>
           <div className="space-y-3">
             {loading ? (
               <div className="space-y-3">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="h-6 bg-gray-200 rounded animate-pulse"></div>
+                  <div key={i} className="h-6 bg-gray-100 rounded animate-pulse"></div>
                 ))}
               </div>
             ) : bloodInventory.length > 0 ? (
               bloodInventory.map((item, index) => (
-                <div key={index} className="flex items-center justify-between">
+                <div key={index} className="flex items-center justify-between py-2">
                   <div className="flex items-center gap-3">
                     <div className={`w-3 h-3 rounded-full ${getStatusColor(item.status)}`}></div>
-                    <span className="font-medium text-gray-900 dark:text-white">{item.bloodType}</span>
+                    <span className="font-medium text-gray-900">{item.bloodType}</span>
                   </div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">{item.units} units</span>
+                  <span className="text-sm text-gray-600 font-medium">{item.units} units</span>
                 </div>
               ))
             ) : (
-              <p className="text-gray-500 dark:text-gray-400 text-center py-4">No inventory data</p>
+              <p className="text-gray-500 text-center py-4">No inventory data</p>
             )}
           </div>
           <button 
             onClick={() => onNavigate('inventory')}
-            className="w-full mt-4 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium cursor-pointer"
+            className="w-full mt-4 py-2.5 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium cursor-pointer shadow-sm"
           >
             View Full Inventory
           </button>
@@ -296,9 +302,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user: _, onNavigate }) 
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Activity</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
           <button className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 cursor-pointer">
             View All
             <ChevronRight className="w-4 h-4" />
@@ -309,10 +315,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user: _, onNavigate }) 
             <div className="space-y-4">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+                  <div className="w-10 h-10 bg-gray-100 rounded-full animate-pulse"></div>
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
-                    <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                    <div className="h-4 bg-gray-100 rounded animate-pulse"></div>
+                    <div className="h-3 bg-gray-100 rounded animate-pulse w-3/4"></div>
                   </div>
                 </div>
               ))}
@@ -322,7 +328,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user: _, onNavigate }) 
               <ActivityItem key={activity.id} {...activity} />
             ))
           ) : (
-            <p className="text-gray-500 dark:text-gray-400 text-center py-8">No recent activity</p>
+            <div className="text-center py-12">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                <Activity className="w-8 h-8 text-gray-400" />
+              </div>
+              <p className="text-gray-600 font-medium">No recent activity</p>
+              <p className="text-sm text-gray-500 mt-1">Activity will appear here as users interact with the system</p>
+            </div>
           )}
         </div>
       </div>
