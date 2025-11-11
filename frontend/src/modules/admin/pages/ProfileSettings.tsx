@@ -273,7 +273,7 @@ const ProfileSettings: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm cursor-pointer"
               >
                 <Save className="w-5 h-5" />
                 {loading ? 'Updating...' : 'Update Profile'}
@@ -379,7 +379,7 @@ const ProfileSettings: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm cursor-pointer"
               >
                 <Lock className="w-5 h-5" />
                 {loading ? 'Updating...' : 'Update Password'}
