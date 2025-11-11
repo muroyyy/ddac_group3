@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BloodLine.Data;
 using BloodLine.Models;
+using BloodLine.Services;
 using BCrypt.Net;
 
 namespace BloodLine.Controllers;
@@ -12,11 +13,13 @@ public class AuthController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
     private readonly ILogger<AuthController> _logger;
+    private readonly IAuditLogService _auditLog;
 
-    public AuthController(ApplicationDbContext context, ILogger<AuthController> logger)
+    public AuthController(ApplicationDbContext context, ILogger<AuthController> logger, IAuditLogService auditLog)
     {
         _context = context;
         _logger = logger;
+        _auditLog = auditLog;
     }
 
     [HttpPost("login")]
@@ -29,6 +32,7 @@ public class AuthController : ControllerBase
 
             if (user == null || !VerifyPassword(request.Password, user.PasswordHash))
             {
+                await _auditLog.LogAsync($"Failed Login Attempt: {request.Email}");
                 return Ok(new AuthResponse
                 {
                     Success = false,
@@ -36,6 +40,7 @@ public class AuthController : ControllerBase
                 });
             }
 
+            await _auditLog.LogAsync($"User Login: {user.Role}", user.Id);
             return Ok(new AuthResponse
             {
                 Success = true,
@@ -96,6 +101,7 @@ public class AuthController : ControllerBase
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
+            await _auditLog.LogAsync($"New User Registration: {userRole}", user.Id);
 
             return Ok(new AuthResponse
             {
@@ -171,6 +177,7 @@ public class AuthController : ControllerBase
 
             _context.PasswordResetTokens.Add(passwordResetToken);
             await _context.SaveChangesAsync();
+            await _auditLog.LogAsync($"Password Reset Requested", user.Id);
 
             _logger.LogInformation($"Password reset token for {request.Email}: {resetToken}");
 
@@ -232,6 +239,7 @@ public class AuthController : ControllerBase
             resetToken.Used = true;
 
             await _context.SaveChangesAsync();
+            await _auditLog.LogAsync($"Password Reset Completed", resetToken.UserId);
 
             return Ok(new AuthResponse
             {

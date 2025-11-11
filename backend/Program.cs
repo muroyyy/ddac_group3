@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAWSService<IAmazonSecretsManager>();
 builder.Services.AddAWSService<IAmazonCloudWatch>();
 builder.Services.AddScoped<DatabaseService>();
+builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 
 // Add CORS
 builder.Services.AddCors(options =>

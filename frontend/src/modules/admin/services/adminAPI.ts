@@ -91,12 +91,16 @@ export const adminAPI = {
 
   updateUser: async (userId: number, userData: Partial<User>): Promise<boolean> => {
     try {
+      const stored = localStorage.getItem('bloodline_session');
+      const session = stored ? JSON.parse(stored) : null;
+      const adminUserId = session?.user?.id || 0;
+
       const response = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ ...userData, adminUserId }),
       });
       return response.ok;
     } catch (error) {
@@ -107,12 +111,16 @@ export const adminAPI = {
 
   updateUserStatus: async (userId: number, status: string): Promise<boolean> => {
     try {
+      const stored = localStorage.getItem('bloodline_session');
+      const session = stored ? JSON.parse(stored) : null;
+      const adminUserId = session?.user?.id || 0;
+
       const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, adminUserId }),
       });
       return response.ok;
     } catch (error) {

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BloodLine.Data;
 using BloodLine.Models;
+using BloodLine.Services;
 
 namespace BloodLine.Controllers;
 
@@ -11,11 +12,13 @@ public class AdminController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
     private readonly ILogger<AdminController> _logger;
+    private readonly IAuditLogService _auditLog;
 
-    public AdminController(ApplicationDbContext context, ILogger<AdminController> logger)
+    public AdminController(ApplicationDbContext context, ILogger<AdminController> logger, IAuditLogService auditLog)
     {
         _context = context;
         _logger = logger;
+        _auditLog = auditLog;
     }
 
     [HttpGet("users")]
@@ -95,6 +98,7 @@ public class AdminController : ControllerBase
             }
 
             await _context.SaveChangesAsync();
+            await _auditLog.LogAsync($"User Updated: {user.FullName}", request.AdminUserId);
             return Ok(new { message = "User updated successfully" });
         }
         catch (Exception ex)
@@ -119,6 +123,7 @@ public class AdminController : ControllerBase
             {
                 user.Status = status;
                 await _context.SaveChangesAsync();
+                await _auditLog.LogAsync($"User Status Changed: {user.FullName} to {status}", request.AdminUserId);
                 return Ok(new { message = "User status updated successfully" });
             }
 
@@ -245,6 +250,7 @@ public class AdminController : ControllerBase
             user.Phone = request.Phone;
 
             await _context.SaveChangesAsync();
+            await _auditLog.LogAsync("Admin Profile Updated", userId);
             return Ok(new { message = "Profile updated successfully" });
         }
         catch (Exception ex)
@@ -272,6 +278,7 @@ public class AdminController : ControllerBase
 
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword, 12);
             await _context.SaveChangesAsync();
+            await _auditLog.LogAsync("Admin Password Changed", userId);
             return Ok(new { message = "Password updated successfully" });
         }
         catch (Exception ex)
@@ -296,11 +303,13 @@ public class UpdateUserRequest
     public string FullName { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;
     public string Role { get; set; } = string.Empty;
+    public int AdminUserId { get; set; }
 }
 
 public class UpdateUserStatusRequest
 {
     public string Status { get; set; } = string.Empty;
+    public int AdminUserId { get; set; }
 }
 
 public class UpdateProfileRequest

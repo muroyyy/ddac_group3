@@ -13,6 +13,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<PatientProfile> PatientProfiles { get; set; }
     public DbSet<Hospital> Hospitals { get; set; }
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
+    public DbSet<AnalyticsLog> AnalyticsLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -54,6 +55,16 @@ public class ApplicationDbContext : DbContext
             entity.HasOne(e => e.User)
                   .WithOne()
                   .HasForeignKey<Hospital>(e => e.UserId);
+        });
+        
+        modelBuilder.Entity<AnalyticsLog>(entity =>
+        {
+            entity.ToTable("analytics_log");
+            entity.HasKey(e => e.LogId);
+            entity.HasOne(e => e.User)
+                  .WithMany()
+                  .HasForeignKey(e => e.PerformedBy)
+                  .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }
