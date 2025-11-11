@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Droplet, Activity, FileText, RefreshCw } from 'lucide-react';
+import { BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 
 interface UsersByRole {
   role: string;
@@ -9,6 +10,7 @@ interface UsersByRole {
 interface BloodTypeData {
   bloodType: string;
   count: number;
+  [key: string]: string | number;
 }
 
 interface RequestStatus {
@@ -58,24 +60,14 @@ const Analytics: React.FC = () => {
     fetchAnalytics();
   }, []);
 
-  const roleColors: Record<string, string> = {
-    Donor: 'bg-green-500',
-    Patient: 'bg-blue-500',
-    Hospital: 'bg-purple-500',
-    Admin: 'bg-gray-500'
+  const ROLE_COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#6b7280'];
+  const BLOOD_COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#6366f1', '#a855f7', '#ec4899'];
+  const STATUS_COLORS: Record<string, string> = {
+    Pending: '#eab308',
+    Approved: '#3b82f6',
+    Rejected: '#ef4444',
+    Fulfilled: '#22c55e'
   };
-
-  const bloodTypeColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500', 'bg-blue-500', 'bg-indigo-500', 'bg-purple-500', 'bg-pink-500'];
-
-  const statusColors: Record<string, string> = {
-    Pending: 'bg-yellow-500',
-    Approved: 'bg-blue-500',
-    Rejected: 'bg-red-500',
-    Fulfilled: 'bg-green-500'
-  };
-
-  const maxRoleCount = Math.max(...usersByRole.map(r => r.count), 1);
-  const maxBloodCount = Math.max(...bloodTypes.map(b => b.count), 1);
 
   return (
     <div className="p-6">
@@ -84,10 +76,16 @@ const Analytics: React.FC = () => {
           <h2 className="text-xl font-semibold text-gray-900">Analytics & Reports</h2>
           <p className="text-sm text-gray-500">Real-time system analytics from database</p>
         </div>
-        <button onClick={fetchAnalytics} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-          <RefreshCw className="w-4 h-4" />
-          Refresh
-        </button>
+        <div className="flex items-center gap-3">
+          <a href={`${API_BASE_URL}/analytics/export/csv`} download className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+            <FileText className="w-4 h-4" />
+            Export CSV
+          </a>
+          <button onClick={fetchAnalytics} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </button>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -135,23 +133,23 @@ const Analytics: React.FC = () => {
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Users by Role</h3>
           {loading ? (
-            <div className="space-y-3">
-              {[1,2,3].map(i => <div key={i} className="h-8 bg-gray-200 rounded animate-pulse"></div>)}
+            <div className="h-64 flex items-center justify-center">
+              <RefreshCw className="w-8 h-8 text-blue-600 animate-spin" />
             </div>
           ) : usersByRole.length > 0 ? (
-            <div className="space-y-4">
-              {usersByRole.map((role) => (
-                <div key={role.role}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">{role.role}</span>
-                    <span className="text-sm font-bold text-gray-900">{role.count}</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
-                    <div className={`${roleColors[role.role] || 'bg-gray-500'} h-3 rounded-full`} style={{ width: `${(role.count / maxRoleCount) * 100}%` }}></div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={usersByRole}>
+                <XAxis dataKey="role" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="count" fill="#3b82f6" name="Users">
+                  {usersByRole.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={ROLE_COLORS[index % ROLE_COLORS.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           ) : (
             <p className="text-gray-500 text-center py-8">No data available</p>
           )}
@@ -161,23 +159,29 @@ const Analytics: React.FC = () => {
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Blood Type Distribution</h3>
           {loading ? (
-            <div className="space-y-3">
-              {[1,2,3,4].map(i => <div key={i} className="h-8 bg-gray-200 rounded animate-pulse"></div>)}
+            <div className="h-64 flex items-center justify-center">
+              <RefreshCw className="w-8 h-8 text-blue-600 animate-spin" />
             </div>
           ) : bloodTypes.length > 0 ? (
-            <div className="space-y-4">
-              {bloodTypes.map((blood, index) => (
-                <div key={blood.bloodType}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">{blood.bloodType}</span>
-                    <span className="text-sm font-bold text-gray-900">{blood.count} donors</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
-                    <div className={`${bloodTypeColors[index % bloodTypeColors.length]} h-3 rounded-full`} style={{ width: `${(blood.count / maxBloodCount) * 100}%` }}></div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={bloodTypes}
+                  dataKey="count"
+                  nameKey="bloodType"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  label
+                >
+                  {bloodTypes.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={BLOOD_COLORS[index % BLOOD_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
           ) : (
             <p className="text-gray-500 text-center py-8">No donor data available</p>
           )}
@@ -187,21 +191,23 @@ const Analytics: React.FC = () => {
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Request Status Breakdown</h3>
           {loading ? (
-            <div className="space-y-3">
-              {[1,2,3].map(i => <div key={i} className="h-12 bg-gray-200 rounded animate-pulse"></div>)}
+            <div className="h-64 flex items-center justify-center">
+              <RefreshCw className="w-8 h-8 text-blue-600 animate-spin" />
             </div>
           ) : requestStatus.length > 0 ? (
-            <div className="space-y-3">
-              {requestStatus.map((status) => (
-                <div key={status.status} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-4 h-4 rounded-full ${statusColors[status.status] || 'bg-gray-500'}`}></div>
-                    <span className="text-sm font-medium text-gray-700">{status.status}</span>
-                  </div>
-                  <span className="text-lg font-bold text-gray-900">{status.count}</span>
-                </div>
-              ))}
-            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={requestStatus} layout="vertical">
+                <XAxis type="number" />
+                <YAxis dataKey="status" type="category" />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="count" name="Requests">
+                  {requestStatus.map((entry) => (
+                    <Cell key={entry.status} fill={STATUS_COLORS[entry.status] || '#6b7280'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           ) : (
             <p className="text-gray-500 text-center py-8">No request data available</p>
           )}

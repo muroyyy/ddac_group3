@@ -151,6 +151,55 @@ public class AnalyticsController : ControllerBase
             });
         }
     }
+
+    [HttpGet("export/csv")]
+    public async Task<IActionResult> ExportAnalyticsCSV()
+    {
+        try
+        {
+            var csv = new System.Text.StringBuilder();
+            csv.AppendLine("BloodLine Analytics Report");
+            csv.AppendLine($"Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC");
+            csv.AppendLine();
+
+            csv.AppendLine("=== SUMMARY ===");
+            var totalDonors = await _context.DonorProfiles.CountAsync();
+            var totalPatients = await _context.PatientProfiles.CountAsync();
+            var totalRequests = await _context.Database.SqlQuery<int>($"SELECT COUNT(*) as Value FROM blood_requests").FirstOrDefaultAsync();
+            csv.AppendLine($"Total Donors,{totalDonors}");
+            csv.AppendLine($"Total Patients,{totalPatients}");
+            csv.AppendLine($"Total Requests,{totalRequests}");
+            csv.AppendLine();
+
+            csv.AppendLine("=== USERS BY ROLE ===");
+            csv.AppendLine("Role,Count");
+            var usersByRole = await _context.Users.Where(u => u.Status == UserStatus.Active).GroupBy(u => u.Role).Select(g => new { Role = g.Key.ToString(), Count = g.Count() }).ToListAsync();
+            foreach (var role in usersByRole)
+                csv.AppendLine($"{role.Role},{role.Count}");
+            csv.AppendLine();
+
+            csv.AppendLine("=== BLOOD TYPE DISTRIBUTION ===");
+            csv.AppendLine("Blood Type,Donor Count");
+            var bloodTypes = await _context.DonorProfiles.GroupBy(d => d.BloodType).Select(g => new { BloodType = g.Key, Count = g.Count() }).OrderByDescending(x => x.Count).ToListAsync();
+            foreach (var blood in bloodTypes)
+                csv.AppendLine($"{blood.BloodType},{blood.Count}");
+            csv.AppendLine();
+
+            csv.AppendLine("=== REQUEST STATUS ===");
+            csv.AppendLine("Status,Count");
+            var statusBreakdown = await _context.Database.SqlQuery<RequestStatusCount>($"SELECT status as Status, COUNT(*) as Count FROM blood_requests GROUP BY status").ToListAsync();
+            foreach (var status in statusBreakdown)
+                csv.AppendLine($"{status.Status},{status.Count}");
+
+            var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
+            return File(bytes, "text/csv", $"BloodLine_Analytics_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error exporting analytics CSV");
+            return StatusCode(500, new { message = "Error generating report" });
+        }
+    }
 }
 
 public class RequestStatusCount
