@@ -1,5 +1,6 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { LayoutDashboard, Droplet, History, User, LogOut } from 'lucide-react';
 
 export default function DonorLayout() {
   const { logout } = useAuth();
@@ -11,10 +12,10 @@ export default function DonorLayout() {
   };
 
   const navItems = [
-    { path: '/donor/dashboard', label: 'Dashboard', icon: '📊' },
-    { path: '/donor/donate', label: 'Donate Blood', icon: '🩸' },
-    { path: '/donor/history', label: 'History', icon: '📋' },
-    { path: '/donor/profile', label: 'Profile', icon: '👤' },
+    { path: '/donor/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
+    { path: '/donor/donate', label: 'Donate Blood', Icon: Droplet },
+    { path: '/donor/history', label: 'History', Icon: History },
+    { path: '/donor/profile', label: 'Profile', Icon: User },
   ];
 
   return (
@@ -31,20 +32,22 @@ export default function DonorLayout() {
                   key={item.path}
                   to={item.path}
                   className={({ isActive }) =>
-                    `px-3 py-2 rounded-md text-sm font-medium transition ${
+                    `flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition ${
                       isActive
                         ? 'bg-red-700 text-white'
                         : 'text-red-100 hover:bg-red-500'
                     }`
                   }
                 >
-                  {item.icon} {item.label}
+                  <item.Icon className="w-4 h-4" />
+                  {item.label}
                 </NavLink>
               ))}
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 bg-red-700 rounded-md text-sm font-medium hover:bg-red-800 transition"
+                className="flex items-center gap-2 px-4 py-2 bg-red-700 rounded-md text-sm font-medium hover:bg-red-800 transition"
               >
+                <LogOut className="w-4 h-4" />
                 Logout
               </button>
             </div>
