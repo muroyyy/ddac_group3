@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 
 interface UserData {
+  id: number;
   email: string;
   name: string;
   role: string;
@@ -30,6 +31,17 @@ const STORAGE_KEY = 'bloodline_session';
 interface AuthProviderProps {
   children: ReactNode;
 }
+
+export const getUserId = (): number | null => {
+  try {
+    const stored = localStorage.getItem('bloodline_session');
+    if (!stored) return null;
+    const session = JSON.parse(stored);
+    return session.user?.id || null;
+  } catch {
+    return null;
+  }
+};
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<UserData | null>(null);

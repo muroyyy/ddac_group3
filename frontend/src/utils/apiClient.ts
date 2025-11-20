@@ -48,14 +48,48 @@ export interface AuthResponse {
 
 export const authAPI = {
   login: async (data: LoginRequest): Promise<AuthResponse> => {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
+    console.log('🔐 Login attempt:', {
+      url: `${API_BASE_URL}/auth/login`,
+      email: data.email,
+      timestamp: new Date().toISOString()
     });
-    return response.json();
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      
+      console.log('📡 Response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        url: response.url
+      });
+      
+      if (!response.ok) {
+        console.error('❌ HTTP Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          url: response.url
+        });
+      }
+      
+      const result = await response.json();
+      console.log('📦 Response data:', result);
+      
+      return result;
+    } catch (error) {
+      console.error('🚨 Network/Parse Error:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        url: `${API_BASE_URL}/auth/login`
+      });
+      throw error;
+    }
   },
 
   register: async (data: RegisterRequest): Promise<AuthResponse> => {

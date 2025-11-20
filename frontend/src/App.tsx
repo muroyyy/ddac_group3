@@ -1,147 +1,56 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-// Import page components
+// Layouts
+import PublicLayout from './layouts/PublicLayout';
+import AdminLayout from './layouts/AdminLayout';
+
+// Pages
 import LandingPage from './layouts/Landing';
 import LoginPage from './layouts/Login';
 import RegisterPage from './layouts/Register';
 import ForgotPassword from './layouts/ForgotPassword';
 import ResetPassword from './layouts/ResetPassword';
 import MockEmail from './layouts/MockEmail';
-import AdminLayout from './layouts/AdminLayout';
 
-// Import layout components
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-
-// Import auth context
+// Context & Components
 import { AuthProvider, useAuth } from './context/AuthContext';
+import LoadingSpinner from './components/LoadingSpinner';
+import ProtectedRoute from './components/ProtectedRoute';
 
-// Protected Route Component
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-  isAuthenticated: boolean;
-}
-
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, isAuthenticated }) => {
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
-};
-
-// Layout Component for pages with Navbar and Footer
-interface LayoutProps {
-  children: React.ReactNode;
-}
-
-const Layout: React.FC<LayoutProps> = ({ children }) => {
-  return (
-    <>
-      <Navbar />
-      <main className="min-h-screen">
-        {children}
-      </main>
-      <Footer />
-    </>
-  );
-};
-
-// App Routes Component
 const AppRoutes: React.FC = () => {
   const { user, isAuthenticated, isLoading, login, logout } = useAuth();
 
-  // Show loading spinner while checking authentication
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  if (isLoading) return <LoadingSpinner />;
 
   return (
     <Router>
       <Routes>
-        {/* Public Routes with Navbar & Footer */}
-        <Route
-          path="/"
-          element={
-            <Layout>
-              <LandingPage />
-            </Layout>
-          }
-        />
-        
-        <Route
-          path="/login"
-          element={
-            <Layout>
-              <LoginPage onLogin={login} />
-            </Layout>
-          }
-        />
-        
-        <Route
-          path="/register"
-          element={
-            <Layout>
-              <RegisterPage />
-            </Layout>
-          }
-        />
-        
-        <Route
-          path="/forgot-password"
-          element={
-            <Layout>
-              <ForgotPassword />
-            </Layout>
-          }
-        />
-        
-        <Route
-          path="/reset-password"
-          element={
-            <Layout>
-              <ResetPassword />
-            </Layout>
-          }
-        />
-        
-        <Route
-          path="/mock-email"
-          element={
-            <Layout>
-              <MockEmail />
-            </Layout>
-          }
-        />
+        {/* Public Routes */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage onLogin={login} />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/mock-email" element={<MockEmail />} />
+        </Route>
 
-        {/* Protected Routes - Dashboard without Navbar & Footer */}
-        <Route
-          path="/admin/dashboard"
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <AdminLayout user={user!} onLogout={logout} />
-            </ProtectedRoute>
-          }
-        />
+        {/* Protected Routes */}
+        <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} />}>
+          <Route path="/admin/dashboard" element={<AdminLayout user={user!} onLogout={logout} />} />
+        </Route>
 
-        {/* Catch all - redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );
 };
 
-// Main App Component
-const App: React.FC = () => {
-  return (
-    <AuthProvider>
-      <AppRoutes />
-    </AuthProvider>
-  );
-};
+const App: React.FC = () => (
+  <AuthProvider>
+    <AppRoutes />
+  </AuthProvider>
+);
 
 export default App;
