@@ -1,35 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-function App() {
-  const [count, setCount] = useState(0)
+// Layouts
+import PublicLayout from './layouts/PublicLayout';
+import AdminLayout from './layouts/AdminLayout';
+
+// Pages
+import LandingPage from './layouts/Landing';
+import LoginPage from './layouts/Login';
+import RegisterPage from './layouts/Register';
+import ForgotPassword from './layouts/ForgotPassword';
+import ResetPassword from './layouts/ResetPassword';
+import MockEmail from './layouts/MockEmail';
+
+// Context & Components
+import { AuthProvider, useAuth } from './context/AuthContext';
+import LoadingSpinner from './components/LoadingSpinner';
+import ProtectedRoute from './components/ProtectedRoute';
+
+const AppRoutes: React.FC = () => {
+  const { user, isAuthenticated, isLoading, login, logout } = useAuth();
+
+  if (isLoading) return <LoadingSpinner />;
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <Router>
+      <Routes>
+        {/* Public Routes */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage onLogin={login} />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/mock-email" element={<MockEmail />} />
+        </Route>
 
-export default App
+        {/* Protected Routes */}
+        <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} />}>
+          <Route path="/admin/dashboard" element={<AdminLayout user={user!} onLogout={logout} />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
+  );
+};
+
+const App: React.FC = () => (
+  <AuthProvider>
+    <AppRoutes />
+  </AuthProvider>
+);
+
+export default App;
