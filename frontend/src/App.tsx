@@ -48,6 +48,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/admin/dashboard" element={<AdminLayout user={user!} onLogout={logout} />} />
           
           <Route path="/donor" element={<DonorLayout />}>
+            <Route index element={<Navigate to="/donor/dashboard" replace />} />
             <Route path="dashboard" element={<DonorDashboard />} />
             <Route path="donate" element={<DonateBloodForm />} />
             <Route path="history" element={<DonationHistory />} />
