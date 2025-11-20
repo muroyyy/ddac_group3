@@ -9,6 +9,9 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<User> Users { get; set; }
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
+    public DbSet<DonorProfile> DonorProfiles { get; set; }
+    public DbSet<DonationRequest> DonationRequests { get; set; }
+    public DbSet<DonationHistory> DonationHistory { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
