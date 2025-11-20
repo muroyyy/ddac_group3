@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
-import { donorAPI, DonationHistory as DonationHistoryType, DonationRequest } from '../services/donorAPI';
+import { donorAPI } from '../services/donorAPI';
+import type { DonationHistory as DonationHistoryType, DonationRequest } from '../services/donorAPI';
 
 export default function DonationHistory() {
   const { user } = useAuth();

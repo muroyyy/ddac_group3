@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
-import { donorAPI, DashboardStats } from '../services/donorAPI';
+import { donorAPI } from '../services/donorAPI';
+import type { DashboardStats } from '../services/donorAPI';
 
 export default function DonorDashboard() {
   const { user } = useAuth();
