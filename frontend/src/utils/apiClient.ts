@@ -1,6 +1,6 @@
 const API_BASE_URL = import.meta.env.VITE_EC2_PUBLIC_IP 
   ? `http://${import.meta.env.VITE_EC2_PUBLIC_IP}:5000/api`
-  : 'http://localhost:5269/api';
+  : 'http://localhost:5000/api';
 
 export interface LoginRequest {
   email: string;
