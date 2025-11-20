@@ -17,13 +17,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const stored = localStorage.getItem('bloodline_theme');
-    const prefersDark = stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const prefersDark = stored === 'dark';
     setIsDark(prefersDark);
     
+    // Always ensure dark class is removed for light mode
+    document.documentElement.classList.remove('dark');
     if (prefersDark) {
       document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
     }
   }, []);
 

@@ -17,6 +17,7 @@ export interface User {
   status: string;
   createdAt: string;
   phone?: string;
+  location?: string;
 }
 
 export interface BloodInventoryItem {
@@ -90,12 +91,16 @@ export const adminAPI = {
 
   updateUser: async (userId: number, userData: Partial<User>): Promise<boolean> => {
     try {
+      const stored = localStorage.getItem('bloodline_session');
+      const session = stored ? JSON.parse(stored) : null;
+      const adminUserId = session?.user?.id || 0;
+
       const response = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ ...userData, adminUserId }),
       });
       return response.ok;
     } catch (error) {
@@ -106,12 +111,16 @@ export const adminAPI = {
 
   updateUserStatus: async (userId: number, status: string): Promise<boolean> => {
     try {
+      const stored = localStorage.getItem('bloodline_session');
+      const session = stored ? JSON.parse(stored) : null;
+      const adminUserId = session?.user?.id || 0;
+
       const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, adminUserId }),
       });
       return response.ok;
     } catch (error) {
@@ -159,6 +168,78 @@ export const adminAPI = {
     } catch (error) {
       console.error('Error fetching activity logs:', error);
       return [];
+    }
+  },
+
+  // Profile Management
+  getProfile: async (): Promise<{ success: boolean; data?: User; message?: string }> => {
+    try {
+      const stored = localStorage.getItem('bloodline_session');
+      if (!stored) return { success: false, message: 'Not authenticated' };
+      const session = JSON.parse(stored);
+      const userId = session.user?.id;
+      if (!userId) return { success: false, message: 'User ID not found' };
+
+      const response = await fetch(`${API_BASE_URL}/admin/profile?userId=${userId}`);
+      if (!response.ok) {
+        return { success: false, message: 'Failed to fetch profile' };
+      }
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      return { success: false, message: 'Network error' };
+    }
+  },
+
+  updateProfile: async (profileData: Partial<User>): Promise<{ success: boolean; message?: string }> => {
+    try {
+      const stored = localStorage.getItem('bloodline_session');
+      if (!stored) return { success: false, message: 'Not authenticated' };
+      const session = JSON.parse(stored);
+      const userId = session.user?.id;
+      if (!userId) return { success: false, message: 'User ID not found' };
+
+      const response = await fetch(`${API_BASE_URL}/admin/profile?userId=${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profileData),
+      });
+      if (!response.ok) {
+        return { success: false, message: 'Failed to update profile' };
+      }
+      return { success: true, message: 'Profile updated successfully' };
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      return { success: false, message: 'Network error' };
+    }
+  },
+
+  updatePassword: async (passwordData: { currentPassword: string; newPassword: string }): Promise<{ success: boolean; message?: string }> => {
+    try {
+      const stored = localStorage.getItem('bloodline_session');
+      if (!stored) return { success: false, message: 'Not authenticated' };
+      const session = JSON.parse(stored);
+      const userId = session.user?.id;
+      if (!userId) return { success: false, message: 'User ID not found' };
+
+      const response = await fetch(`${API_BASE_URL}/admin/profile/password?userId=${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(passwordData),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        return { success: false, message: errorData.message || 'Failed to update password' };
+      }
+      return { success: true, message: 'Password updated successfully' };
+    } catch (error) {
+      console.error('Error updating password:', error);
+      return { success: false, message: 'Network error' };
     }
   },
 };

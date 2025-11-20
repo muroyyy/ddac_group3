@@ -68,18 +68,18 @@ const UserManagement: React.FC = () => {
 
   const getRoleColor = (role: string) => {
     const colors: Record<string, string> = {
-      Admin: 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200',
-      Donor: 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300',
-      Patient: 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300',
-      Hospital: 'bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-300'
+      Admin: 'bg-gray-100 text-gray-800',
+      Donor: 'bg-green-100 text-green-800',
+      Patient: 'bg-blue-100 text-blue-800',
+      Hospital: 'bg-purple-100 text-purple-800'
     };
-    return colors[role] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
+    return colors[role] || 'bg-gray-100 text-gray-800';
   };
 
   const getStatusColor = (status: string) => {
     return status === 'Active' 
-      ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300' 
-      : 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300';
+      ? 'bg-green-100 text-green-800' 
+      : 'bg-red-100 text-red-800';
   };
 
   const formatDate = (dateString: string) => {
@@ -87,17 +87,17 @@ const UserManagement: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 bg-gray-50 min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">User Management</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Manage system users and their permissions</p>
+          <h2 className="text-2xl font-semibold text-gray-900">User Management</h2>
+          <p className="text-sm text-gray-600 mt-1">Manage system users and their permissions</p>
         </div>
         <button
           onClick={loadUsers}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           Refresh
@@ -105,27 +105,27 @@ const UserManagement: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Search users..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           {/* Role Filter */}
           <div className="relative">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
+            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <select
               value={filterRole}
               onChange={(e) => setFilterRole(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer"
             >
               <option value="all">All Roles</option>
               <option value="Admin">Admin</option>
@@ -137,11 +137,11 @@ const UserManagement: React.FC = () => {
 
           {/* Status Filter */}
           <div className="relative">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
+            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer"
             >
               <option value="all">All Status</option>
               <option value="Active">Active</option>
@@ -152,29 +152,29 @@ const UserManagement: React.FC = () => {
       </div>
 
       {/* Users Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+            <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   User
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Role
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Joined
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
                 // Loading skeleton
                 Array.from({ length: 5 }).map((_, index) => (
@@ -204,15 +204,15 @@ const UserManagement: React.FC = () => {
                 ))
               ) : filteredUsers.length > 0 ? (
                 filteredUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <tr key={user.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium">
+                        <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center text-white font-medium">
                           {user.fullName.charAt(0)}
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">{user.fullName}</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                          <div className="text-sm font-medium text-gray-900">{user.fullName}</div>
+                          <div className="text-sm text-gray-500 flex items-center gap-1">
                             <Mail className="w-3 h-3" />
                             {user.email}
                           </div>
@@ -229,7 +229,7 @@ const UserManagement: React.FC = () => {
                         {user.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                    <td className="px-6 py-4 text-sm text-gray-500">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         {formatDate(user.createdAt)}
@@ -240,7 +240,7 @@ const UserManagement: React.FC = () => {
                         {user.status === 'Active' ? (
                           <button
                             onClick={() => handleStatusChange(user.id, 'Suspended')}
-                            className="p-1 text-red-600 hover:bg-red-50 rounded cursor-pointer"
+                            className="p-1 text-red-600 hover:bg-red-50 rounded cursor-pointer transition-colors"
                             title="Suspend User"
                           >
                             <UserX className="w-4 h-4" />
@@ -248,7 +248,7 @@ const UserManagement: React.FC = () => {
                         ) : (
                           <button
                             onClick={() => handleStatusChange(user.id, 'Active')}
-                            className="p-1 text-green-600 hover:bg-green-50 rounded cursor-pointer"
+                            className="p-1 text-green-600 hover:bg-green-50 rounded cursor-pointer transition-colors"
                             title="Activate User"
                           >
                             <UserCheck className="w-4 h-4" />
@@ -256,7 +256,7 @@ const UserManagement: React.FC = () => {
                         )}
                         <button 
                           onClick={() => setEditingUserId(user.id)}
-                          className="p-1 text-blue-600 hover:bg-blue-50 rounded cursor-pointer"
+                          className="p-1 text-red-600 hover:bg-red-50 rounded cursor-pointer transition-colors"
                           title="Edit User"
                         >
                           <Edit className="w-4 h-4" />
@@ -268,8 +268,9 @@ const UserManagement: React.FC = () => {
               ) : (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center">
-                    <Users className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-                    <p className="text-gray-500 dark:text-gray-400">No users found</p>
+                    <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500 font-medium">No users found</p>
+                    <p className="text-sm text-gray-400 mt-1">Try adjusting your search or filter criteria</p>
                   </td>
                 </tr>
               )}
@@ -280,14 +281,23 @@ const UserManagement: React.FC = () => {
 
       {/* Summary */}
       {!loading && (
-        <div className="mt-6 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-          <p>
-            Showing {filteredUsers.length} of {users.length} users
+        <div className="mt-6 flex items-center justify-between text-sm text-gray-600 bg-white rounded-lg shadow-sm border border-gray-200 px-6 py-4">
+          <p className="font-medium">
+            Showing <span className="text-red-600">{filteredUsers.length}</span> of <span className="text-red-600">{users.length}</span> users
           </p>
-          <div className="flex items-center gap-4">
-            <span>Total: {users.length}</span>
-            <span>Active: {users.filter(u => u.status === 'Active').length}</span>
-            <span>Suspended: {users.filter(u => u.status === 'Suspended').length}</span>
+          <div className="flex items-center gap-6">
+            <span className="flex items-center gap-2">
+              <span className="text-gray-500">Total:</span> 
+              <span className="font-semibold text-gray-900">{users.length}</span>
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="text-gray-500">Active:</span> 
+              <span className="font-semibold text-green-600">{users.filter(u => u.status === 'Active').length}</span>
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="text-gray-500">Suspended:</span> 
+              <span className="font-semibold text-red-600">{users.filter(u => u.status === 'Suspended').length}</span>
+            </span>
           </div>
         </div>
       )}
