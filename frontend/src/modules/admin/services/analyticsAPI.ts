@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = 'http://localhost:5000/api';
 
 export interface AnalyticsOverview {
   totalUsers: number;
@@ -26,25 +26,25 @@ export interface BloodTypeDistribution {
 
 export const analyticsAPI = {
   getOverview: async (): Promise<AnalyticsOverview> => {
-    const response = await fetch(`${API_BASE_URL}/api/analytics/overview`);
+    const response = await fetch(`${API_BASE_URL}/analytics/overview`);
     if (!response.ok) throw new Error('Failed to fetch overview');
     return response.json();
   },
 
   getUserGrowth: async (): Promise<UserGrowthData[]> => {
-    const response = await fetch(`${API_BASE_URL}/api/analytics/user-growth`);
+    const response = await fetch(`${API_BASE_URL}/analytics/user-growth`);
     if (!response.ok) throw new Error('Failed to fetch user growth');
     return response.json();
   },
 
   getUserDistribution: async (): Promise<UserDistribution[]> => {
-    const response = await fetch(`${API_BASE_URL}/api/analytics/user-distribution`);
+    const response = await fetch(`${API_BASE_URL}/analytics/user-distribution`);
     if (!response.ok) throw new Error('Failed to fetch user distribution');
     return response.json();
   },
 
   getBloodTypeDistribution: async (): Promise<BloodTypeDistribution[]> => {
-    const response = await fetch(`${API_BASE_URL}/api/analytics/blood-type-distribution`);
+    const response = await fetch(`${API_BASE_URL}/analytics/blood-type-distribution`);
     if (!response.ok) throw new Error('Failed to fetch blood type distribution');
     return response.json();
   }

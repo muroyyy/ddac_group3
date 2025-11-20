@@ -23,7 +23,18 @@ builder.Services.AddCors(options =>
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
 {
-    // Get database credentials from AWS Secrets Manager
+    // First, try to read a connection string from configuration (appsettings.json or environment).
+    var configuration = builder.Configuration;
+    var configuredConnection = configuration.GetConnectionString("DefaultConnection");
+
+    if (!string.IsNullOrEmpty(configuredConnection))
+    {
+        // Use the local/configured connection string (useful for development/local runs).
+        options.UseMySql(configuredConnection, ServerVersion.AutoDetect(configuredConnection));
+        return;
+    }
+
+    // Fallback: Get database credentials from AWS Secrets Manager (used in production/deployment).
     var databaseService = serviceProvider.GetRequiredService<DatabaseService>();
     var credentials = databaseService.GetDatabaseCredentialsAsync().GetAwaiter().GetResult();
     
@@ -31,7 +42,7 @@ builder.Services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =
     var endpointParts = credentials.endpoint.Split(':');
     var server = endpointParts[0];
     var port = endpointParts.Length > 1 ? endpointParts[1] : "3306";
-    
+
     var connectionString = $"Server={server};Port={port};Database={credentials.database};User={credentials.username};Password={credentials.password};";
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
