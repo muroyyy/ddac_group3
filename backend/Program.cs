@@ -1,4 +1,5 @@
 using BloodLine.Data;
+using BloodLine.Models;
 using BloodLine.Services;
 using Microsoft.EntityFrameworkCore;
 using Amazon.SecretsManager;
@@ -21,20 +22,29 @@ builder.Services.AddCors(options =>
 });
 
 // Add services to the container.
-builder.Services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
+if (builder.Environment.IsDevelopment())
 {
-    // Get database credentials from AWS Secrets Manager
-    var databaseService = serviceProvider.GetRequiredService<DatabaseService>();
-    var credentials = databaseService.GetDatabaseCredentialsAsync().GetAwaiter().GetResult();
-    
-    // Parse endpoint to separate hostname and port
-    var endpointParts = credentials.endpoint.Split(':');
-    var server = endpointParts[0];
-    var port = endpointParts.Length > 1 ? endpointParts[1] : "3306";
-    
-    var connectionString = $"Server={server};Port={port};Database={credentials.database};User={credentials.username};Password={credentials.password};";
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
-});
+    // Use local MySQL connection string in development
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+}
+else
+{
+    // Use AWS Secrets Manager in production
+    builder.Services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
+    {
+        var databaseService = serviceProvider.GetRequiredService<DatabaseService>();
+        var credentials = databaseService.GetDatabaseCredentialsAsync().GetAwaiter().GetResult();
+        
+        var endpointParts = credentials.endpoint.Split(':');
+        var server = endpointParts[0];
+        var port = endpointParts.Length > 1 ? endpointParts[1] : "3306";
+        
+        var connectionString = $"Server={server};Port={port};Database={credentials.database};User={credentials.username};Password={credentials.password};";
+        options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+    });
+}
 
 builder.Services.AddControllersWithViews();
 
@@ -52,6 +62,53 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseCors("AllowFrontend");
+
+// Seed demo donor account
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    
+    try
+    {
+        // Check if demo donor exists
+        var demoEmail = "donor@demo.com";
+        var demoUser = await context.Users.FirstOrDefaultAsync(u => u.Email == demoEmail);
+        
+        if (demoUser == null)
+        {
+            // Create demo donor user
+            demoUser = new User
+            {
+                FullName = "Demo Donor",
+                Email = demoEmail,
+                Phone = "+60123456789",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123", 12),
+                Role = UserRole.Donor,
+                Status = UserStatus.Active
+            };
+            context.Users.Add(demoUser);
+            await context.SaveChangesAsync();
+            
+            // Create donor profile
+            var donorProfile = new DonorProfile
+            {
+                UserId = demoUser.Id,
+                BloodType = "O+",
+                Location = "Kuala Lumpur",
+                IsAvailable = true
+            };
+            context.DonorProfiles.Add(donorProfile);
+            await context.SaveChangesAsync();
+            
+            logger.LogInformation("Demo donor account created: {Email} / password123", demoEmail);
+        }
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error seeding demo donor account");
+    }
+}
 app.UseRouting();
 
 app.UseAuthorization();
