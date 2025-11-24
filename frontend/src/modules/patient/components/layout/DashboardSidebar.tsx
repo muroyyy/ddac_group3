@@ -22,13 +22,13 @@ import {
 import bloodlineLogo from "../../../../assets/bloodline_logo.jpg";
 
 const navItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Request Blood", url: "/request-blood", icon: Droplet },
-  { title: "View Requests", url: "/view-requests", icon: FileText },
-  { title: "Appointments", url: "/appointments", icon: Calendar },
-  { title: "Notifications", url: "/notifications", icon: Bell },
-  { title: "Profile", url: "/profile", icon: User },
-  { title: "Insights", url: "/insights", icon: TrendingUp },
+  { title: "Dashboard", url: "/patient/dashboard", icon: LayoutDashboard },
+  { title: "Request Blood", url: "/patient/request-blood", icon: Droplet },
+  { title: "View Requests", url: "/patient/view-requests", icon: FileText },
+  { title: "Appointments", url: "/patient/appointments", icon: Calendar },
+  { title: "Notifications", url: "/patient/notifications", icon: Bell },
+  { title: "Profile", url: "/patient/profile", icon: User },
+  { title: "Insights", url: "/patient/insights", icon: TrendingUp },
 ];
 
 export function DashboardSidebar() {
@@ -73,7 +73,7 @@ export function DashboardSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <button
-                    onClick={() => navigate("/logout")}
+                    onClick={() => navigate("/patient/logout")}
                     className="flex w-full items-center gap-3 px-3 py-2 text-base font-semibold text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
                   >
                     <LogOut className="h-5 w-5 flex-shrink-0" />

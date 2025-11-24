@@ -26,6 +26,10 @@ import PatientDashboard from './modules/patient/pages/Dashboard';
 import RequestBlood from './modules/patient/pages/RequestBlood';
 import ViewRequests from './modules/patient/pages/ViewRequests';
 import PatientProfile from './modules/patient/pages/Profile';
+import Appointments from './modules/patient/pages/Appointments';
+import Notifications from './modules/patient/pages/Notifications';
+import Insights from './modules/patient/pages/Insights';
+import Logout from './modules/patient/pages/Logout';
 
 // Context & Components
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -67,7 +71,11 @@ const AppRoutes: React.FC = () => {
             <Route path="dashboard" element={<PatientDashboard />} />
             <Route path="request-blood" element={<RequestBlood />} />
             <Route path="view-requests" element={<ViewRequests />} />
+            <Route path="appointments" element={<Appointments />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="insights" element={<Insights />} />
             <Route path="profile" element={<PatientProfile />} />
+            <Route path="logout" element={<Logout />} />
           </Route>
         </Route>
 
