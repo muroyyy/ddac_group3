@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { Button } from "../ui/button";
+import { Button } from "../ui/simple-button";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "../ui/badge";
 
