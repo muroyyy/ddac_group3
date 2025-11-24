@@ -73,7 +73,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 );
 
 // Simple Select components
-export const Select = ({ children, onValueChange, value, required }: any) => (
+export const Select = ({ children }: any) => (
   <div className="relative">{children}</div>
 );
 
@@ -99,14 +99,14 @@ export const SelectContent = ({ children }: any) => (
   </div>
 );
 
-export const SelectItem = ({ value, children }: any) => (
+export const SelectItem = ({ children }: any) => (
   <div className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none">
     {children}
   </div>
 );
 
 // Simple Dialog components
-export const Dialog = ({ open, onOpenChange, children }: any) => (
+export const Dialog = ({ open, children }: any) => (
   open ? <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">{children}</div> : null
 );
 

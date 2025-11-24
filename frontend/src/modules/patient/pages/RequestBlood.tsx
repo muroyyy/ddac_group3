@@ -55,7 +55,7 @@ export default function RequestBlood() {
                 <Label htmlFor="bloodType">Blood Type *</Label>
                 <Select
                   value={formData.bloodType}
-                  onValueChange={(value) =>
+                  onValueChange={(value: string) =>
                     setFormData({ ...formData, bloodType: value })
                   }
                   required
@@ -95,7 +95,7 @@ export default function RequestBlood() {
                 <Label htmlFor="hospital">Hospital *</Label>
                 <Select
                   value={formData.hospital}
-                  onValueChange={(value) =>
+                  onValueChange={(value: string) =>
                     setFormData({ ...formData, hospital: value })
                   }
                   required
@@ -116,7 +116,7 @@ export default function RequestBlood() {
                 <Label htmlFor="urgency">Urgency Level *</Label>
                 <Select
                   value={formData.urgency}
-                  onValueChange={(value) =>
+                  onValueChange={(value: string) =>
                     setFormData({ ...formData, urgency: value })
                   }
                   required
