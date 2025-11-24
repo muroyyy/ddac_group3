@@ -50,11 +50,12 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-foreground">
+        <h1 className="text-3xl font-bold text-red-600">
           Welcome back, {userName}!
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-red-400">
           Here's an overview of your blood transfusion journey
         </p>
       </div>
@@ -62,27 +63,30 @@ export default function Dashboard() {
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-3">
         {stats.map((stat) => (
-          <Card key={stat.title} className="shadow-md">
+          <Card
+            key={stat.title}
+            className="shadow-md border border-red-300"
+          >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-sm font-medium text-red-500">
                 {stat.title}
               </CardTitle>
-              <stat.icon className="h-5 w-5 text-primary" />
+              <stat.icon className="h-5 w-5 text-red-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-foreground">{stat.value}</div>
-              <p className="text-xs text-muted-foreground">{stat.description}</p>
+              <div className="text-3xl font-bold text-red-600">{stat.value}</div>
+              <p className="text-xs text-red-400">{stat.description}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Patient News Section */}
-      <Card className="shadow-md">
+      {/* News Section */}
+      <Card className="shadow-md border border-red-300">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Newspaper className="h-5 w-5 text-primary" />
-            <CardTitle>Patient News</CardTitle>
+            <Newspaper className="h-5 w-5 text-red-500" />
+            <CardTitle className="text-red-600">Patient News</CardTitle>
           </div>
         </CardHeader>
         <CardContent>
@@ -90,13 +94,13 @@ export default function Dashboard() {
             {newsItems.map((item, index) => (
               <div
                 key={index}
-                className="rounded-lg border border-border bg-card p-4 transition-shadow hover:shadow-md"
+                className="rounded-lg border border-red-300 bg-white p-4 transition-shadow hover:shadow-md"
               >
-                <h3 className="mb-2 font-semibold text-card-foreground">
+                <h3 className="mb-2 font-semibold text-red-600">
                   {item.title}
                 </h3>
-                <p className="mb-2 text-sm text-muted-foreground">{item.excerpt}</p>
-                <p className="text-xs text-muted-foreground">{item.date}</p>
+                <p className="mb-2 text-sm text-red-400">{item.excerpt}</p>
+                <p className="text-xs text-red-300">{item.date}</p>
               </div>
             ))}
           </div>
@@ -105,3 +109,4 @@ export default function Dashboard() {
     </div>
   );
 }
+
