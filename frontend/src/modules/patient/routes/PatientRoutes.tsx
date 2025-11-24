@@ -15,14 +15,14 @@ export default function PatientRoutes() {
     <DashboardLayout>
       <Routes>
         <Route path="/" element={<Dashboard />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/request-blood" element={<RequestBlood />} />
-        <Route path="/view-requests" element={<ViewRequests />} />
-        <Route path="/appointments" element={<Appointments />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/notifications" element={<Notifications />} />
-        <Route path="/insights" element={<Insights />} />
-        <Route path="/logout" element={<Logout />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="request-blood" element={<RequestBlood />} />
+        <Route path="view-requests" element={<ViewRequests />} />
+        <Route path="appointments" element={<Appointments />} />
+        <Route path="profile" element={<Profile />} />
+        <Route path="notifications" element={<Notifications />} />
+        <Route path="insights" element={<Insights />} />
+        <Route path="logout" element={<Logout />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </DashboardLayout>

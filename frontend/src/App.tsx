@@ -5,7 +5,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import PublicLayout from './layouts/PublicLayout';
 import AdminLayout from './layouts/AdminLayout';
 import DonorLayout from './layouts/DonorLayout';
-import { DashboardLayout as PatientLayout } from './modules/patient/components/layout/DashboardLayout';
 
 // Pages
 import LandingPage from './layouts/Landing';
@@ -21,15 +20,8 @@ import DonateBloodForm from './modules/donor/pages/DonateBloodForm';
 import DonationHistory from './modules/donor/pages/DonationHistory';
 import DonorProfile from './modules/donor/pages/DonorProfile';
 
-// Patient Pages
-import PatientDashboard from './modules/patient/pages/Dashboard';
-import RequestBlood from './modules/patient/pages/RequestBlood';
-import ViewRequests from './modules/patient/pages/ViewRequests';
-import PatientProfile from './modules/patient/pages/Profile';
-import Appointments from './modules/patient/pages/Appointments';
-import Notifications from './modules/patient/pages/Notifications';
-import Insights from './modules/patient/pages/Insights';
-import Logout from './modules/patient/pages/Logout';
+// Patient Routes
+import { PatientRoutes } from './modules/patient/routes';
 
 // Context & Components
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -66,17 +58,7 @@ const AppRoutes: React.FC = () => {
             <Route path="profile" element={<DonorProfile />} />
           </Route>
           
-          <Route path="/patient" element={<PatientLayout />}>
-            <Route index element={<Navigate to="/patient/dashboard" replace />} />
-            <Route path="dashboard" element={<PatientDashboard />} />
-            <Route path="request-blood" element={<RequestBlood />} />
-            <Route path="view-requests" element={<ViewRequests />} />
-            <Route path="appointments" element={<Appointments />} />
-            <Route path="notifications" element={<Notifications />} />
-            <Route path="insights" element={<Insights />} />
-            <Route path="profile" element={<PatientProfile />} />
-            <Route path="logout" element={<Logout />} />
-          </Route>
+          <Route path="/patient/*" element={<PatientRoutes />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
