@@ -26,7 +26,7 @@ const LandingPage: React.FC = () => {
                 Saving Lives Through Technology
               </div>
               <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                Connect Donors & Save Lives in
+                Connecttt Donors & Save Lives in
                 <span className="text-red-600"> Real-Time</span>
               </h1>
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
