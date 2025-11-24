@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import PublicLayout from './layouts/PublicLayout';
 import AdminLayout from './layouts/AdminLayout';
 import DonorLayout from './layouts/DonorLayout';
+import { DashboardLayout as PatientLayout } from './modules/patient/components/layout/DashboardLayout';
 
 // Pages
 import LandingPage from './layouts/Landing';
@@ -19,6 +20,12 @@ import DonorDashboard from './modules/donor/pages/DonorDashboard';
 import DonateBloodForm from './modules/donor/pages/DonateBloodForm';
 import DonationHistory from './modules/donor/pages/DonationHistory';
 import DonorProfile from './modules/donor/pages/DonorProfile';
+
+// Patient Pages
+import PatientDashboard from './modules/patient/pages/Dashboard';
+import RequestBlood from './modules/patient/pages/RequestBlood';
+import ViewRequests from './modules/patient/pages/ViewRequests';
+import PatientProfile from './modules/patient/pages/Profile';
 
 // Context & Components
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -53,6 +60,14 @@ const AppRoutes: React.FC = () => {
             <Route path="donate" element={<DonateBloodForm />} />
             <Route path="history" element={<DonationHistory />} />
             <Route path="profile" element={<DonorProfile />} />
+          </Route>
+          
+          <Route path="/patient" element={<PatientLayout />}>
+            <Route index element={<Navigate to="/patient/dashboard" replace />} />
+            <Route path="dashboard" element={<PatientDashboard />} />
+            <Route path="request-blood" element={<RequestBlood />} />
+            <Route path="view-requests" element={<ViewRequests />} />
+            <Route path="profile" element={<PatientProfile />} />
           </Route>
         </Route>
 
