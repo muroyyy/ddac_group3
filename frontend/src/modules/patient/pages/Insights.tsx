@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { TrendingUp, Activity, Clock, Building2 } from "lucide-react";
 import {
   BarChart,
