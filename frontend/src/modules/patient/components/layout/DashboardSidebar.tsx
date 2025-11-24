@@ -18,7 +18,7 @@ import {
   SidebarMenuButton,
   useSidebar,
 } from "../ui/sidebar";
-import bloodlineLogo from "../../assets/bloodline_logo.jpg"; // Fixed path
+import bloodlineLogo from "../../../../assets/bloodline_logo.jpg";
 
 const navItems = [
   { title: "Dashboard", url: "/patient/dashboard", icon: LayoutDashboard },
