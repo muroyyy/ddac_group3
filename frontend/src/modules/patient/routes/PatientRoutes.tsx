@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
-import './styles/patient.css';
+import '../styles/patient.css';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Dashboard from '../pages/Dashboard';
 import RequestBlood from '../pages/RequestBlood';
