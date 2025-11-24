@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
-  Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
@@ -19,7 +18,7 @@ import {
   SidebarMenuButton,
   useSidebar,
 } from "../ui/sidebar";
-import bloodlineLogo from "../../../../assets/bloodline_logo.jpg";
+import bloodlineLogo from "../../assets/bloodline_logo.jpg"; // Fixed path
 
 const navItems = [
   { title: "Dashboard", url: "/patient/dashboard", icon: LayoutDashboard },
@@ -36,8 +35,9 @@ export function DashboardSidebar() {
   const navigate = useNavigate();
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
-      <div className="flex h-16 items-center justify-center border-b border-sidebar-border bg-sidebar">
+    <>
+      {/* Header/Logo Section */}
+      <div className="flex h-16 items-center justify-center border-b border-sidebar-border px-4">
         <img
           src={bloodlineLogo}
           alt="BloodLine"
@@ -45,39 +45,28 @@ export function DashboardSidebar() {
         />
       </div>
 
+      {/* Navigation Content */}
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      end
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2 text-base font-semibold ${
-                          isActive
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                            : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
-                        }`
-                      }
-                    >
-                      <item.icon className="h-5 w-5 flex-shrink-0" />
-                      {open && <span>{item.title}</span>}
+                  <SidebarMenuButton asChild isActive={location.pathname === item.url}>
+                    <NavLink to={item.url} end>
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
 
+              {/* Logout Button */}
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <button
-                    onClick={() => navigate("/patient/logout")}
-                    className="flex w-full items-center gap-3 px-3 py-2 text-base font-semibold text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
-                  >
-                    <LogOut className="h-5 w-5 flex-shrink-0" />
-                    {open && <span>Logout</span>}
+                  <button onClick={() => navigate("/patient/logout")}>
+                    <LogOut className="h-5 w-5" />
+                    <span>Logout</span>
                   </button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -85,6 +74,6 @@ export function DashboardSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-    </Sidebar>
+    </>
   );
 }

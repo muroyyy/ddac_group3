@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import { SidebarProvider } from "../ui/sidebar";
+import { useState } from "react";
+import { SidebarProvider, Sidebar, SidebarInset } from "../ui/sidebar";
 import { DashboardSidebar } from "./DashboardSidebar";
 import { DashboardHeader } from "./DashboardHeader";
 import { DashboardFooter } from "./DashboardFooter";
@@ -14,16 +14,19 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <SidebarProvider open={open} onOpenChange={setOpen}>
-      <div className="flex min-h-screen w-full">
+      {/* Sidebar wrapper */}
+      <Sidebar collapsible="icon">
         <DashboardSidebar />
-        <div className="flex flex-1 flex-col">
-          <DashboardHeader />
-          <main className="flex-1 bg-background p-6">
-            {children || <Outlet />}
-          </main>
-          <DashboardFooter />
-        </div>
-      </div>
+      </Sidebar>
+
+      {/* Main content area */}
+      <SidebarInset>
+        <DashboardHeader />
+        <main className="flex-1 p-4 md:p-6 lg:p-8">
+          {children || <Outlet />}
+        </main>
+        <DashboardFooter />
+      </SidebarInset>
     </SidebarProvider>
   );
 }
