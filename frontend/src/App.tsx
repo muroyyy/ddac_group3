@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import PublicLayout from './layouts/PublicLayout';
 import AdminLayout from './layouts/AdminLayout';
 import DonorLayout from './layouts/DonorLayout';
+import HospitalLayout from './layouts/HospitalLayout';
 
 // Pages
 import LandingPage from './layouts/Landing';
@@ -13,6 +14,7 @@ import RegisterPage from './layouts/Register';
 import ForgotPassword from './layouts/ForgotPassword';
 import ResetPassword from './layouts/ResetPassword';
 import MockEmail from './layouts/MockEmail';
+import Unauthorized from './layouts/Unauthorized';
 
 // Donor Pages
 import DonorDashboard from './modules/donor/pages/DonorDashboard';
@@ -20,6 +22,7 @@ import DonateBloodForm from './modules/donor/pages/DonateBloodForm';
 import DonationHistory from './modules/donor/pages/DonationHistory';
 import DonorProfile from './modules/donor/pages/DonorProfile';
 import PendingRequests from './modules/donor/pages/PendingRequests';
+import HospitalDashboard from './modules/hospital/pages/HospitalDashboard';
 
 // Patient Routes removed
 
@@ -27,6 +30,7 @@ import PendingRequests from './modules/donor/pages/PendingRequests';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LoadingSpinner from './components/LoadingSpinner';
 import ProtectedRoute from './components/ProtectedRoute';
+import RoleProtected from './routes/ProtectedRoutes';
 
 const AppRoutes: React.FC = () => {
   const { user, isAuthenticated, isLoading, login, logout } = useAuth();
@@ -44,6 +48,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/mock-email" element={<MockEmail />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
         </Route>
 
         {/* Protected Routes */}
@@ -58,7 +63,15 @@ const AppRoutes: React.FC = () => {
             <Route path="profile" element={<DonorProfile />} />
             <Route path="pending-requests" element={<PendingRequests />} />
           </Route>
-          
+
+          {/* Hospital routes - role protected */}
+          <Route element={<RoleProtected requiredRole="hospital"> <></> </RoleProtected>}>
+            <Route path="/hospital" element={<HospitalLayout />}>
+              <Route index element={<Navigate to="/hospital/dashboard" replace />} />
+              <Route path="dashboard" element={<HospitalDashboard user={user!} onNavigate={() => { /* noop or implement navigation */ }} />} />
+            </Route>
+          </Route>
+
           {/* Patient routes removed */}
         </Route>
 
