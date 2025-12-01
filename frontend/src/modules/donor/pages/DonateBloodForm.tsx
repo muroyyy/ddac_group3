@@ -82,22 +82,13 @@ export default function DonateBloodForm() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Blood Type
             </label>
-            <select
-              value={formData.bloodType}
-              onChange={(e) => setFormData({ ...formData, bloodType: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-              required
-            >
-              <option value="">Select Blood Type</option>
-              <option value="A+">A+</option>
-              <option value="A-">A-</option>
-              <option value="B+">B+</option>
-              <option value="B-">B-</option>
-              <option value="AB+">AB+</option>
-              <option value="AB-">AB-</option>
-              <option value="O+">O+</option>
-              <option value="O-">O-</option>
-            </select>
+            <input
+              type="text"
+              value={profile?.bloodType || 'Loading...'}
+              readOnly
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+            />
+            <p className="text-sm text-gray-500 mt-1">Blood type from your profile</p>
           </div>
 
           <div>
