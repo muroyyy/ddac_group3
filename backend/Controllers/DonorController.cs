@@ -122,6 +122,30 @@ namespace BloodLine.Controllers
 
             return Ok(requests);
         }
+
+        [HttpPost("donation-request")]
+        public async Task<IActionResult> CreateDonationRequest([FromQuery] int userId, [FromBody] CreateDonationRequestDto request)
+        {
+            var donorProfile = await _context.DonorProfiles.FirstOrDefaultAsync(d => d.UserId == userId);
+            if (donorProfile == null)
+            {
+                return BadRequest(new { message = "Donor profile not found. Please complete your profile first." });
+            }
+
+            // For now, just use the first hospital as default since we don't have hospital selection in the request
+            var hospital = await _context.Hospitals.FirstOrDefaultAsync();
+            if (hospital == null)
+            {
+                return BadRequest(new { message = "No hospitals available" });
+            }
+
+            await _context.Database.ExecuteSqlRawAsync(
+                @"INSERT INTO donation_requests (donor_id, hospital_id, status, requested_date) 
+                  VALUES ({0}, {1}, 'Pending', {2})",
+                donorProfile.DonorId, hospital.HospitalId, DateTime.Now);
+
+            return Ok(new { message = "Donation request submitted successfully" });
+        }
     }
 
     public class DonorUpdateProfileRequest
@@ -140,5 +164,12 @@ namespace BloodLine.Controllers
         public DateTime? UpdatedAt { get; set; }
         public string HospitalName { get; set; } = "";
         public string Notes { get; set; } = "";
+    }
+
+    public class CreateDonationRequestDto
+    {
+        public string BloodType { get; set; } = "";
+        public int UnitsRequested { get; set; }
+        public string? Notes { get; set; }
     }
 }

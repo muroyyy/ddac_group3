@@ -21,6 +21,7 @@ export interface DonationRequest {
   notes?: string;
   createdAt: string;
   updatedAt?: string;
+  hospitalName?: string;
 }
 
 export interface DonationHistory {
