@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
-import { donorAPI, type Hospital } from '../services/donorAPI';
+import { donorAPI } from '../services/donorAPI';
+import type { Hospital } from '../services/donorAPI';
 
 export default function DonateBloodForm() {
   const { user } = useAuth();
