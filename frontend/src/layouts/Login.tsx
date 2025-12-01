@@ -86,26 +86,29 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         if (response.success && response.user) {
           console.log('✅ Login successful, user data:', response.user);
           
+          // Normalize role to lowercase for internal checks and storage
+          const normalizedRole = (response.user.role || '').toString().toLowerCase();
+
           const userData = {
             id: response.user.id,
             email: response.user.email,
             name: response.user.fullName,
-            role: response.user.role
+            role: normalizedRole
           };
-          
+
           onLogin(userData);
-          
-          // Navigate based on role
-          const roleRoutes = {
-            'Admin': '/admin/dashboard',
-            'Donor': '/donor/dashboard',
-            'Patient': '/patient/dashboard',
-            'Hospital': '/hospital/dashboard'
+
+          // Navigate based on normalized (lowercase) role keys
+          const roleRoutes: Record<string, string> = {
+            'admin': '/admin/dashboard',
+            'donor': '/donor/dashboard',
+            'patient': '/patient/dashboard',
+            'hospital': '/hospital/dashboard'
           };
-          
-          const targetRoute = roleRoutes[response.user.role as keyof typeof roleRoutes] || '/dashboard';
+
+          const targetRoute = roleRoutes[normalizedRole] || '/dashboard';
           console.log('📍 Navigating to:', targetRoute);
-          
+
           navigate(targetRoute);
         } else {
           console.log('❌ Login failed:', response.message);

@@ -67,7 +67,7 @@ const AppRoutes: React.FC = () => {
           </Route>
 
           {/* Hospital routes - role protected */}
-          <Route element={<RoleProtected requiredRole="hospital"> <></> </RoleProtected>}>
+          <Route element={<RoleProtected requiredRole="hospital" />}>
             <Route path="/hospital" element={<HospitalLayout />}>
               <Route index element={<Navigate to="/hospital/dashboard" replace />} />
               <Route path="dashboard" element={<HospitalDashboard user={user!} onNavigate={() => { /* noop or implement navigation */ }} />} />
