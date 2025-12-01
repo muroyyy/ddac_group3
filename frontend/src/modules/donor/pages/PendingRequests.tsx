@@ -1,8 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
-import { donorAPI } from '../services/donorAPI';
-import type { DonationRequest } from '../services/donorAPI';
+
+interface DonationRequest {
+  id: number;
+  bloodType: string;
+  unitsRequested: number;
+  status: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt?: string;
+  hospitalName?: string;
+}
 
 export default function PendingRequests() {
   const { user } = useAuth();
