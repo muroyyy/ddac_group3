@@ -24,6 +24,8 @@ import DonorProfile from './modules/donor/pages/DonorProfile';
 import PendingRequests from './modules/donor/pages/PendingRequests';
 import AppointmentsTable from './modules/donor/pages/AppointmentsTable';
 import HospitalDashboard from './modules/hospital/pages/HospitalDashboard';
+import Inventory from './modules/hospital/pages/Inventory';
+import Approvals from './modules/hospital/pages/Approvals';
 
 // Patient Routes removed
 
@@ -70,7 +72,9 @@ const AppRoutes: React.FC = () => {
           <Route element={<RoleProtected requiredRole="hospital" />}>
             <Route path="/hospital" element={<HospitalLayout />}>
               <Route index element={<Navigate to="/hospital/dashboard" replace />} />
-              <Route path="dashboard" element={<HospitalDashboard user={user!} onNavigate={() => { /* noop or implement navigation */ }} />} />
+              <Route path="dashboard" element={<HospitalDashboard user={user!} />} />
+              <Route path="inventory" element={<Inventory />} />
+              <Route path="approvals" element={<Approvals />} />
             </Route>
           </Route>
 

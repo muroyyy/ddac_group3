@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Droplet, Users, AlertTriangle, Activity } from 'lucide-react';
 import { hospitalAPI } from '../services/hospitalAPI';
 import type { DashboardStats } from '../services/hospitalAPI';
 
 interface HospitalDashboardProps {
   user: { id: number; name: string; email: string; role: string };
-  onNavigate: (tab: string) => void;
 }
 
-export default function HospitalDashboard({ user, onNavigate }: HospitalDashboardProps) {
+export default function HospitalDashboard({ user }: HospitalDashboardProps) {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -43,10 +44,10 @@ export default function HospitalDashboard({ user, onNavigate }: HospitalDashboar
         ))}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <button onClick={() => onNavigate('inventory')} className="p-6 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold">
+        <button onClick={() => navigate('/hospital/inventory')} className="p-6 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold">
           Manage Blood Inventory
         </button>
-        <button onClick={() => onNavigate('approvals')} className="p-6 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
+        <button onClick={() => navigate('/hospital/approvals')} className="p-6 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
           Review Approvals
         </button>
       </div>
