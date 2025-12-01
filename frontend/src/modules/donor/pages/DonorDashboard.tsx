@@ -48,7 +48,10 @@ export default function DonorDashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div 
+          onClick={() => navigate('/donor/pending-requests')}
+          className="bg-white p-6 rounded-lg shadow cursor-pointer hover:shadow-md transition"
+        >
           <div className="text-sm text-gray-600">Pending Requests</div>
           <div className="text-3xl font-bold text-yellow-600 mt-2">
             {stats?.pendingRequests || 0}

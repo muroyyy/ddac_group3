@@ -19,6 +19,7 @@ import DonorDashboard from './modules/donor/pages/DonorDashboard';
 import DonateBloodForm from './modules/donor/pages/DonateBloodForm';
 import DonationHistory from './modules/donor/pages/DonationHistory';
 import DonorProfile from './modules/donor/pages/DonorProfile';
+import PendingRequests from './modules/donor/pages/PendingRequests';
 
 // Patient Routes
 import { PatientRoutes } from './modules/patient/routes';
@@ -56,6 +57,7 @@ const AppRoutes: React.FC = () => {
             <Route path="donate" element={<DonateBloodForm />} />
             <Route path="history" element={<DonationHistory />} />
             <Route path="profile" element={<DonorProfile />} />
+            <Route path="pending-requests" element={<PendingRequests />} />
           </Route>
           
           <Route path="/patient/*" element={<PatientRoutes />} />
