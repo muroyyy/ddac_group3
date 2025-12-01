@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Droplet, Users, AlertTriangle, Activity } from 'lucide-react';
-import { hospitalAPI, DashboardStats } from '../services/hospitalAPI';
+import { hospitalAPI } from '../services/hospitalAPI';
+import type { DashboardStats } from '../services/hospitalAPI';
 
 interface HospitalDashboardProps {
   user: { id: number; name: string; email: string; role: string };
