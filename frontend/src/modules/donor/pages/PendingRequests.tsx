@@ -1,51 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-interface MockDonationRequest {
-  id: number;
-  bloodType: string;
-  unitsRequested: number;
-  status: string;
-  notes?: string;
-  createdAt: string;
-  updatedAt?: string;
-  hospitalName: string;
-}
+import { useAuth } from '../../../context/AuthContext';
+import { donorAPI } from '../services/donorAPI';
+import type { DonationRequest } from '../services/donorAPI';
 
 export default function PendingRequests() {
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const [selectedRequest, setSelectedRequest] = useState<MockDonationRequest | null>(null);
+  const [requests, setRequests] = useState<DonationRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedRequest, setSelectedRequest] = useState<DonationRequest | null>(null);
 
-  // Mock data for demonstration
-  const requests: MockDonationRequest[] = [
-    {
-      id: 1,
-      bloodType: 'O+',
-      unitsRequested: 1,
-      status: 'Pending',
-      notes: 'Available on weekends',
-      createdAt: '2024-01-15T10:30:00Z',
-      hospitalName: 'Kuala Lumpur General Hospital'
-    },
-    {
-      id: 2,
-      bloodType: 'O+',
-      unitsRequested: 2,
-      status: 'Accepted',
-      createdAt: '2024-01-10T14:20:00Z',
-      updatedAt: '2024-01-12T09:15:00Z',
-      hospitalName: 'Pantai Hospital Kuala Lumpur'
-    },
-    {
-      id: 3,
-      bloodType: 'O+',
-      unitsRequested: 1,
-      status: 'Completed',
-      createdAt: '2023-12-20T11:45:00Z',
-      updatedAt: '2023-12-22T16:30:00Z',
-      hospitalName: 'Prince Court Medical Centre'
+  useEffect(() => {
+    if (user?.id) {
+      loadRequests();
     }
-  ];
+  }, [user]);
+
+  const loadRequests = async () => {
+    try {
+      const data = await donorAPI.getDonationRequests(user!.id);
+      setRequests(data || []);
+    } catch (error) {
+      console.error('Error loading requests:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -68,11 +49,15 @@ export default function PendingRequests() {
         >
           ← Back to Dashboard
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">My Donation Requests</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Pending Requests</h1>
         <p className="text-gray-600 mt-2">Track your donation requests and their status</p>
       </div>
 
-      {requests.length === 0 ? (
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="text-gray-500">Loading requests...</div>
+        </div>
+      ) : requests.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-8 text-center">
           <p className="text-gray-500 mb-4">You haven't made any donation requests yet.</p>
           <button
