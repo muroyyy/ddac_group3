@@ -80,14 +80,17 @@ namespace BloodLine.Controllers
         [HttpGet("hospitals")]
         public async Task<IActionResult> GetHospitals()
         {
-            var hospitals = new[]
-            {
-                new { id = 1, name = "Kuala Lumpur General Hospital", location = "Kuala Lumpur", phone = "+603-2615-5555", email = "info@klgh.gov.my" },
-                new { id = 2, name = "Pantai Hospital Kuala Lumpur", location = "Bangsar, KL", phone = "+603-2296-0888", email = "info@pantai.com.my" },
-                new { id = 3, name = "Prince Court Medical Centre", location = "Kuala Lumpur", phone = "+603-2160-0000", email = "info@princecourt.com" },
-                new { id = 4, name = "Sunway Medical Centre", location = "Petaling Jaya", phone = "+603-7491-9191", email = "info@sunwaymedical.com" },
-                new { id = 5, name = "Gleneagles Kuala Lumpur", location = "Ampang, KL", phone = "+603-4141-3000", email = "info@gleneagles.com.my" }
-            };
+            var hospitals = await _context.Hospitals
+                .Include(h => h.User)
+                .Select(h => new
+                {
+                    id = h.HospitalId,
+                    name = h.HospitalName,
+                    location = h.Address,
+                    phone = h.ContactNumber ?? "N/A",
+                    email = h.User.Email
+                })
+                .ToListAsync();
             
             return Ok(hospitals);
         }
