@@ -31,13 +31,12 @@ namespace BloodLine.Controllers
                 email = user.Email,
                 phone = user.Phone,
                 bloodType = profile?.BloodType ?? "",
-                location = profile?.Location ?? "",
-                isAvailable = profile?.IsAvailable ?? true
+                location = profile?.Location ?? ""
             });
         }
 
         [HttpPut("profile/{userId}")]
-        public async Task<IActionResult> UpdateProfile(int userId, [FromBody] UpdateProfileRequest request)
+        public async Task<IActionResult> UpdateProfile(int userId, [FromBody] DonorUpdateProfileRequest request)
         {
             var profile = await _context.DonorProfiles.FirstOrDefaultAsync(d => d.UserId == userId);
             
@@ -47,8 +46,7 @@ namespace BloodLine.Controllers
                 {
                     UserId = userId,
                     BloodType = request.BloodType,
-                    Location = request.Location,
-                    IsAvailable = request.IsAvailable
+                    Location = request.Location
                 };
                 _context.DonorProfiles.Add(profile);
             }
@@ -56,7 +54,6 @@ namespace BloodLine.Controllers
             {
                 profile.BloodType = request.BloodType;
                 profile.Location = request.Location;
-                profile.IsAvailable = request.IsAvailable;
             }
 
             await _context.SaveChangesAsync();
@@ -72,7 +69,6 @@ namespace BloodLine.Controllers
                 pendingRequests = 0,
                 bloodType = "O+",
                 lastDonation = (string?)null,
-                isAvailable = true,
                 urgentAlerts = 0
             });
         }
@@ -96,10 +92,9 @@ namespace BloodLine.Controllers
         }
     }
 
-    public class UpdateProfileRequest
+    public class DonorUpdateProfileRequest
     {
         public string BloodType { get; set; } = "";
         public string Location { get; set; } = "";
-        public bool IsAvailable { get; set; }
     }
 }
