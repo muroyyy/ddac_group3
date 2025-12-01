@@ -2,12 +2,15 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { donorAPI } from '../services/donorAPI';
+import type { Hospital } from '../services/donorAPI';
 
 export default function DonateBloodForm() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
+  const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const [selectedHospital, setSelectedHospital] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     bloodType: '',
     unitsRequested: 1,
@@ -17,6 +20,7 @@ export default function DonateBloodForm() {
   useEffect(() => {
     if (user?.id) {
       loadProfile();
+      loadHospitals();
     }
   }, [user]);
 
@@ -30,12 +34,26 @@ export default function DonateBloodForm() {
     }
   };
 
+  const loadHospitals = async () => {
+    try {
+      const data = await donorAPI.getHospitals();
+      setHospitals(data);
+    } catch (error) {
+      console.error('Error loading hospitals:', error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!profile?.bloodType) {
       alert('Please complete your profile first');
       navigate('/donor/profile');
+      return;
+    }
+
+    if (!selectedHospital) {
+      alert('Please select a hospital');
       return;
     }
 
@@ -96,6 +114,41 @@ export default function DonateBloodForm() {
               required
             />
             <p className="text-sm text-gray-500 mt-1">Typically 1 unit = 450ml</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Select Hospital *
+            </label>
+            <div className="border border-gray-300 rounded-lg max-h-48 overflow-y-auto">
+              {hospitals.map((hospital) => (
+                <div
+                  key={hospital.id}
+                  onClick={() => setSelectedHospital(hospital.id)}
+                  className={`p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50 ${
+                    selectedHospital === hospital.id ? 'bg-red-50 border-red-200' : ''
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      name="hospital"
+                      checked={selectedHospital === hospital.id}
+                      onChange={() => setSelectedHospital(hospital.id)}
+                      className="mr-3 text-red-600"
+                    />
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900">{hospital.name}</h3>
+                      <p className="text-sm text-gray-600">{hospital.location}</p>
+                      <p className="text-sm text-gray-500">{hospital.phone}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {hospitals.length === 0 && (
+              <p className="text-sm text-gray-500 mt-2">Loading hospitals...</p>
+            )}
           </div>
 
           <div>
