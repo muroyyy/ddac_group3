@@ -21,8 +21,7 @@ import DonationHistory from './modules/donor/pages/DonationHistory';
 import DonorProfile from './modules/donor/pages/DonorProfile';
 import PendingRequests from './modules/donor/pages/PendingRequests';
 
-// Patient Routes
-import { PatientRoutes } from './modules/patient/routes';
+// Patient Routes removed
 
 // Context & Components
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -60,7 +59,7 @@ const AppRoutes: React.FC = () => {
             <Route path="pending-requests" element={<PendingRequests />} />
           </Route>
           
-          <Route path="/patient/*" element={<PatientRoutes />} />
+          {/* Patient routes removed */}
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

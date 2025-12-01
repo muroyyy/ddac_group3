@@ -1,5 +1,4 @@
 import { Routes, Route } from 'react-router-dom';
-import { PatientRoutes } from '../modules/patient/routes';
 import Landing from '../layouts/Landing';
 import Login from '../layouts/Login';
 import Register from '../layouts/Register';
@@ -14,7 +13,7 @@ export default function AppRoutes() {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/patient/*" element={<PatientRoutes />} />
+      {/* Patient routes removed */}
     </Routes>
   );
 }
