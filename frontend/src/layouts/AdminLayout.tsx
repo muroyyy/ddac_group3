@@ -149,7 +149,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto bg-gray-50">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-gray-50">
           {renderContent()}
         </main>
       </div>

@@ -6,7 +6,7 @@ import Footer from '../components/Footer';
 const PublicLayout: React.FC = () => (
   <>
     <Navbar />
-    <main className="min-h-screen">
+    <main className="min-h-screen overflow-x-hidden">
       <Outlet />
     </main>
     <Footer />
