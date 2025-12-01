@@ -95,6 +95,12 @@ export default function DonorDashboard() {
             >
               Update Profile
             </button>
+            <button
+              onClick={() => navigate("/donor/appointments")}
+              className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition"
+            >
+              View Appointments
+            </button>
           </div>
         </div>
 

@@ -20,6 +20,7 @@ import DonateBloodForm from './modules/donor/pages/DonateBloodForm';
 import DonationHistory from './modules/donor/pages/DonationHistory';
 import DonorProfile from './modules/donor/pages/DonorProfile';
 import PendingRequests from './modules/donor/pages/PendingRequests';
+import AppointmentsTable from './modules/donor/pages/AppointmentsTable';
 
 // Patient Routes removed
 
@@ -57,6 +58,7 @@ const AppRoutes: React.FC = () => {
             <Route path="history" element={<DonationHistory />} />
             <Route path="profile" element={<DonorProfile />} />
             <Route path="pending-requests" element={<PendingRequests />} />
+            <Route path="appointments" element={<AppointmentsTable />} />
           </Route>
           
           {/* Patient routes removed */}
