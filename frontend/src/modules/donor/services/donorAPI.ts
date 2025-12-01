@@ -40,6 +40,14 @@ export interface DashboardStats {
   isAvailable: boolean;
 }
 
+export interface Hospital {
+  id: number;
+  name: string;
+  location: string;
+  phone: string;
+  email: string;
+}
+
 export const donorAPI = {
   getProfile: async (userId: number): Promise<DonorProfile> => {
     const response = await fetch(`${API_BASE_URL}/donor/profile/${userId}`);
@@ -76,6 +84,11 @@ export const donorAPI = {
 
   getDashboardStats: async (userId: number): Promise<DashboardStats> => {
     const response = await fetch(`${API_BASE_URL}/donor/dashboard-stats/${userId}`);
+    return response.json();
+  },
+
+  getHospitals: async (): Promise<Hospital[]> => {
+    const response = await fetch(`${API_BASE_URL}/donor/hospitals`);
     return response.json();
   },
 };
