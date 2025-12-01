@@ -105,7 +105,10 @@ namespace BloodLine.Controllers
         public async Task<IActionResult> GetDonationRequests(int userId)
         {
             var donorProfile = await _context.DonorProfiles.FirstOrDefaultAsync(d => d.UserId == userId);
-            if (donorProfile == null) return NotFound();
+            if (donorProfile == null) 
+            {
+                return Ok(new List<DonationRequestDto>()); // Return empty array instead of 404
+            }
 
             var requests = await _context.Database
                 .SqlQueryRaw<DonationRequestDto>(

@@ -9,6 +9,7 @@ export default function PendingRequests() {
   const navigate = useNavigate();
   const [requests, setRequests] = useState<DonationRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<DonationRequest | null>(null);
 
   useEffect(() => {
@@ -19,10 +20,34 @@ export default function PendingRequests() {
 
   const loadRequests = async () => {
     try {
-      const data = await donorAPI.getDonationRequests(user!.id);
-      setRequests(data || []);
+      console.log('Loading requests for user ID:', user!.id);
+      const response = await fetch(`${import.meta.env.VITE_EC2_PUBLIC_IP ? `http://${import.meta.env.VITE_EC2_PUBLIC_IP}:5000/api` : 'http://localhost:5000/api'}/donor/donation-requests/${user!.id}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('API response:', data);
+      
+      // Ensure data is always an array
+      setRequests(Array.isArray(data) ? data : []);
+      setError(null);
     } catch (error) {
       console.error('Error loading requests:', error);
+      // Use mock data as fallback
+      const mockData = [
+        {
+          id: 1,
+          bloodType: 'O+',
+          unitsRequested: 1,
+          status: 'Pending',
+          createdAt: '2024-01-15T10:30:00Z',
+          hospitalName: 'Kuala Lumpur General Hospital'
+        }
+      ];
+      setRequests(mockData);
+      setError('Using sample data - API connection failed');
     } finally {
       setLoading(false);
     }
@@ -56,6 +81,16 @@ export default function PendingRequests() {
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <div className="text-gray-500">Loading requests...</div>
+        </div>
+      ) : error ? (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <p className="text-red-700 mb-4">{error}</p>
+          <button
+            onClick={loadRequests}
+            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+          >
+            Try Again
+          </button>
         </div>
       ) : requests.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-8 text-center">
