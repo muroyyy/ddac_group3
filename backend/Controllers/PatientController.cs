@@ -38,11 +38,24 @@ namespace BloodLine.Controllers
         }
 
         // GET: api/patient/{patientId}/dashboard
-        [HttpGet("{patientId}/dashboard")]
-        public async Task<IActionResult> Dashboard(int patientId)
+   [HttpGet("{patientId}/dashboard")]
+public async Task<IActionResult> Dashboard(int patientId)
+{
+    var result = await _patientService.GetDashboardAsync(patientId);
+
+    if (result == null)
+    {
+        // Return safe empty JSON object instead of null
+        return Ok(new
         {
-            var result = await _patientService.GetDashboardAsync(patientId);
-            return Ok(result);
-        }
+            totalRequests = 0,
+            pending = 0,
+            fulfilled = 0,
+            upcomingAppointments = 0
+        });
     }
+
+    return Ok(result);
+}
+
 }
