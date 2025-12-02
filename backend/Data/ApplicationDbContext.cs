@@ -15,6 +15,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
     public DbSet<AnalyticsLog> AnalyticsLogs { get; set; }
     public DbSet<BloodRequest> BloodRequests { get; set; }
+    public DbSet<UserDocument> UserDocuments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -25,6 +26,10 @@ public class ApplicationDbContext : DbContext
             entity.HasIndex(e => e.Email).IsUnique();
             entity.Property(e => e.Role).HasConversion<string>();
             entity.Property(e => e.Status).HasConversion<string>();
+            entity.Property(e => e.VerificationStatus).HasConversion<string>();
+            entity.HasMany(e => e.Documents)
+                  .WithOne(e => e.User)
+                  .HasForeignKey(e => e.UserId);
         });
 
       //BloodRequest Table  
@@ -71,6 +76,15 @@ public class ApplicationDbContext : DbContext
                   .WithMany()
                   .HasForeignKey(e => e.PerformedBy)
                   .OnDelete(DeleteBehavior.SetNull);
+        });
+        
+        modelBuilder.Entity<UserDocument>(entity =>
+        {
+            entity.ToTable("user_documents");
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.User)
+                  .WithMany(e => e.Documents)
+                  .HasForeignKey(e => e.UserId);
         });
     }
 }

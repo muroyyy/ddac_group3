@@ -9,6 +9,7 @@ import {
   Bell,
   FileText,
   Menu,
+  CheckCircle,
   X,
   LogOut,
   Settings
@@ -24,6 +25,7 @@ import BloodInventory from '../modules/admin/pages/BloodInventory';
 import Notifications from '../modules/admin/pages/Notifications';
 import AuditLogs from '../modules/admin/pages/AuditLogs';
 import ProfileSettings from '../modules/admin/pages/ProfileSettings';
+import UserVerification from '../modules/admin/pages/UserVerification';
 
 interface AdminLayoutProps {
   user: {
@@ -41,6 +43,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
   const navItems = [
     { id: 'dashboard', icon: <Activity className="w-5 h-5" />, label: 'Dashboard' },
     { id: 'users', icon: <Users className="w-5 h-5" />, label: 'User Management' },
+    { id: 'verification', icon: <CheckCircle className="w-5 h-5" />, label: 'User Verification' },
     { id: 'analytics', icon: <TrendingUp className="w-5 h-5" />, label: 'Analytics & Reports' },
     { id: 'security', icon: <Shield className="w-5 h-5" />, label: 'Security & Compliance' },
     { id: 'monitoring', icon: <Server className="w-5 h-5" />, label: 'System Monitoring' },
@@ -56,6 +59,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
         return <AdminDashboard user={user} onNavigate={setActiveTab} />;
       case 'users':
         return <UserManagement />;
+      case 'verification':
+        return <UserVerification />;
       case 'analytics':
         return <Analytics />;
       case 'security':

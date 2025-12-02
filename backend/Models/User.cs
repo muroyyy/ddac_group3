@@ -31,6 +31,12 @@ public class User
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     public UserStatus Status { get; set; } = UserStatus.Active;
+    
+    [Column("verification_status")]
+    public VerificationStatus VerificationStatus { get; set; } = VerificationStatus.Pending;
+    
+    // Navigation properties
+    public ICollection<UserDocument> Documents { get; set; } = new List<UserDocument>();
 }
 
 public enum UserRole
@@ -45,4 +51,11 @@ public enum UserStatus
 {
     Active = 1,
     Suspended = 2
+}
+
+public enum VerificationStatus
+{
+    Pending = 1,
+    Approved = 2,
+    Rejected = 3
 }

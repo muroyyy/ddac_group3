@@ -15,6 +15,7 @@ phone (varchar(15), NULL)
 role (enum: 'Donor','Patient','Hospital','Admin', NOT NULL)
 created_at (datetime, DEFAULT CURRENT_TIMESTAMP)
 status (enum: 'Active','Suspended', DEFAULT 'Active')
+verification_status (enum: 'Pending','Approved','Rejected', DEFAULT 'Pending')
 ```
 
 #### 2. donor_profile
@@ -144,6 +145,17 @@ token (varchar(255), NOT NULL)
 expires_at (datetime, NOT NULL)
 used (tinyint(1), DEFAULT 0)
 created_at (datetime, DEFAULT CURRENT_TIMESTAMP)
+```
+
+#### 13. user_documents
+User verification documents
+```sql
+document_id (int, PK, auto_increment)
+user_id (int, NOT NULL, FK -> users.user_id)
+file_name (varchar(255), NOT NULL)
+file_path (varchar(500), NOT NULL)
+document_type (varchar(50), NOT NULL)
+uploaded_at (datetime, DEFAULT CURRENT_TIMESTAMP)
 ```
 
 ## Key Relationships

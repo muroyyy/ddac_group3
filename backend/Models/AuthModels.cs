@@ -38,6 +38,8 @@ public class RegisterRequest
     
     [Required]
     public string Role { get; set; } = string.Empty;
+    
+    public List<IFormFile>? Documents { get; set; }
 }
 
 public class AuthResponse
@@ -77,4 +79,5 @@ public class UserData
     public string Role { get; set; } = string.Empty;
     public string? BloodType { get; set; }
     public string Location { get; set; } = string.Empty;
+    public string VerificationStatus { get; set; } = string.Empty;
 }

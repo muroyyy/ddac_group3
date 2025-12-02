@@ -10,7 +10,9 @@ import {
   User,
   Phone,
   MapPin,
-  Check
+  Check,
+  Upload,
+  FileText
 } from 'lucide-react';
 import bloodlineLogo from '../assets/bloodline_logo.jpg';
 
@@ -24,6 +26,7 @@ interface FormData {
   confirmPassword: string;
   role: 'donor' | 'patient' | 'hospital' | '';
   agreeToTerms: boolean;
+  documents: File[];
 }
 
 const RegisterPage: React.FC = () => {
@@ -37,7 +40,8 @@ const RegisterPage: React.FC = () => {
     password: '',
     confirmPassword: '',
     role: '',
-    agreeToTerms: false
+    agreeToTerms: false,
+    documents: []
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -95,6 +99,21 @@ const RegisterPage: React.FC = () => {
         [name]: ''
       }));
     }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setFormData(prev => ({
+      ...prev,
+      documents: files
+    }));
+  };
+
+  const removeFile = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      documents: prev.documents.filter((_, i) => i !== index)
+    }));
   };
 
   const validateStep1 = (): boolean => {
@@ -177,15 +196,23 @@ const RegisterPage: React.FC = () => {
       
       try {
         const { authAPI } = await import('../utils/apiClient');
-        const response = await authAPI.register({
-          fullName: formData.fullName,
-          email: formData.email,
-          phone: formData.phone,
-          bloodType: formData.bloodType,
-          location: formData.location,
-          password: formData.password,
-          role: formData.role
+        
+        // Create FormData for file upload
+        const submitData = new FormData();
+        submitData.append('fullName', formData.fullName);
+        submitData.append('email', formData.email);
+        submitData.append('phone', formData.phone);
+        submitData.append('bloodType', formData.bloodType);
+        submitData.append('location', formData.location);
+        submitData.append('password', formData.password);
+        submitData.append('role', formData.role);
+        
+        // Add documents if any
+        formData.documents.forEach((file, index) => {
+          submitData.append(`documents`, file);
         });
+        
+        const response = await authAPI.registerWithFiles(submitData);
 
         if (response.success) {
           alert('Registration successful! You can now sign in.');
@@ -435,6 +462,51 @@ const RegisterPage: React.FC = () => {
                         <AlertCircle className="w-4 h-4" />
                         {errors.bloodType}
                       </p>
+                    )}
+                  </div>
+                )}
+
+                {(formData.role === 'donor' || formData.role === 'patient') && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Upload Verification Documents *
+                    </label>
+                    <p className="text-xs text-gray-500 mb-3">
+                      Please upload your ID card or medical card showing your blood type for verification
+                    </p>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-red-400 transition-colors">
+                      <input
+                        type="file"
+                        id="documents"
+                        multiple
+                        accept=".jpg,.jpeg,.png,.pdf"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                      <label htmlFor="documents" className="cursor-pointer">
+                        <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600 mb-1">Click to upload documents</p>
+                        <p className="text-xs text-gray-400">JPG, PNG, PDF up to 10MB each</p>
+                      </label>
+                    </div>
+                    {formData.documents.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        {formData.documents.map((file, index) => (
+                          <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                            <div className="flex items-center gap-2">
+                              <FileText className="w-4 h-4 text-gray-500" />
+                              <span className="text-sm text-gray-700">{file.name}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeFile(index)}
+                              className="text-red-500 hover:text-red-700 text-sm"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
                 )}

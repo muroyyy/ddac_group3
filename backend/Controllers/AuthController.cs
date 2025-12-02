@@ -14,12 +14,14 @@ public class AuthController : ControllerBase
     private readonly ApplicationDbContext _context;
     private readonly ILogger<AuthController> _logger;
     private readonly IAuditLogService _auditLog;
+    private readonly IFileUploadService _fileUpload;
 
-    public AuthController(ApplicationDbContext context, ILogger<AuthController> logger, IAuditLogService auditLog)
+    public AuthController(ApplicationDbContext context, ILogger<AuthController> logger, IAuditLogService auditLog, IFileUploadService fileUpload)
     {
         _context = context;
         _logger = logger;
         _auditLog = auditLog;
+        _fileUpload = fileUpload;
     }
 
     [HttpPost("login")]
@@ -52,7 +54,8 @@ public class AuthController : ControllerBase
                     Email = user.Email,
                     Role = user.Role.ToString(),
                     BloodType = null,
-                    Location = ""
+                    Location = "",
+                    VerificationStatus = user.VerificationStatus.ToString()
                 }
             });
         }
@@ -68,7 +71,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request)
+    public async Task<ActionResult<AuthResponse>> Register([FromForm] RegisterRequest request)
     {
         try
         {
@@ -101,6 +104,28 @@ public class AuthController : ControllerBase
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
+            
+            // Handle document uploads for donor/patient
+            if ((userRole == UserRole.Donor || userRole == UserRole.Patient) && request.Documents?.Any() == true)
+            {
+                foreach (var document in request.Documents)
+                {
+                    if (document.Length > 0)
+                    {
+                        var filePath = await _fileUpload.UploadFileAsync(document, user.Id.ToString(), "VERIFICATION");
+                        var userDocument = new UserDocument
+                        {
+                            UserId = user.Id,
+                            FileName = document.FileName,
+                            FilePath = filePath,
+                            DocumentType = "VERIFICATION"
+                        };
+                        _context.UserDocuments.Add(userDocument);
+                    }
+                }
+                await _context.SaveChangesAsync();
+            }
+            
             await _auditLog.LogAsync($"New User Registration: {userRole}", user.Id);
 
             return Ok(new AuthResponse
@@ -114,7 +139,8 @@ public class AuthController : ControllerBase
                     Email = user.Email,
                     Role = user.Role.ToString(),
                     BloodType = request.BloodType,
-                    Location = request.Location
+                    Location = request.Location,
+                    VerificationStatus = user.VerificationStatus.ToString()
                 }
             });
         }

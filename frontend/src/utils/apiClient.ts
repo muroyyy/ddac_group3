@@ -37,6 +37,7 @@ export interface AuthResponse {
     role: string;
     bloodType?: string;
     location: string;
+    verificationStatus?: string;
   };
   token?: string;
   mockEmailData?: {
@@ -121,6 +122,39 @@ export const authAPI = {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+
+  registerWithFiles: async (formData: FormData): Promise<AuthResponse> => {
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: 'POST',
+      body: formData, // No Content-Type header for FormData
+    });
+    return response.json();
+  },
+};
+
+export const verificationAPI = {
+  getPendingVerifications: async (): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/verification/pending`);
+    return response.json();
+  },
+
+  approveUser: async (userId: number): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/verification/approve/${userId}`, {
+      method: 'POST',
+    });
+    return response.json();
+  },
+
+  rejectUser: async (userId: number, reason: string): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/verification/reject/${userId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ reason }),
     });
     return response.json();
   },
