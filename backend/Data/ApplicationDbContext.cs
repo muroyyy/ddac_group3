@@ -14,6 +14,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Hospital> Hospitals { get; set; }
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
     public DbSet<AnalyticsLog> AnalyticsLogs { get; set; }
+    public DbSet<BloodRequest> BloodRequests { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -25,7 +26,8 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.Role).HasConversion<string>();
             entity.Property(e => e.Status).HasConversion<string>();
         });
-        
+
+      //BloodRequest Table  
         modelBuilder.Entity<DonorProfile>(entity =>
         {
             entity.ToTable("donor_profile");
@@ -47,6 +49,8 @@ public class ApplicationDbContext : DbContext
                   .HasForeignKey<PatientProfile>(e => e.UserId);
         });
         
+
+
         modelBuilder.Entity<Hospital>(entity =>
         {
             entity.ToTable("hospital");
@@ -57,6 +61,8 @@ public class ApplicationDbContext : DbContext
                   .HasForeignKey<Hospital>(e => e.UserId);
         });
         
+        modelBuilder.Entity<BloodRequest>().ToTable("blood_requests");
+
         modelBuilder.Entity<AnalyticsLog>(entity =>
         {
             entity.ToTable("analytics_log");

@@ -11,6 +11,7 @@ builder.Services.AddAWSService<IAmazonSecretsManager>();
 builder.Services.AddAWSService<IAmazonCloudWatch>();
 builder.Services.AddScoped<DatabaseService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
+builder.Services.AddScoped<PatientService>();
 
 // Add CORS
 builder.Services.AddCors(options =>

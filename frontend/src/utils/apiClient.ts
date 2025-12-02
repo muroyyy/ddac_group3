@@ -125,3 +125,4 @@ export const authAPI = {
     return response.json();
   },
 };
+
