@@ -166,6 +166,37 @@ namespace BloodLine.Controllers
 
             return Ok(appointments);
         }
+
+        [HttpGet("completed-donations/{userId}")]
+        public async Task<IActionResult> GetCompletedDonations(int userId)
+        {
+            var donorProfile = await _context.DonorProfiles.FirstOrDefaultAsync(d => d.UserId == userId);
+            if (donorProfile == null)
+            {
+                return Ok(new List<CompletedDonationDto>());
+            }
+
+            var completedDonations = await _context.Database
+                .SqlQueryRaw<CompletedDonationDto>(
+                    @"SELECT 
+                        da.appointment_id as Id,
+                        da.donation_id as DonationId,
+                        h.hospital_name as HospitalName,
+                        da.appointment_date as Date,
+                        da.appointment_time as Time,
+                        dp.blood_type as BloodType,
+                        dr.units_required as Units,
+                        da.status as Status
+                      FROM donor_appointments da
+                      JOIN donation_requests dr ON da.donation_id = dr.donation_id
+                      JOIN donor_profile dp ON dr.donor_id = dp.donor_id
+                      JOIN hospital h ON da.hospital_id = h.hospital_id
+                      WHERE da.donor_id = {0} AND da.status = 'Completed'
+                      ORDER BY da.appointment_date DESC", donorProfile.DonorId)
+                .ToListAsync();
+
+            return Ok(completedDonations);
+        }
     }
 
     public class DonorUpdateProfileRequest
@@ -203,5 +234,17 @@ namespace BloodLine.Controllers
         public string Status { get; set; } = "";
         public string BloodType { get; set; } = "";
         public int Units { get; set; }
+    }
+
+    public class CompletedDonationDto
+    {
+        public int Id { get; set; }
+        public int DonationId { get; set; }
+        public string HospitalName { get; set; } = "";
+        public DateTime Date { get; set; }
+        public TimeSpan Time { get; set; }
+        public string BloodType { get; set; } = "";
+        public int Units { get; set; }
+        public string Status { get; set; } = "";
     }
 }
