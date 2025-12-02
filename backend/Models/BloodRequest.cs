@@ -1,7 +1,12 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace BloodLine.Models
 {
     public class BloodRequest
     {
+        [Key]
+        [Column("request_id")]
         public int RequestId { get; set; }
         public int PatientId { get; set; }
         public int HospitalId { get; set; }
