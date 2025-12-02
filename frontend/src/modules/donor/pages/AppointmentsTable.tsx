@@ -1,47 +1,31 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-interface Appointment {
-  id: number;
-  hospitalName: string;
-  date: string;
-  time: string;
-  status: string;
-  bloodType: string;
-  units: number;
-}
+import { useAuth } from '../../../context/AuthContext';
+import { donorAPI } from '../services/donorAPI';
+import type { Appointment } from '../services/donorAPI';
 
 export default function AppointmentsTable() {
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const appointments: Appointment[] = [
-    {
-      id: 1,
-      hospitalName: 'Kuala Lumpur General Hospital',
-      date: '2024-01-25',
-      time: '10:00 AM',
-      status: 'Confirmed',
-      bloodType: 'O+',
-      units: 1
-    },
-    {
-      id: 2,
-      hospitalName: 'Pantai Hospital Kuala Lumpur',
-      date: '2024-01-30',
-      time: '2:00 PM',
-      status: 'Pending',
-      bloodType: 'O+',
-      units: 1
-    },
-    {
-      id: 3,
-      hospitalName: 'Prince Court Medical Centre',
-      date: '2024-02-05',
-      time: '9:00 AM',
-      status: 'Completed',
-      bloodType: 'O+',
-      units: 2
+  useEffect(() => {
+    if (user?.id) {
+      loadAppointments();
     }
-  ];
+  }, [user]);
+
+  const loadAppointments = async () => {
+    try {
+      const data = await donorAPI.getAppointments(user!.id);
+      setAppointments(data || []);
+    } catch (error) {
+      console.error('Error loading appointments:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -66,7 +50,12 @@ export default function AppointmentsTable() {
         <p className="text-gray-600 mt-2">View all your donation appointments</p>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="text-gray-500">Loading appointments...</div>
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -127,7 +116,8 @@ export default function AppointmentsTable() {
             ))}
           </tbody>
         </table>
-      </div>
+        </div>
+      )}
 
       {appointments.length === 0 && (
         <div className="bg-white rounded-lg shadow p-8 text-center">

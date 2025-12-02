@@ -49,6 +49,16 @@ export interface Hospital {
   email: string;
 }
 
+export interface Appointment {
+  id: number;
+  hospitalName: string;
+  date: string;
+  time: string;
+  status: string;
+  bloodType: string;
+  units: number;
+}
+
 export const donorAPI = {
   getProfile: async (userId: number): Promise<DonorProfile> => {
     const response = await fetch(`${API_BASE_URL}/donor/profile/${userId}`);
@@ -90,6 +100,11 @@ export const donorAPI = {
 
   getHospitals: async (): Promise<Hospital[]> => {
     const response = await fetch(`${API_BASE_URL}/donor/hospitals`);
+    return response.json();
+  },
+
+  getAppointments: async (userId: number): Promise<Appointment[]> => {
+    const response = await fetch(`${API_BASE_URL}/donor/appointments/${userId}`);
     return response.json();
   },
 };

@@ -149,6 +149,30 @@ namespace BloodLine.Controllers
 
             return Ok(new { message = "Donation request submitted successfully" });
         }
+
+        [HttpGet("appointments/{userId}")]
+        public async Task<IActionResult> GetAppointments(int userId)
+        {
+            var donorProfile = await _context.DonorProfiles.FirstOrDefaultAsync(d => d.UserId == userId);
+            if (donorProfile == null)
+            {
+                return Ok(new List<AppointmentDto>());
+            }
+
+            var appointments = await _context.Database
+                .SqlQueryRaw<AppointmentDto>(
+                    @"SELECT da.appointment_id as Id, h.hospital_name as HospitalName,
+                      da.appointment_date as Date, da.appointment_time as Time,
+                      da.status as Status, dp.blood_type as BloodType, 1 as Units
+                      FROM donor_appointments da
+                      JOIN hospital h ON da.hospital_id = h.hospital_id
+                      JOIN donor_profile dp ON da.donor_id = dp.donor_id
+                      WHERE da.donor_id = {0}
+                      ORDER BY da.appointment_date DESC", donorProfile.DonorId)
+                .ToListAsync();
+
+            return Ok(appointments);
+        }
     }
 
     public class DonorUpdateProfileRequest
@@ -174,5 +198,16 @@ namespace BloodLine.Controllers
         public string BloodType { get; set; } = "";
         public int UnitsRequested { get; set; }
         public string? Notes { get; set; }
+    }
+
+    public class AppointmentDto
+    {
+        public int Id { get; set; }
+        public string HospitalName { get; set; } = "";
+        public DateTime Date { get; set; }
+        public TimeSpan Time { get; set; }
+        public string Status { get; set; } = "";
+        public string BloodType { get; set; } = "";
+        public int Units { get; set; }
     }
 }
