@@ -24,7 +24,7 @@ namespace BloodLine.Services
                 BloodType = dto.BloodType,
                 UnitsRequired = dto.UnitsRequired,
                 UrgencyLevel = dto.UrgencyLevel,
-                Reason = dto.Reason,
+                // Reason = dto.Reason,
                 Status = "Pending",
                 CreatedAt = DateTime.UtcNow
             };
