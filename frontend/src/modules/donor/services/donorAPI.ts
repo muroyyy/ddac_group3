@@ -112,4 +112,9 @@ export const donorAPI = {
     const response = await fetch(`${API_BASE_URL}/donor/completed-donations/${userId}`);
     return response.json();
   },
+
+  getAppointmentHistory: async (userId: number): Promise<Appointment[]> => {
+    const response = await fetch(`${API_BASE_URL}/donor/appointment-history/${userId}`);
+    return response.json();
+  },
 };
