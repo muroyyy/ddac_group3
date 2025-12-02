@@ -23,6 +23,7 @@ import DonationHistory from './modules/donor/pages/DonationHistory';
 import DonorProfile from './modules/donor/pages/DonorProfile';
 import PendingRequests from './modules/donor/pages/PendingRequests';
 import AppointmentsTable from './modules/donor/pages/AppointmentsTable';
+import CompletedDonations from './modules/donor/pages/CompletedDonations';
 import HospitalDashboard from './modules/hospital/pages/HospitalDashboard';
 import Inventory from './modules/hospital/pages/Inventory';
 import Approvals from './modules/hospital/pages/Approvals';
@@ -66,6 +67,7 @@ const AppRoutes: React.FC = () => {
             <Route path="profile" element={<DonorProfile />} />
             <Route path="pending-requests" element={<PendingRequests />} />
             <Route path="appointments" element={<AppointmentsTable />} />
+            <Route path="completed-donations" element={<CompletedDonations />} />
           </Route>
 
           {/* Hospital routes - role protected */}
