@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { PatientService as patientService } from "../patient.service";
+import { useAuth } from "../../../context/AuthContext";
+import LoadingSpinner from "../../../components/LoadingSpinner";
 
 /**
  * Patient Dashboard Page
@@ -11,8 +13,8 @@ import { PatientService as patientService } from "../patient.service";
  */
 
 export default function Dashboard() {
-  // TEMP patient ID — later replace with AuthContext
-  const patientId = 9;
+  const { user, isLoading: authLoading } = useAuth();
+  const patientId = user?.id ?? null;
 
   /**
    * Dashboard state
@@ -29,16 +31,37 @@ export default function Dashboard() {
   /**
    * Fetch dashboard data on page load
    */
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    patientService.getDashboard(patientId).then((data) => {
-      setSummary({
-        totalRequests: data.totalRequests,
-        pending: data.pending,
-        fulfilled: data.fulfilled,
-        upcomingAppointments: data.upcomingAppointments,
-      });
-    });
-  }, []);
+    if (authLoading) return;
+    if (!patientId) {
+      setError('No authenticated patient found');
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    patientService.getDashboard(patientId)
+      .then((data) => {
+        if (!data) {
+          setError('No data returned from server');
+        } else {
+          setSummary({
+            totalRequests: data.totalRequests || 0,
+            pending: data.pending || 0,
+            fulfilled: data.fulfilled || 0,
+            upcomingAppointments: data.upcomingAppointments || 0,
+          });
+        }
+      })
+      .catch((err) => {
+        console.error('Error fetching patient dashboard:', err);
+        setError(String(err?.message ?? err));
+      })
+      .finally(() => setLoading(false));
+  }, [authLoading, patientId]);
 
   return (
     <div className="p-6">
@@ -46,7 +69,7 @@ export default function Dashboard() {
           HEADER SECTION 
       ------------------------------------------------------*/}
       <h1 className="text-3xl font-bold text-gray-800 mb-1">
-        Welcome back, Sharveen Kaur!
+        Welcome back, {user?.name ?? 'patient'}!
       </h1>
       <p className="text-gray-500 mb-8">
         Here's an overview of your blood transfusion journey
@@ -56,7 +79,12 @@ export default function Dashboard() {
           STATISTICS CARDS  
           These match your UI screenshot (3 cards)
       ------------------------------------------------------*/}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+      {loading ? (
+        <LoadingSpinner />
+      ) : error ? (
+        <div className="p-6 bg-yellow-50 rounded-md border border-yellow-100 text-yellow-800">{error}</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
 
         {/* Pending Requests */}
         <div className="p-6 bg-white shadow rounded-xl border border-gray-100">
@@ -90,7 +118,8 @@ export default function Dashboard() {
             Total successful transfusions
           </p>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* -----------------------------------------------------
           PATIENT NEWS SECTION
