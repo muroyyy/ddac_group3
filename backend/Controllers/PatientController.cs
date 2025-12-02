@@ -57,5 +57,5 @@ public async Task<IActionResult> Dashboard(int patientId)
 
     return Ok(result);
 }
-
+    }
 }

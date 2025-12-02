@@ -208,7 +208,7 @@ const RegisterPage: React.FC = () => {
         submitData.append('role', formData.role);
         
         // Add documents if any
-        formData.documents.forEach((file, index) => {
+        formData.documents.forEach((file) => {
           submitData.append(`documents`, file);
         });
         
