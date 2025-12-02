@@ -1,4 +1,4 @@
-namespace BloodLine.Api.Models
+namespace BloodLine.Models
 {
     public class BloodRequest
     {
