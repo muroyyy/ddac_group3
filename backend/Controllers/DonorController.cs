@@ -113,7 +113,7 @@ namespace BloodLine.Controllers
             var requests = await _context.Database
                 .SqlQueryRaw<DonationRequestDto>(
                     @"SELECT dr.donation_id as Id, dr.status as Status, 
-                      dp.blood_type as BloodType, 1 as UnitsRequested,
+                      dp.blood_type as BloodType, dr.units_required as UnitsRequested,
                       dr.requested_date as CreatedAt, dr.donation_date as UpdatedAt,
                       h.hospital_name as HospitalName, '' as Notes
                       FROM donation_requests dr
@@ -135,17 +135,10 @@ namespace BloodLine.Controllers
                 return BadRequest(new { message = "Donor profile not found. Please complete your profile first." });
             }
 
-            // For now, just use the first hospital as default since we don't have hospital selection in the request
-            var hospital = await _context.Hospitals.FirstOrDefaultAsync();
-            if (hospital == null)
-            {
-                return BadRequest(new { message = "No hospitals available" });
-            }
-
             await _context.Database.ExecuteSqlRawAsync(
-                @"INSERT INTO donation_requests (donor_id, hospital_id, status, requested_date) 
-                  VALUES ({0}, {1}, 'Pending', {2})",
-                donorProfile.DonorId, hospital.HospitalId, DateTime.Now);
+                @"INSERT INTO donation_requests (donor_id, hospital_id, status, requested_date, units_required) 
+                  VALUES ({0}, {1}, 'Pending', {2}, {3})",
+                donorProfile.DonorId, request.HospitalId, DateTime.Now, request.UnitsRequested);
 
             return Ok(new { message = "Donation request submitted successfully" });
         }
@@ -198,6 +191,7 @@ namespace BloodLine.Controllers
         public string BloodType { get; set; } = "";
         public int UnitsRequested { get; set; }
         public string? Notes { get; set; }
+        public int HospitalId { get; set; }
     }
 
     public class AppointmentDto

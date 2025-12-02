@@ -59,7 +59,11 @@ export default function DonateBloodForm() {
 
     setLoading(true);
     try {
-      const result = await donorAPI.createDonationRequest(user!.id, formData);
+      const requestData = {
+        ...formData,
+        hospitalId: selectedHospital
+      };
+      const result = await donorAPI.createDonationRequest(user!.id, requestData);
       if (result.message) {
         alert(result.message);
         navigate('/donor/dashboard');

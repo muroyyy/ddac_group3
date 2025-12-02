@@ -74,7 +74,7 @@ export const donorAPI = {
     return response.json();
   },
 
-  createDonationRequest: async (userId: number, data: { bloodType: string; unitsRequested: number; notes?: string }) => {
+  createDonationRequest: async (userId: number, data: { bloodType: string; unitsRequested: number; notes?: string; hospitalId: number }) => {
     const response = await fetch(`${API_BASE_URL}/donor/donation-request?userId=${userId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
