@@ -37,7 +37,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import RoleProtected from './routes/ProtectedRoutes';
 
 const AppRoutes: React.FC = () => {
-  const { user, isAuthenticated, isLoading, login, logout } = useAuth();
+  const { user, isLoading, login, logout } = useAuth();
 
   if (isLoading) return <LoadingSpinner />;
 
