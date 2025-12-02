@@ -137,12 +137,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
         <header className="bg-white border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <button 
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="cursor-pointer"
-              >
-                <Menu className="w-6 h-6 text-gray-700" />
-              </button>
+              {!sidebarOpen && (
+                <button 
+                  onClick={() => setSidebarOpen(true)}
+                  className="cursor-pointer"
+                >
+                  <Menu className="w-6 h-6 text-gray-700" />
+                </button>
+              )}
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
                   {navItems.find(item => item.id === activeTab)?.label || 'Admin Dashboard'}
