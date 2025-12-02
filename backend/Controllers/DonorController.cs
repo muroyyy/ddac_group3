@@ -66,16 +66,22 @@ namespace BloodLine.Controllers
             var donorProfile = await _context.DonorProfiles.FirstOrDefaultAsync(d => d.UserId == userId);
             
             var pendingCount = 0;
+            var completedCount = 0;
+            
             if (donorProfile != null)
             {
                 pendingCount = await _context.Database
                     .SqlQuery<int>($"SELECT COUNT(*) as Value FROM donation_requests WHERE donor_id = {donorProfile.DonorId} AND status = 'Pending'")
                     .FirstOrDefaultAsync();
+                    
+                completedCount = await _context.Database
+                    .SqlQuery<int>($"SELECT COUNT(*) as Value FROM donor_appointments WHERE donor_id = {donorProfile.DonorId} AND status = 'Completed'")
+                    .FirstOrDefaultAsync();
             }
 
             return Ok(new
             {
-                totalDonations = donorProfile?.TotalDonations ?? 0,
+                totalDonations = completedCount,
                 pendingRequests = pendingCount,
                 bloodType = donorProfile?.BloodType ?? "N/A",
                 lastDonation = (string?)null,
