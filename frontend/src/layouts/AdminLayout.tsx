@@ -37,7 +37,7 @@ interface AdminLayoutProps {
 }
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
 
   const navItems = [
@@ -83,13 +83,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out`}>
+      <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out`}>
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
             <Droplet className="w-8 h-8 text-red-600" />
             <span className="text-xl font-bold text-gray-900">BloodLine</span>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="lg:hidden cursor-pointer">
+          <button onClick={() => setSidebarOpen(false)} className="cursor-pointer">
             <X className="w-6 h-6 text-gray-500" />
           </button>
         </div>
@@ -138,8 +138,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button 
-                onClick={() => setSidebarOpen(true)}
-                className="lg:hidden cursor-pointer"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="cursor-pointer"
               >
                 <Menu className="w-6 h-6 text-gray-700" />
               </button>
