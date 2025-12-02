@@ -24,7 +24,7 @@ export default function DonorLayout() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Side Navigation Panel */}
-      <div className="w-64 bg-white shadow-lg flex flex-col">
+      <div className="w-64 bg-white shadow-lg flex flex-col fixed h-full">
         {/* Header */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center">
@@ -81,7 +81,7 @@ export default function DonorLayout() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1">
+      <div className="flex-1 ml-64">
         <main className="p-8">
           <Outlet />
         </main>
