@@ -56,7 +56,7 @@ const AppRoutes: React.FC = () => {
         </Route>
 
         {/* Protected Routes */}
-        <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} />}>
+        <Route element={<ProtectedRoute />}>
           {/* Patient: redirect to dashboard if role is patient */}
           {user?.role === 'patient' && (
             <Route path="*" element={<Navigate to="/patient/dashboard" replace />} />

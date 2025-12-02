@@ -81,6 +81,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = (userData: UserData): void => {
     setUser(userData);
     saveSession(userData);
+    setIsLoading(false); // Ensure loading is false after login
+    console.log('[AuthContext] User logged in:', userData);
   };
 
   const logout = (): void => {
@@ -92,34 +94,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const checkSession = () => {
       const session = getStoredSession();
-      
       if (!session) {
         setUser(null);
         setIsLoading(false);
         return;
       }
-      
       if (Date.now() > session.expiresAt) {
         clearSession();
         setUser(null);
         setIsLoading(false);
         return;
       }
-
       setUser(session.user);
       setIsLoading(false);
+      console.log('[AuthContext] Session restored:', session.user);
     };
 
-    // Check session immediately
     checkSession();
-
-    // Set up periodic session checks (every minute)
     const interval = setInterval(() => {
       if (!isLoading) {
         checkSession();
       }
     }, 60 * 1000);
-
     return () => clearInterval(interval);
   }, [isLoading]);
 
