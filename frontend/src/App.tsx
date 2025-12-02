@@ -57,8 +57,13 @@ const AppRoutes: React.FC = () => {
 
         {/* Protected Routes */}
         <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} />}>
+          {/* Patient: redirect to dashboard if role is patient */}
+          {user?.role === 'patient' && (
+            <Route path="*" element={<Navigate to="/patient/dashboard" replace />} />
+          )}
+
           <Route path="/admin/dashboard" element={<AdminLayout user={user!} onLogout={logout} />} />
-          
+
           <Route path="/donor" element={<DonorLayout />}>
             <Route index element={<Navigate to="/donor/dashboard" replace />} />
             <Route path="dashboard" element={<DonorDashboard />} />
@@ -79,8 +84,6 @@ const AppRoutes: React.FC = () => {
               <Route path="approvals" element={<Approvals />} />
             </Route>
           </Route>
-
-          {/* Patient routes removed */}
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
