@@ -16,8 +16,23 @@ import ResetPassword from './layouts/ResetPassword';
 import MockEmail from './layouts/MockEmail';
 import Unauthorized from './layouts/Unauthorized';
 
-// Patient Routes
-import { PatientRoutes } from './modules/patient/routes';
+// Patient Pages
+import PatientDashboard from './modules/patient/pages/Dashboard';
+import RequestBlood from './modules/patient/pages/RequestBlood';
+import ViewRequests from './modules/patient/pages/ViewRequests';
+import Appointments from './modules/patient/pages/Appointments';
+import PatientProfile from './modules/patient/pages/Profile';
+import Notifications from './modules/patient/pages/Notifications';
+import Insights from './modules/patient/pages/Insights';
+import Logout from './modules/patient/pages/Logout';
+import { Outlet } from 'react-router-dom';
+
+// Simple patient layout wrapper
+const PatientLayout = () => (
+  <div className="patient-layout">
+    <Outlet />
+  </div>
+);
 
 // Donor Pages
 import DonorDashboard from './modules/donor/pages/DonorDashboard';
@@ -59,7 +74,17 @@ const AppRoutes: React.FC = () => {
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
           {/* Patient Routes */}
-          <Route path="/patient/*" element={<PatientRoutes />} />
+          <Route path="/patient" element={<PatientLayout />}>
+            <Route index element={<Navigate to="/patient/dashboard" replace />} />
+            <Route path="dashboard" element={<PatientDashboard />} />
+            <Route path="request-blood" element={<RequestBlood />} />
+            <Route path="view-requests" element={<ViewRequests />} />
+            <Route path="appointments" element={<Appointments />} />
+            <Route path="profile" element={<PatientProfile />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="insights" element={<Insights />} />
+            <Route path="logout" element={<Logout />} />
+          </Route>
 
           <Route path="/admin/dashboard" element={<AdminLayout user={user!} onLogout={logout} />} />
 
