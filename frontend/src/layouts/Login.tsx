@@ -116,8 +116,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
           const targetRoute = roleRoutes[normalizedRole] || '/dashboard';
           console.log('📍 Navigating to:', targetRoute);
+          console.log('🔍 Current location before navigate:', window.location.pathname);
 
-          navigate(targetRoute);
+          // Use window.location for immediate redirect
+          window.location.href = targetRoute;
         } else {
           console.log('❌ Login failed:', response.message);
           setErrors({
