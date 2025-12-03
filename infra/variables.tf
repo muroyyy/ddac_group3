@@ -33,3 +33,9 @@ variable "quicksight_user" {
   type        = string
   default     = "admin"
 }
+
+variable "domain_name" {
+  description = "Custom domain name"
+  type        = string
+  default     = "bloodline.dev"
+}

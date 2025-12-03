@@ -103,3 +103,35 @@ module "quicksight" {
   db_password       = module.rds.db_password
   quicksight_user   = var.quicksight_user
 }
+
+# Route53 Module
+module "route53" {
+  source = "./modules/route53"
+  
+  domain_name                = var.domain_name
+  project_name               = var.project_name
+  environment                = var.environment
+  cloudfront_domain_name     = module.cloudfront.domain_name
+  cloudfront_hosted_zone_id  = module.cloudfront.hosted_zone_id
+}
+
+# ACM Certificate Module
+module "acm" {
+  source = "./modules/acm"
+  
+  domain_name     = var.domain_name
+  project_name    = var.project_name
+  environment     = var.environment
+  hosted_zone_id  = module.route53.hosted_zone_id
+}
+
+# CloudFront Module
+module "cloudfront" {
+  source = "./modules/cloudfront"
+  
+  domain_name        = var.domain_name
+  project_name       = var.project_name
+  environment        = var.environment
+  origin_domain_name = module.ec2.public_dns
+  certificate_arn    = module.acm.certificate_arn
+}
