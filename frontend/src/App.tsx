@@ -75,7 +75,7 @@ const AppRoutes: React.FC = () => {
             <Route path="view-requests" element={<ViewRequests />} />
             <Route path="appointments" element={<Appointments />} />
             <Route path="profile" element={<PatientProfile />} />
-            <Route path="/edit-profile" element={<EditProfile />} />
+            <Route path="edit-profile" element={<EditProfile />} />
             <Route path="notifications" element={<Notifications />} />
             <Route path="insights" element={<Insights />} />
             <Route path="logout" element={<Logout />} />
