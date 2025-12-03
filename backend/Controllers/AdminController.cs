@@ -329,18 +329,19 @@ public class AdminController : ControllerBase
             var logs = await _context.AnalyticsLogs
                 .OrderByDescending(a => a.Timestamp)
                 .Take(10)
-                .Select(a => new
-                {
-                    id = a.LogId,
-                    userId = a.PerformedBy ?? 0,
-                    userName = a.ActionType.Contains(":") ? a.ActionType.Split(':')[1].Trim() : "System",
-                    action = a.ActionType,
-                    timestamp = a.Timestamp.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"),
-                    userRole = "Admin"
-                })
                 .ToListAsync();
 
-            return Ok(logs);
+            var result = logs.Select(a => new
+            {
+                id = a.LogId,
+                userId = a.PerformedBy ?? 0,
+                userName = a.ActionType.Contains(":") ? a.ActionType.Split(':')[1].Trim() : "System",
+                action = a.ActionType,
+                timestamp = a.Timestamp.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"),
+                userRole = "Admin"
+            }).ToList();
+
+            return Ok(result);
         }
         catch (Exception ex)
         {
