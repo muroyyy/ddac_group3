@@ -53,6 +53,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 import SessionProvider from './components/SessionProvider';
 import AuthRedirect from './components/AuthRedirect';
+import LogoutPage from './pages/Logout';
 
 const App: React.FC = () => (
   <AuthProvider>
@@ -83,6 +84,7 @@ const AppContent: React.FC = () => {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/mock-email" element={<MockEmail />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route path="/logout" element={<LogoutPage />} />
         </Route>
 
         {/* Protected Routes */}
