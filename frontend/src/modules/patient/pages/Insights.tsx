@@ -5,7 +5,7 @@
 // LATER: you will replace the mock with a real API call
 // that reads from your database and (optionally) an AWS AI service.
 
-import React from "react";
+
 
 // ------------------ MOCK DATA SECTION ----------------------
 // In the future, you will fetch this from your backend:

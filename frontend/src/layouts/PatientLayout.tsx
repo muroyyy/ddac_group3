@@ -13,7 +13,7 @@ import {
 import bloodlineLogo from "../assets/bloodline_logo.jpg"; // <-- Make sure your logo file path is correct!
 
 export default function PatientLayout() {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
