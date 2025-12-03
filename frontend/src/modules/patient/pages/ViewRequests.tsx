@@ -1,155 +1,100 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-// This page allows the patient to "request blood".
-// For now, everything is mockdata-only (no backend).
+// This page displays ALL previous blood requests (mocked for now).
 
-export default function RequestBlood() {
+export default function ViewRequests() {
+  const [requests, setRequests] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // ----------- FORM STATE (TEMP VALUES UNTIL BACKEND READY) ----------
-
-  // useState lets the input fields keep values in React.
-  const [bloodType, setBloodType] = useState("");
-  const [units, setUnits] = useState("");
-  const [urgency, setUrgency] = useState("");
-  const [hospital, setHospital] = useState("");
-  const [notes, setNotes] = useState("");
-
-  // This will show “Request Submitted” message
-  const [submitted, setSubmitted] = useState(false);
-
-
-  // ------------- MOCK HOSPITAL LIST ----------------
-  const mockHospitals = [
-    { id: 1, name: "City General Hospital" },
-    { id: 2, name: "Sunway Medical Centre" },
-    { id: 3, name: "Gleneagles KL" },
+  // Mock dataset (later replace with backend GET /patient/requests)
+  const mockRequests = [
+    {
+      id: 1,
+      bloodType: "O+",
+      units: 2,
+      urgency: "High",
+      hospital: "City General Hospital",
+      status: "Pending",
+      date: "2025-01-12",
+    },
+    {
+      id: 2,
+      bloodType: "A-",
+      units: 1,
+      urgency: "Medium",
+      hospital: "Sunway Medical Centre",
+      status: "Approved",
+      date: "2025-01-05",
+    },
+    {
+      id: 3,
+      bloodType: "B+",
+      units: 3,
+      urgency: "Critical",
+      hospital: "Gleneagles KL",
+      status: "Fulfilled",
+      date: "2025-01-01",
+    },
   ];
 
-  // ------------- HANDLE FORM SUBMISSION ------------
+  useEffect(() => {
+    // simulate loading
+    setTimeout(() => {
+      setRequests(mockRequests);
+      setLoading(false);
+    }, 500);
+  }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // For now we simply show a success message.
-    // Later: send POST → backend.
-    setSubmitted(true);
-
-    console.log("Mock request submitted:", {
-      bloodType,
-      units,
-      urgency,
-      hospital,
-      notes,
-    });
-  };
-
-
-  // ====================== UI LAYOUT ===============================
+  if (loading) {
+    return <div className="text-center p-6">Loading your requests...</div>;
+  }
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Request Blood</h1>
+      <h1 className="text-2xl font-bold text-gray-900">My Blood Requests</h1>
+      <p className="text-gray-600">View all blood requests you have submitted.</p>
 
-      <p className="text-gray-600">Submit a new blood request to your selected hospital.</p>
+      <div className="bg-white shadow rounded-lg p-6">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-gray-100 text-left">
+              <th className="p-3 border">Request ID</th>
+              <th className="p-3 border">Blood Type</th>
+              <th className="p-3 border">Units</th>
+              <th className="p-3 border">Urgency</th>
+              <th className="p-3 border">Hospital</th>
+              <th className="p-3 border">Status</th>
+              <th className="p-3 border">Date</th>
+            </tr>
+          </thead>
 
-      {/* SUCCESS MESSAGE */}
-      {submitted && (
-        <div className="p-4 bg-green-100 border border-green-400 text-green-700 rounded">
-          Your request has been submitted (mock).  
-        </div>
-      )}
-
-      {/* === FORM START === */}
-      <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-lg shadow">
-
-        {/* BLOOD TYPE */}
-        <div>
-          <label className="block font-medium mb-1">Blood Type</label>
-          <select
-            className="border p-2 w-full rounded"
-            value={bloodType}
-            onChange={(e) => setBloodType(e.target.value)}
-            required
-          >
-            <option value="">Select one</option>
-            <option value="A+">A+</option><option value="A-">A-</option>
-            <option value="B+">B+</option><option value="B-">B-</option>
-            <option value="AB+">AB+</option><option value="AB-">AB-</option>
-            <option value="O+">O+</option><option value="O-">O-</option>
-          </select>
-        </div>
-
-        {/* UNITS REQUIRED */}
-        <div>
-          <label className="block font-medium mb-1">Units Required</label>
-          <input
-            type="number"
-            className="border p-2 w-full rounded"
-            placeholder="Example: 2"
-            value={units}
-            onChange={(e) => setUnits(e.target.value)}
-            required
-          />
-        </div>
-
-        {/* URGENCY */}
-        <div>
-          <label className="block font-medium mb-1">Urgency</label>
-          <select
-            className="border p-2 w-full rounded"
-            value={urgency}
-            onChange={(e) => setUrgency(e.target.value)}
-            required
-          >
-            <option value="">Choose urgency</option>
-            <option value="Low">Low</option>
-            <option value="Medium">Medium</option>
-            <option value="High">High</option>
-            <option value="Critical">Critical</option>
-          </select>
-        </div>
-
-        {/* HOSPITAL */}
-        <div>
-          <label className="block font-medium mb-1">Choose Hospital</label>
-          <select
-            className="border p-2 w-full rounded"
-            value={hospital}
-            onChange={(e) => setHospital(e.target.value)}
-            required
-          >
-            <option value="">Select hospital</option>
-            {mockHospitals.map(h => (
-              <option key={h.id} value={h.id}>
-                {h.name}
-              </option>
+          <tbody>
+            {requests.map((req) => (
+              <tr key={req.id} className="hover:bg-gray-50">
+                <td className="p-3 border">{req.id}</td>
+                <td className="p-3 border">{req.bloodType}</td>
+                <td className="p-3 border">{req.units}</td>
+                <td className="p-3 border">{req.urgency}</td>
+                <td className="p-3 border">{req.hospital}</td>
+                <td
+                  className={`p-3 border font-semibold ${
+                    req.status === "Pending"
+                      ? "text-yellow-600"
+                      : req.status === "Approved"
+                      ? "text-blue-600"
+                      : req.status === "Rejected"
+                      ? "text-red-600"
+                      : "text-green-600"
+                  }`}
+                >
+                  {req.status}
+                </td>
+                <td className="p-3 border">{req.date}</td>
+              </tr>
             ))}
-          </select>
-        </div>
-
-        {/* NOTES */}
-        <div>
-          <label className="block font-medium mb-1">Additional Notes (Optional)</label>
-          <textarea
-            className="border p-2 w-full rounded"
-            rows={3}
-            placeholder="Symptoms, doctor’s recommendation, etc."
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          ></textarea>
-        </div>
-
-        {/* SUBMIT BUTTON */}
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Submit Request
-        </button>
-
-      </form>
-
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
-
