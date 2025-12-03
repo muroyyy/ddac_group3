@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Mail, 
@@ -95,6 +95,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             name: response.user.fullName,
             role: normalizedRole
           };
+
+          // Store session with token if provided
+          if (response.token) {
+            const { sessionManager } = await import('../utils/sessionManager');
+            sessionManager.setSession(userData, response.token);
+          }
 
           onLogin(userData);
 

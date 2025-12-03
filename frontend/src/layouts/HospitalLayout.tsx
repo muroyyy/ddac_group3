@@ -6,7 +6,9 @@ export default function HospitalLayout() {
 	const { logout, user } = useAuth();
 	const navigate = useNavigate();
 
-	const handleLogout = () => {
+	const handleLogout = async () => {
+		const { sessionAPI } = await import('../utils/apiClient');
+		await sessionAPI.logout();
 		logout();
 		navigate('/login');
 	};
@@ -50,7 +52,7 @@ export default function HospitalLayout() {
 								<p className="text-sm font-medium text-gray-800">{user?.name}</p>
 								<p className="text-xs text-gray-500 truncate">{user?.email}</p>
 							</div>
-							<button onClick={handleLogout} className="text-red-600 hover:text-red-800">
+							<button onClick={handleLogout} className="text-red-600 hover:text-red-800 cursor-pointer">
 								<LogOut className="w-5 h-5" />
 							</button>
 						</div>

@@ -6,7 +6,9 @@ export default function DonorLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const { sessionAPI } = await import('../utils/apiClient');
+    await sessionAPI.logout();
     logout();
     navigate('/login');
   };
@@ -72,7 +74,7 @@ export default function DonorLayout() {
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             Logout

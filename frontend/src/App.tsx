@@ -50,9 +50,18 @@ import Approvals from './modules/hospital/pages/Approvals';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LoadingSpinner from './components/LoadingSpinner';
 import ProtectedRoute from './components/ProtectedRoute';
-import RoleProtected from './routes/ProtectedRoutes';
 
-const AppRoutes: React.FC = () => {
+import SessionProvider from './components/SessionProvider';
+
+const App: React.FC = () => (
+  <AuthProvider>
+    <SessionProvider>
+      <AppContent />
+    </SessionProvider>
+  </AuthProvider>
+);
+
+const AppContent: React.FC = () => {
   const { user, isLoading, login, logout } = useAuth();
 
   if (isLoading) return <LoadingSpinner />;
@@ -72,7 +81,7 @@ const AppRoutes: React.FC = () => {
         </Route>
 
         {/* Protected Routes */}
-        <Route element={<ProtectedRoute />}>
+        <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
           {/* Patient Routes */}
           <Route path="/patient" element={<PatientLayout />}>
             <Route index element={<Navigate to="/patient/dashboard" replace />} />
@@ -86,9 +95,19 @@ const AppRoutes: React.FC = () => {
             <Route path="logout" element={<Logout />} />
           </Route>
 
-          <Route path="/admin/dashboard" element={<AdminLayout user={user!} onLogout={logout} />} />
+          {/* Admin Routes - Protected */}
+          <Route path="/admin/dashboard" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminLayout user={user!} onLogout={logout} />
+            </ProtectedRoute>
+          } />
 
-          <Route path="/donor" element={<DonorLayout />}>
+          {/* Donor Routes - Protected */}
+          <Route path="/donor" element={
+            <ProtectedRoute allowedRoles={['donor']}>
+              <DonorLayout />
+            </ProtectedRoute>
+          }>
             <Route index element={<Navigate to="/donor/dashboard" replace />} />
             <Route path="dashboard" element={<DonorDashboard />} />
             <Route path="donate" element={<DonateBloodForm />} />
@@ -99,14 +118,16 @@ const AppRoutes: React.FC = () => {
             <Route path="completed-donations" element={<CompletedDonations />} />
           </Route>
 
-          {/* Hospital routes - role protected */}
-          <Route element={<RoleProtected requiredRole="hospital" />}>
-            <Route path="/hospital" element={<HospitalLayout />}>
-              <Route index element={<Navigate to="/hospital/dashboard" replace />} />
-              <Route path="dashboard" element={<HospitalDashboard user={user!} />} />
-              <Route path="inventory" element={<Inventory />} />
-              <Route path="approvals" element={<Approvals />} />
-            </Route>
+          {/* Hospital Routes - Protected */}
+          <Route path="/hospital" element={
+            <ProtectedRoute allowedRoles={['hospital']}>
+              <HospitalLayout />
+            </ProtectedRoute>
+          }>
+            <Route index element={<Navigate to="/hospital/dashboard" replace />} />
+            <Route path="dashboard" element={<HospitalDashboard user={user!} />} />
+            <Route path="inventory" element={<Inventory />} />
+            <Route path="approvals" element={<Approvals />} />
           </Route>
         </Route>
 
@@ -115,11 +136,5 @@ const AppRoutes: React.FC = () => {
     </Router>
   );
 };
-
-const App: React.FC = () => (
-  <AuthProvider>
-    <AppRoutes />
-  </AuthProvider>
-);
 
 export default App;
