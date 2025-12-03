@@ -30,6 +30,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -96,6 +98,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             role: normalizedRole
           };
 
+          // Store session (use empty token if none provided)
+          const { sessionManager } = await import('../utils/sessionManager');
+          const token = response.token || 'no-token';
+          sessionManager.setSession(userData, token);
+          console.log('💾 Session stored:', userData);
+
           onLogin(userData);
 
           // Navigate based on normalized (lowercase) role keys
@@ -108,8 +116,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
           const targetRoute = roleRoutes[normalizedRole] || '/dashboard';
           console.log('📍 Navigating to:', targetRoute);
+          console.log('🔍 Current location before navigate:', window.location.pathname);
 
-          navigate(targetRoute);
+          // Use window.location for immediate redirect
+          window.location.href = targetRoute;
         } else {
           console.log('❌ Login failed:', response.message);
           setErrors({
@@ -230,6 +240,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
+                    autoComplete="username"
                     className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
                       errors.email ? 'border-red-500 bg-red-50' : 'border-gray-300'
                     }`}
@@ -258,6 +269,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
+                    autoComplete="current-password"
                     className={`w-full pl-12 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
                       errors.password ? 'border-red-500 bg-red-50' : 'border-gray-300'
                     }`}

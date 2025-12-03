@@ -92,14 +92,35 @@ module "iam" {
   ec2_instance_id    = module.ec2.instance_id
 }
 
-# QuickSight Module
-module "quicksight" {
-  source = "./modules/quicksight"
+# Route53 Module
+module "route53" {
+  source = "./modules/route53"
   
-  aws_region        = var.aws_region
-  rds_instance_id   = module.rds.instance_id
-  database_name     = var.db_name
-  db_username       = var.db_username
-  db_password       = module.rds.db_password
-  quicksight_user   = var.quicksight_user
+  domain_name                = var.domain_name
+  project_name               = var.project_name
+  environment                = var.environment
+  cloudfront_domain_name     = module.cloudfront.domain_name
+  cloudfront_hosted_zone_id  = module.cloudfront.hosted_zone_id
+}
+
+# ACM Certificate Module
+module "acm" {
+  source = "./modules/acm"
+  
+  domain_name     = var.domain_name
+  project_name    = var.project_name
+  environment     = var.environment
+  hosted_zone_id  = module.route53.hosted_zone_id
+}
+
+# CloudFront Module
+module "cloudfront" {
+  source = "./modules/cloudfront"
+  
+  domain_name         = var.domain_name
+  project_name        = var.project_name
+  environment         = var.environment
+  s3_website_endpoint = module.s3.website_endpoint
+  ec2_public_dns      = module.ec2.public_dns
+  certificate_arn     = module.acm.certificate_arn
 }

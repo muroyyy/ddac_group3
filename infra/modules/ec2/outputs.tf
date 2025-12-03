@@ -7,3 +7,8 @@ output "public_ip" {
   description = "EC2 Elastic IP"
   value       = aws_eip.main.public_ip
 }
+
+output "public_dns" {
+  description = "EC2 public DNS name"
+  value       = aws_eip.main.public_dns
+}

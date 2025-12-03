@@ -1,14 +1,54 @@
+import { sessionManager } from './sessionManager';
+
 // API Configuration with fallback
 const getApiBaseUrl = () => {
+  // Check if we're accessing via custom domain
+  if (window.location.hostname === 'bloodline.dev' || window.location.hostname === 'www.bloodline.dev') {
+    return 'https://bloodline.dev/api';
+  }
   // Check if we're in production and have EC2 IP
   if (import.meta.env.VITE_EC2_PUBLIC_IP && import.meta.env.PROD) {
-    return `http://${import.meta.env.VITE_EC2_PUBLIC_IP}:5269/api`;
+    return `http://${import.meta.env.VITE_EC2_PUBLIC_IP}:5000/api`;
   }
   // Development fallback
-  return 'http://localhost:5269/api';
+  return 'http://localhost:5000/api';
 };
 
 const API_BASE_URL = getApiBaseUrl();
+
+// Helper to get authenticated headers
+const getAuthHeaders = (): HeadersInit => {
+  const token = sessionManager.getToken();
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
+  return headers;
+};
+
+// Helper for authenticated fetch requests
+const authenticatedFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      ...getAuthHeaders(),
+      ...options.headers,
+    },
+  });
+  
+  // Handle 401 Unauthorized - token expired or invalid
+  if (response.status === 401) {
+    sessionManager.clearSession();
+    window.location.href = '/login';
+    throw new Error('Session expired. Please login again.');
+  }
+  
+  return response;
+};
 
 /**
  * Helper to safely parse JSON responses, handling non-JSON errors
@@ -91,19 +131,13 @@ export const authAPI = {
     });
     
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-      
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
-        signal: controller.signal
       });
-      
-      clearTimeout(timeoutId);
       
       console.log('📡 Response received:', {
         status: response.status,
@@ -124,8 +158,8 @@ export const authAPI = {
         formData: data
       });
       
-      // Check if it's a connection timeout or network error
-      if (error instanceof Error && (error.name === 'AbortError' || error.message.includes('Failed to fetch'))) {
+      // Check if it's a network error
+      if (error instanceof Error && error.message.includes('Failed to fetch')) {
         throw new Error(`Cannot connect to backend server at ${API_BASE_URL}. Please check if the server is running.`);
       }
       
@@ -177,26 +211,145 @@ export const authAPI = {
 
 export const verificationAPI = {
   getPendingVerifications: async (): Promise<any> => {
-    const response = await fetch(`${API_BASE_URL}/verification/pending`);
+    const response = await authenticatedFetch(`${API_BASE_URL}/verification/pending`);
     return parseJsonResponse(response);
   },
 
   approveUser: async (userId: number): Promise<any> => {
-    const response = await fetch(`${API_BASE_URL}/verification/approve/${userId}`, {
+    const response = await authenticatedFetch(`${API_BASE_URL}/verification/approve/${userId}`, {
       method: 'POST',
     });
     return parseJsonResponse(response);
   },
 
   rejectUser: async (userId: number, reason: string): Promise<any> => {
-    const response = await fetch(`${API_BASE_URL}/verification/reject/${userId}`, {
+    const response = await authenticatedFetch(`${API_BASE_URL}/verification/reject/${userId}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({ reason }),
     });
-    return response.json();
+    return parseJsonResponse(response);
+  },
+};
+
+// Donor API endpoints
+export const donorAPI = {
+  getDashboard: async (): Promise<any> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/donor/dashboard`);
+    return parseJsonResponse(response);
+  },
+
+  getDonationHistory: async (): Promise<any> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/donor/history`);
+    return parseJsonResponse(response);
+  },
+
+  getPendingRequests: async (): Promise<any> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/donor/pending-requests`);
+    return parseJsonResponse(response);
+  },
+
+  updateProfile: async (profileData: any): Promise<any> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/donor/profile`, {
+      method: 'PUT',
+      body: JSON.stringify(profileData),
+    });
+    return parseJsonResponse(response);
+  },
+};
+
+// Hospital API endpoints
+export const hospitalAPI = {
+  getDashboard: async (): Promise<any> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/hospital/dashboard`);
+    return parseJsonResponse(response);
+  },
+
+  getInventory: async (): Promise<any> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/hospital/inventory`);
+    return parseJsonResponse(response);
+  },
+
+  updateInventory: async (inventoryData: any): Promise<any> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/hospital/inventory`, {
+      method: 'PUT',
+      body: JSON.stringify(inventoryData),
+    });
+    return parseJsonResponse(response);
+  },
+
+  getApprovals: async (): Promise<any> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/hospital/approvals`);
+    return parseJsonResponse(response);
+  },
+
+  approveRequest: async (requestId: number): Promise<any> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/hospital/approvals/${requestId}/approve`, {
+      method: 'POST',
+    });
+    return parseJsonResponse(response);
+  },
+};
+
+// Admin API endpoints
+export const adminAPI = {
+  getDashboardStats: async (): Promise<any> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/admin/dashboard/stats`);
+    return parseJsonResponse(response);
+  },
+
+  getUsers: async (): Promise<any> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/admin/users`);
+    return parseJsonResponse(response);
+  },
+
+  getSystemAlerts: async (): Promise<any> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/admin/alerts`);
+    return parseJsonResponse(response);
+  },
+
+  getActivityLogs: async (): Promise<any> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/admin/activity-logs`);
+    return parseJsonResponse(response);
+  },
+
+  getBloodInventory: async (): Promise<any> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/admin/blood-inventory`);
+    return parseJsonResponse(response);
+  },
+};
+
+// Session management API
+export const sessionAPI = {
+  validateToken: async (): Promise<{ valid: boolean; user?: any }> => {
+    try {
+      const response = await authenticatedFetch(`${API_BASE_URL}/auth/validate`);
+      return parseJsonResponse(response);
+    } catch {
+      return { valid: false };
+    }
+  },
+
+  refreshToken: async (): Promise<{ success: boolean; token?: string }> => {
+    try {
+      const response = await authenticatedFetch(`${API_BASE_URL}/auth/refresh`, {
+        method: 'POST',
+      });
+      return parseJsonResponse(response);
+    } catch {
+      return { success: false };
+    }
+  },
+
+  logout: async (): Promise<void> => {
+    try {
+      await authenticatedFetch(`${API_BASE_URL}/auth/logout`, {
+        method: 'POST',
+      });
+    } catch {
+      // Ignore errors on logout
+    } finally {
+      sessionManager.clearSession();
+    }
   },
 };
 

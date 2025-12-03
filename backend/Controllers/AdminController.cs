@@ -287,6 +287,68 @@ public class AdminController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
+
+    [HttpGet("alerts")]
+    public ActionResult<IEnumerable<object>> GetSystemAlerts()
+    {
+        try
+        {
+            // Mock system alerts for now
+            var alerts = new List<object>
+            {
+                new
+                {
+                    id = 1,
+                    type = "info",
+                    message = "System backup completed successfully",
+                    timestamp = DateTime.UtcNow.AddMinutes(-30).ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+                },
+                new
+                {
+                    id = 2,
+                    type = "warning",
+                    message = "Blood type O- inventory running low",
+                    timestamp = DateTime.UtcNow.AddHours(-2).ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+                }
+            };
+
+            return Ok(alerts);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving system alerts");
+            return Ok(new List<object>());
+        }
+    }
+
+    [HttpGet("activity-logs")]
+    public async Task<ActionResult<IEnumerable<object>>> GetActivityLogs()
+    {
+        try
+        {
+            var logs = await _context.AnalyticsLogs
+                .OrderByDescending(a => a.Timestamp)
+                .Take(10)
+                .ToListAsync();
+
+            var result = logs.Select(a => new
+            {
+                id = a.LogId,
+                userId = a.PerformedBy ?? 0,
+                userName = a.ActionType.Contains(":") ? a.ActionType.Split(':')[1].Trim() : "System",
+                action = a.ActionType,
+                timestamp = a.Timestamp.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"),
+                userRole = "Admin"
+            }).ToList();
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving activity logs");
+            return Ok(new List<object>());
+        }
+    }
 }
 
 public class BloodInventorySummary

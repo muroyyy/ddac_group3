@@ -122,7 +122,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
             </div>
           </div>
           <button
-            onClick={onLogout}
+            onClick={async () => {
+              const { sessionAPI } = await import('../utils/apiClient');
+              await sessionAPI.logout();
+              onLogout();
+            }}
             className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium cursor-pointer"
           >
             <LogOut className="w-4 h-4" />

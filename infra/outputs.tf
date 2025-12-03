@@ -54,12 +54,30 @@ output "github_actions_secret_access_key" {
   sensitive   = true
 }
 
-output "quicksight_dashboard_id" {
-  description = "QuickSight dashboard ID"
-  value       = module.quicksight.dashboard_id
+
+
+# Domain and CDN outputs
+output "domain_name" {
+  description = "Custom domain name"
+  value       = var.domain_name
 }
 
-output "quicksight_dashboard_arn" {
-  description = "QuickSight dashboard ARN"
-  value       = module.quicksight.dashboard_arn
+output "cloudfront_distribution_id" {
+  description = "CloudFront distribution ID"
+  value       = module.cloudfront.distribution_id
+}
+
+output "cloudfront_domain_name" {
+  description = "CloudFront distribution domain name"
+  value       = module.cloudfront.domain_name
+}
+
+output "route53_name_servers" {
+  description = "Route53 name servers (configure these in Namecheap)"
+  value       = module.route53.name_servers
+}
+
+output "certificate_arn" {
+  description = "ACM certificate ARN"
+  value       = module.acm.certificate_arn
 }

@@ -20,7 +20,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://dev-bloodline-frontend-8826eb40.s3-website-ap-southeast-1.amazonaws.com")
+        policy.WithOrigins(
+                "http://localhost:3000", 
+                "http://dev-bloodline-frontend-8826eb40.s3-website-ap-southeast-1.amazonaws.com",
+                "https://bloodline.dev",
+                "https://www.bloodline.dev"
+            )
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
