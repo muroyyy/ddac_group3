@@ -80,7 +80,7 @@ export default function PatientLayout() {
       <div className="flex flex-1">
 
         {/* ------- LEFT SIDEBAR ------- */}
-        <aside className="w-80 bg-white shadow-lg h-full p-6 border-r">
+        <aside className="w-80 bg-white shadow-lg min-h-full p-6 border-r">
           <ul className="space-y-3">
             {navItems.map((item) => (
               <NavLink
