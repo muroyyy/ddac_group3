@@ -1,18 +1,29 @@
 import { useAuth } from "../../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
-// This page displays the patient's profile information.
-// For now, the data is MOCK ONLY. Later you will fetch this from backend.
-// Current goal: make the UI pages fully functional with mock data.
-
+/**
+ * Patient Profile Page
+ * ---------------------------------------------------------
+ * Displays the patient's medical + personal details.
+ * Uses MOCK DATA for now so the frontend can run
+ * even before backend API development is completed.
+ *
+ * Later: Replace with GET /api/patient/{id}/profile (real backend)
+ */
 export default function Profile() {
 
-  // Read logged-in user data from global AuthContext.
-  // The login page sets this when the user logs in.
+  // Read logged-in user details from AuthContext
   const { user } = useAuth();
 
-  // ---------------- MOCK PROFILE DATA --------------------
-  // Later: replace this with GET /api/patient/{id}/profile
-  // This helps your UI run even with no backend.
+  // React Router navigation hook
+  const navigate = useNavigate();
+
+  /**
+   * MOCK PROFILE DATA
+   * -------------------------------------------------------
+   * These values will eventually come from your database.
+   * For now, they allow you to build a fully functional UI.
+   */
   const mockProfile = {
     fullName: user?.name ?? "Sharveen Patient",
     email: user?.email ?? "patient@example.com",
@@ -23,16 +34,18 @@ export default function Profile() {
     hospitalPreference: "City General Hospital",
   };
 
-  // ========================== UI LAYOUT ==============================
+  // ========================== PAGE UI ==============================
 
   return (
     <div className="max-w-2xl bg-white p-6 rounded-lg shadow space-y-5">
 
-      {/* HEADER */}
+      {/* -------------------- PAGE HEADER -------------------- */}
       <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
-      <p className="text-gray-600">Review your medical and personal details.</p>
+      <p className="text-gray-600">
+        Review your medical and personal details.
+      </p>
 
-      {/* PROFILE DETAILS CARD */}
+      {/* -------------------- PROFILE DETAILS -------------------- */}
       <div className="space-y-4">
 
         {/* FULL NAME */}
@@ -41,7 +54,7 @@ export default function Profile() {
           <p className="text-lg">{mockProfile.fullName}</p>
         </div>
 
-        {/* EMAIL */}
+        {/* EMAIL ADDRESS */}
         <div>
           <h2 className="text-sm font-semibold text-gray-500">Email Address</h2>
           <p>{mockProfile.email}</p>
@@ -53,7 +66,7 @@ export default function Profile() {
           <p>{mockProfile.phone}</p>
         </div>
 
-        {/* BLOOD TYPE NEEDED */}
+        {/* BLOOD TYPE */}
         <div>
           <h2 className="text-sm font-semibold text-gray-500">Blood Type Needed</h2>
           <p>{mockProfile.bloodTypeNeeded}</p>
@@ -62,13 +75,17 @@ export default function Profile() {
         {/* MEDICAL CONDITION */}
         <div>
           <h2 className="text-sm font-semibold text-gray-500">Medical Condition</h2>
-          <p className="leading-relaxed text-gray-700">{mockProfile.conditionDescription}</p>
+          <p className="leading-relaxed text-gray-700">
+            {mockProfile.conditionDescription}
+          </p>
         </div>
 
         {/* URGENCY LEVEL */}
         <div>
           <h2 className="text-sm font-semibold text-gray-500">Urgency Level</h2>
-          <p className="text-red-600 font-semibold">{mockProfile.urgencyLevel}</p>
+          <p className="text-red-600 font-semibold">
+            {mockProfile.urgencyLevel}
+          </p>
         </div>
 
         {/* PREFERRED HOSPITAL */}
@@ -79,10 +96,10 @@ export default function Profile() {
 
       </div>
 
-      {/* EDIT BUTTON (only navigates for now — real logic later) */}
+      {/* -------------------- EDIT PROFILE BUTTON -------------------- */}
       <button
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-        onClick={() => alert("Later: navigate to Edit Profile page")}
+        onClick={() => navigate("/patient/edit-profile")}
+        className="w-full mt-6 px-6 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition font-medium"
       >
         Edit Profile
       </button>

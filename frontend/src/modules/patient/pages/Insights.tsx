@@ -1,127 +1,207 @@
-import { useState } from "react";
+// src/modules/patient/pages/Insights.tsx
 
-// This page gives the patient an overview of their request history.
-// Example insights: total requests, approval rate, fulfillment stats, etc.
-// Everything is MOCK right now — later you will fetch real data from backend.
+// This page shows "Request Insights" for the patient.
+// RIGHT NOW: everything is mock + frontend-only.
+// LATER: you will replace the mock with a real API call
+// that reads from your database and (optionally) an AWS AI service.
+
+import React from "react";
+
+// ------------------ MOCK DATA SECTION ----------------------
+// In the future, you will fetch this from your backend:
+// GET /api/patient/{id}/insights
+
+const mockStats = {
+  totalRequests: 12,
+  approved: 6,
+  rejected: 3,
+  fulfilled: 2,
+  pending: 1,
+  // average time from request → approved (hours)
+  avgApprovalTimeHours: 18,
+  // How often the patient usually makes requests (days between)
+  avgDaysBetweenRequests: 30,
+};
+
+// Fake trend data for last 6 months
+const mockMonthlyTrend = [
+  { month: "Sep", requests: 1 },
+  { month: "Oct", requests: 2 },
+  { month: "Nov", requests: 3 },
+  { month: "Dec", requests: 2 },
+  { month: "Jan", requests: 2 },
+  { month: "Feb", requests: 2 },
+];
+
+// ------------------ SIMPLE HELPERS -------------------------
+
+// Helper to calculate a percentage safely.
+const getPercent = (part: number, total: number) =>
+  total === 0 ? 0 : Math.round((part / total) * 100);
 
 export default function Insights() {
-  
-  // ---------------- MOCK INSIGHTS DATA --------------------
-  // This mimics what an API response WOULD look like later.
-  // We hardcode the values so the frontend layout can be built first.
+  const { totalRequests, approved, rejected, fulfilled, pending } = mockStats;
 
-  const [insights] = useState({
-    totalRequests: 12,
-    approved: 6,
-    rejected: 3,
-    fulfilled: 2,
-    pending: 1,
-  });
-
-  // Converts the number into a percentage for bar-chart width.
-  // Example: approved = 6 out of 12 => 50%
-  const getPercentage = (value: number) => {
-    if (insights.totalRequests === 0) return "0%";
-    return `${(value / insights.totalRequests) * 100}%`;
-  };
-
-
-  // ========================== UI ==============================
+  const approvedPct = getPercent(approved, totalRequests);
+  const rejectedPct = getPercent(rejected, totalRequests);
+  const fulfilledPct = getPercent(fulfilled, totalRequests);
+  const pendingPct = getPercent(pending, totalRequests);
 
   return (
-    <div className="max-w-3xl bg-white p-6 rounded-lg shadow space-y-8">
-
-      {/* HEADER SECTION */}
+    <div className="space-y-6">
+      {/* PAGE HEADER */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Request Insights</h1>
-        <p className="text-gray-600 text-sm mt-2">
-          An overview of your blood request activity and outcomes.
+        <p className="text-gray-600">
+          A quick overview of your blood request history and helpful patterns.
         </p>
       </div>
 
-      {/* SUMMARY CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        
+      {/* TOP SUMMARY CARDS (4) */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Total Requests */}
-        <div className="p-5 bg-blue-100 border-l-4 border-blue-500 rounded">
-          <h3 className="text-blue-900 font-semibold">Total Requests</h3>
-          <p className="text-3xl font-bold mt-2">{insights.totalRequests}</p>
+        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+          <p className="text-sm font-medium text-blue-800">Total Requests</p>
+          <p className="mt-2 text-3xl font-bold text-blue-900">
+            {totalRequests}
+          </p>
+          <p className="mt-1 text-xs text-blue-700">
+            All requests submitted in your history.
+          </p>
         </div>
 
         {/* Approved */}
-        <div className="p-5 bg-green-100 border-l-4 border-green-500 rounded">
-          <h3 className="text-green-900 font-semibold">Approved</h3>
-          <p className="text-3xl font-bold mt-2">{insights.approved}</p>
+        <div className="bg-green-50 border border-green-100 rounded-xl p-4">
+          <p className="text-sm font-medium text-green-800">Approved</p>
+          <p className="mt-2 text-3xl font-bold text-green-900">
+            {approved}
+          </p>
+          <p className="mt-1 text-xs text-green-700">
+            {approvedPct}% of your requests were approved.
+          </p>
         </div>
 
         {/* Rejected */}
-        <div className="p-5 bg-red-100 border-l-4 border-red-500 rounded">
-          <h3 className="text-red-900 font-semibold">Rejected</h3>
-          <p className="text-3xl font-bold mt-2">{insights.rejected}</p>
+        <div className="bg-red-50 border border-red-100 rounded-xl p-4">
+          <p className="text-sm font-medium text-red-800">Rejected</p>
+          <p className="mt-2 text-3xl font-bold text-red-900">{rejected}</p>
+          <p className="mt-1 text-xs text-red-700">
+            {rejectedPct}% were rejected by hospitals.
+          </p>
         </div>
 
         {/* Fulfilled */}
-        <div className="p-5 bg-purple-100 border-l-4 border-purple-500 rounded">
-          <h3 className="text-purple-900 font-semibold">Fulfilled</h3>
-          <p className="text-3xl font-bold mt-2">{insights.fulfilled}</p>
+        <div className="bg-purple-50 border border-purple-100 rounded-xl p-4">
+          <p className="text-sm font-medium text-purple-800">Fulfilled</p>
+          <p className="mt-2 text-3xl font-bold text-purple-900">
+            {fulfilled}
+          </p>
+          <p className="mt-1 text-xs text-purple-700">
+            Completed transfusions linked to your requests.
+          </p>
         </div>
       </div>
 
-
-      {/* MINI BAR CHARTS */}
-      <div className="space-y-6 mt-10">
-
-        {/* SECTION TITLE */}
-        <h2 className="text-xl font-semibold text-gray-800">
+      {/* BREAKDOWN BARS – same idea as your screenshot but cleaner */}
+      <div className="bg-white rounded-xl shadow p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-gray-900">
           Breakdown of Request Status
         </h2>
+        <p className="text-sm text-gray-600 mb-2">
+          Shows how all your requests were distributed.
+        </p>
 
-        {/* Approved Bar */}
-        <div>
-          <p className="font-medium text-gray-700">Approved</p>
-          <div className="h-4 bg-gray-200 rounded mt-2">
-            {/* The filled bar */}
-            <div
-              className="h-full bg-green-500 rounded"
-              style={{ width: getPercentage(insights.approved) }}
-            />
-          </div>
-        </div>
+        {/* Approved bar */}
+        <BarRow label="Approved" percent={approvedPct} barClass="bg-green-500" />
 
-        {/* Rejected Bar */}
-        <div>
-          <p className="font-medium text-gray-700">Rejected</p>
-          <div className="h-4 bg-gray-200 rounded mt-2">
-            <div
-              className="h-full bg-red-500 rounded"
-              style={{ width: getPercentage(insights.rejected) }}
-            />
-          </div>
-        </div>
+        {/* Rejected bar */}
+        <BarRow label="Rejected" percent={rejectedPct} barClass="bg-red-500" />
 
-        {/* Fulfilled Bar */}
-        <div>
-          <p className="font-medium text-gray-700">Fulfilled</p>
-          <div className="h-4 bg-gray-200 rounded mt-2">
-            <div
-              className="h-full bg-purple-500 rounded"
-              style={{ width: getPercentage(insights.fulfilled) }}
-            />
-          </div>
-        </div>
+        {/* Fulfilled bar */}
+        <BarRow
+          label="Fulfilled"
+          percent={fulfilledPct}
+          barClass="bg-purple-500"
+        />
 
-        {/* Pending Bar */}
-        <div>
-          <p className="font-medium text-gray-700">Pending</p>
-          <div className="h-4 bg-gray-200 rounded mt-2">
-            <div
-              className="h-full bg-yellow-500 rounded"
-              style={{ width: getPercentage(insights.pending) }}
-            />
-          </div>
+        {/* Pending bar */}
+        <BarRow label="Pending" percent={pendingPct} barClass="bg-yellow-500" />
+      </div>
+
+      {/* MONTHLY TREND (very simple bar chart) */}
+      <div className="bg-white rounded-xl shadow p-6">
+        <h2 className="text-lg font-semibold text-gray-900">
+          Requests Over the Last 6 Months
+        </h2>
+        <p className="text-sm text-gray-600 mb-4">
+          Helps you see busy periods and patterns.
+        </p>
+
+        <div className="grid grid-cols-6 gap-3 items-end">
+          {mockMonthlyTrend.map((m) => (
+            <div key={m.month} className="flex flex-col items-center gap-2">
+              {/* Bar height is proportional to number of requests */}
+              <div
+                className="w-full rounded-t-md bg-red-400"
+                style={{ height: `${m.requests * 18}px` }}
+              />
+              <span className="text-xs text-gray-600">{m.month}</span>
+              <span className="text-xs font-semibold text-gray-700">
+                {m.requests}
+              </span>
+            </div>
+          ))}
         </div>
+      </div>
+
+      {/* “AI” STYLE SUMMARY (MOCKED FOR NOW) */}
+      <div className="bg-red-50 border border-red-100 rounded-xl p-5 space-y-2">
+        <h2 className="text-lg font-semibold text-red-900 flex items-center gap-2">
+          {/* Simple fake AI badge */}
+          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-600 text-white text-xs font-bold">
+            AI
+          </span>
+          Smart Insight (Mock)
+        </h2>
+        <p className="text-sm text-red-900">
+          Based on your request history, most of your requests are{" "}
+          <strong>approved within about {mockStats.avgApprovalTimeHours} hours</strong>.
+          You typically submit a new request every{" "}
+          <strong>{mockStats.avgDaysBetweenRequests} days</strong>. Try to plan
+          future requests at least <strong>2–3 days in advance</strong> to give
+          hospitals enough time to prepare blood safely.
+        </p>
+        <p className="text-xs text-red-700 mt-1">
+          *In the future, this paragraph can be generated by an AWS Bedrock
+          model using your real data.
+        </p>
       </div>
     </div>
   );
 }
 
+// ----------------- SMALL REUSABLE COMPONENT -------------------
+// Displays a single “label + progress bar + percentage” row.
+
+type BarRowProps = {
+  label: string;
+  percent: number;
+  barClass: string;
+};
+
+function BarRow({ label, percent, barClass }: BarRowProps) {
+  return (
+    <div className="space-y-1">
+      <div className="flex justify-between text-sm">
+        <span className="font-medium text-gray-800">{label}</span>
+        <span className="text-gray-600">{percent}%</span>
+      </div>
+      <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+        <div
+          className={`h-3 rounded-full ${barClass}`}
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+    </div>
+  );
+}

@@ -1,13 +1,14 @@
-// This page displays *mock appointment data* for the patient.
-// Later, you will replace this with a real API call.
-// For now, this helps you complete the frontend layout.
+import { CalendarDays, MapPin, User2, History } from "lucide-react";
 
 export default function Appointments() {
-
-  // ---------------- MOCK APPOINTMENT DATA --------------------
-  // Exactly the same structure as your database table.
-  // "status" matches your ENUM: Upcoming, Completed, Cancelled
-
+  /* 
+  ---------------------------------------------------------------
+  MOCK APPOINTMENT DATA
+  ---------------------------------------------------------------
+  - This represents what your backend will eventually return.
+  - Good for building UI early without API implementation.
+  ---------------------------------------------------------------
+  */
   const mockAppointments = [
     {
       appointmentId: 1,
@@ -32,119 +33,169 @@ export default function Appointments() {
     },
   ];
 
-
-  // ---------------- STATUS COLOR HELPER -----------------
-  // Adds a color and background depending on appointment status.
-
+  /* 
+  ---------------------------------------------------------------
+  FUNCTION: getStatusClass()
+  ---------------------------------------------------------------
+  - Determines the color of the status badge.
+  - Matches your database ENUM values.
+  ---------------------------------------------------------------
+  */
   const getStatusClass = (status: string) => {
     switch (status) {
       case "Upcoming":
-        return "text-blue-700 bg-blue-100";
+        return "text-blue-700 bg-blue-100"; // Blue badge
       case "Completed":
-        return "text-green-700 bg-green-100";
+        return "text-green-700 bg-green-100"; // Green badge
       case "Cancelled":
-        return "text-red-700 bg-red-100";
+        return "text-red-700 bg-red-100"; // Red badge
       default:
         return "text-gray-700 bg-gray-100";
     }
   };
 
-  // ---------------- GROUPING APPOINTMENTS ----------------
-  // You will often do this in dashboards:
-  // Separate upcoming vs completed/cancelled.
-
+  /* 
+  ---------------------------------------------------------------
+  GROUPING APPOINTMENTS
+  ---------------------------------------------------------------
+  - Useful for dashboards and separating "future" vs "past".
+  ---------------------------------------------------------------
+  */
   const upcoming = mockAppointments.filter(a => a.status === "Upcoming");
   const past = mockAppointments.filter(a => a.status !== "Upcoming");
 
-
-  // ========================== PAGE UI ==============================
-
+  /* 
+  =================================================================
+  RENDER UI
+  =================================================================
+  */
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      
+      {/* ===================== PAGE HEADER ===================== */}
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">My Appointments</h1>
+        <p className="text-gray-600 mt-1">
+          Track your scheduled and past medical appointments.
+        </p>
+      </div>
 
-      {/* PAGE HEADER */}
-      <h1 className="text-2xl font-bold text-gray-900">My Appointments</h1>
-      <p className="text-gray-600">View your upcoming and past medical appointments.</p>
+      {/* ===================== UPCOMING SECTION ===================== */}
+      <section className="bg-white p-6 rounded-xl shadow-sm border">
 
+        {/* Section Title */}
+        <h2 className="text-xl font-semibold mb-4 text-gray-800 flex items-center gap-2">
+          <CalendarDays className="w-5 h-5 text-blue-600" />
+          Upcoming Appointments
+        </h2>
 
-      {/* ========== UPCOMING APPOINTMENTS SECTION ========== */}
-      <section>
-        <h2 className="text-xl font-semibold mb-3">Upcoming Appointments</h2>
+        {/* Case: No upcoming appointments */}
+        {upcoming.length === 0 ? (
+          <p className="text-gray-500 italic">No upcoming appointments.</p>
+        ) : (
+          <div className="space-y-4">
+            {upcoming.map((appt) => (
+              <div
+                key={appt.appointmentId}
+                className="border rounded-lg p-4 bg-blue-50 hover:bg-blue-100 transition"
+              >
 
-        {/* If no upcoming appointments */}
-        {upcoming.length === 0 && (
-          <p className="text-gray-500 italic">No upcoming appointments scheduled.</p>
+                {/* Top Row → Appointment ID + Status Badge */}
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-sm text-gray-600">
+                    Appointment #{appt.appointmentId}
+                  </span>
+
+                  {/* Status badge */}
+                  <span
+                    className={`px-3 py-1 text-sm rounded-full font-medium ${getStatusClass(
+                      appt.status
+                    )}`}
+                  >
+                    {appt.status}
+                  </span>
+                </div>
+
+                {/* Appointment Details (Doctor, Location, Date) */}
+                <div className="space-y-1">
+                  <p className="flex items-center gap-2 text-gray-800">
+                    <User2 className="w-4 h-4 text-blue-700" />
+                    <strong>Doctor:</strong> {appt.doctor}
+                  </p>
+
+                  <p className="flex items-center gap-2 text-gray-800">
+                    <MapPin className="w-4 h-4 text-blue-700" />
+                    <strong>Location:</strong> {appt.location}
+                  </p>
+
+                  <p className="flex items-center gap-2 text-gray-800">
+                    <CalendarDays className="w-4 h-4 text-blue-700" />
+                    <strong>Date:</strong> {appt.date}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
-
-        <div className="space-y-4">
-          {upcoming.map((appt) => (
-            <div
-              key={appt.appointmentId}
-              className="p-4 bg-white rounded-lg shadow border hover:shadow-md transition"
-            >
-
-              {/* Top row: doctor + status */}
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Appointment #{appt.appointmentId}</h3>
-
-                <span
-                  className={`px-3 py-1 text-sm rounded-full font-medium ${getStatusClass(
-                    appt.status
-                  )}`}
-                >
-                  {appt.status}
-                </span>
-              </div>
-
-              {/* Appointment Details */}
-              <div className="mt-3 text-sm space-y-1">
-                <p><span className="font-semibold">Doctor:</span> {appt.doctor}</p>
-                <p><span className="font-semibold">Location:</span> {appt.location}</p>
-                <p><span className="font-semibold">Date:</span> {appt.date}</p>
-              </div>
-            </div>
-          ))}
-        </div>
       </section>
 
+      {/* ===================== PAST APPOINTMENTS ===================== */}
+      <section className="bg-white p-6 rounded-xl shadow-sm border">
 
-      {/* ========== PAST APPOINTMENTS SECTION ========== */}
+        {/* Section Title */}
+        <h2 className="text-xl font-semibold mb-4 text-gray-800 flex items-center gap-2">
+          <History className="w-5 h-5 text-gray-700" />
+          Past Appointments
+        </h2>
 
-      <section>
-        <h2 className="text-xl font-semibold mb-3">Past Appointments</h2>
+        {/* Case: No past appointments */}
+        {past.length === 0 ? (
+          <p className="text-gray-500 italic">No past appointments.</p>
+        ) : (
+          <div className="space-y-4">
+            {past.map((appt) => (
+              <div
+                key={appt.appointmentId}
+                className="border rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition"
+              >
 
-        {past.length === 0 && (
-          <p className="text-gray-500 italic">No past appointments available.</p>
+                {/* Top Row: ID + Status */}
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-sm text-gray-600">
+                    Appointment #{appt.appointmentId}
+                  </span>
+
+                  <span
+                    className={`px-3 py-1 text-sm rounded-full font-medium ${getStatusClass(
+                      appt.status
+                    )}`}
+                  >
+                    {appt.status}
+                  </span>
+                </div>
+
+                {/* Appointment Detail Info */}
+                <div className="space-y-1 text-gray-800">
+                  <p className="flex items-center gap-2">
+                    <User2 className="w-4 h-4 text-gray-600" />
+                    <strong>Doctor:</strong> {appt.doctor}
+                  </p>
+
+                  <p className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-gray-600" />
+                    <strong>Location:</strong> {appt.location}
+                  </p>
+
+                  <p className="flex items-center gap-2">
+                    <CalendarDays className="w-4 h-4 text-gray-600" />
+                    <strong>Date:</strong> {appt.date}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
-
-        <div className="space-y-4">
-          {past.map((appt) => (
-            <div
-              key={appt.appointmentId}
-              className="p-4 bg-gray-50 rounded-lg border shadow-sm"
-            >
-
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Appointment #{appt.appointmentId}</h3>
-                <span
-                  className={`px-3 py-1 text-sm rounded-full font-medium ${getStatusClass(
-                    appt.status
-                  )}`}
-                >
-                  {appt.status}
-                </span>
-              </div>
-
-              <div className="mt-3 text-sm space-y-1">
-                <p><span className="font-semibold">Doctor:</span> {appt.doctor}</p>
-                <p><span className="font-semibold">Location:</span> {appt.location}</p>
-                <p><span className="font-semibold">Date:</span> {appt.date}</p>
-              </div>
-            </div>
-          ))}
-        </div>
       </section>
-
     </div>
   );
 }

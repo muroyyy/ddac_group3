@@ -1,119 +1,146 @@
-// Import the authentication context so we can read the logged-in user's name
+import { useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
+import { Calendar, HeartPulse, ListChecks, CheckCircle } from "lucide-react";
 
-// These TypeScript interfaces describe the shape of our mock data.
-// This helps VSCode auto-complete and prevents mistakes.
-interface PatientDashboardStats {
-  pendingRequests: number;
-  upcomingAppointments: number;
-  completedTransfusions: number;
-}
+// ---------------- MOCK NEWS ITEMS ----------------
+// Each news article embeds a real external webpage.
+// "embed" = URL that loads inside an iframe.
 
-interface NewsItem {
-  id: number;
-  title: string;
-  excerpt: string;
-  date: string;
-}
-
-// ---- MOCK DATA (THIS WILL BE REPLACED WITH API DATA LATER) ----
-
-// Statistics you normally get from backend.
-// We hardcode them for now so the frontend works without backend.
-const mockStats: PatientDashboardStats = {
-  pendingRequests: 2,
-  upcomingAppointments: 1,
-  completedTransfusions: 8,
-};
-
-// News / updates for the patient dashboard.
-const mockNews: NewsItem[] = [
+const patientNews = [
   {
     id: 1,
-    title: "Post-Transfusion Care Tips",
-    excerpt: "Learn how to care for yourself after a transfusion...",
-    date: "March 15, 2025",
+    title: "WHO: Why Blood Donation Matters",
+    desc: "Learn insights from the World Health Organization about global blood donation needs.",
+    date: "March 2025",
+    img: "https://www.who.int/images/default-source/health-topics/blood-safety/donor.jpg",
+    url: "https://www.who.int/campaigns/world-blood-donor-day",
   },
   {
     id: 2,
-    title: "Blood Supply Update",
-    excerpt: "Hospitals are reporting healthy blood inventory levels...",
-    date: "March 10, 2025",
+    title: "Red Cross – What Happens During Blood Donation?",
+    desc: "Understand the step-by-step process when donating blood.",
+    date: "March 2025",
+    img: "https://www.redcrossblood.org/content/dam/redcrossblood/blood-donor-hero.jpg",
+    url: "https://www.redcrossblood.org/donate-blood/blood-donation-process.html",
+  },
+  {
+    id: 3,
+    title: "CDC: Blood Safety Overview",
+    desc: "CDC guidelines on safe blood transfusions and best practices.",
+    date: "March 2025",
+    img: "https://www.cdc.gov/blood-safety/images/blood-donation.jpg",
+    url: "https://www.cdc.gov/blood-safety/",
   },
 ];
 
-// ---- MAIN DASHBOARD COMPONENT ----
-export default function Dashboard() {
-  // Access currently logged-in user (from login)
-  // Example: { name: "Sharveen Patient", email: "..." }
+export default function PatientDashboard() {
   const { user } = useAuth();
 
+  // Track which news article is expanded (shows iframe)
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+
+  const stats = {
+    pending: 2,
+    upcoming: 1,
+    completed: 8,
+  };
+
+  // Toggle open/close for embedded news iframe
+  const toggleExpand = (id: number) => {
+    setExpandedId(prev => (prev === id ? null : id));
+  };
+
   return (
-    <div className="space-y-6">
-      
-      {/* GREETING HEADER */}
-      <h1 className="text-3xl font-bold text-gray-900">
-        Welcome back, {user?.name ?? "Patient"}!
-      </h1>
+    <div className="space-y-8">
 
-      <p className="text-gray-600">
-        Here is your transfusion journey overview.
-      </p>
+      {/* ---------------- HEADER ---------------- */}
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">
+          Welcome back, {user?.name || "Patient"}!
+        </h1>
+        <p className="text-gray-600 mt-1">
+          Here's an overview of your blood transfusion journey.
+        </p>
+      </div>
 
-      {/* STATISTICS CARDS */}
-      {/* This creates 3 boxes side-by-side (Pending, Upcoming, Completed) */}
+      {/* ---------------- STAT CARDS ---------------- */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-        {/* We loop through an array of stats to generate 3 cards automatically */}
-        {[
-          { label: "Pending Requests", value: mockStats.pendingRequests, color: "text-red-600" },
-          { label: "Upcoming Appointments", value: mockStats.upcomingAppointments, color: "text-yellow-600" },
-          { label: "Completed Transfusions", value: mockStats.completedTransfusions, color: "text-green-600" },
-        ].map((stat, i) => (
-          
-          // Each box is a card
-          <div key={i} className="bg-white p-6 rounded-lg shadow">
-            
-            {/* Label */}
-            <div className="text-sm text-gray-600">{stat.label}</div>
+        <div className="bg-white rounded-lg shadow p-6 border hover:shadow-md transition">
+          <div className="flex justify-between items-center">
+            <p className="text-sm text-gray-500">Pending Requests</p>
+            <HeartPulse className="w-5 h-5 text-red-600" />
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900 mt-2">{stats.pending}</h2>
+        </div>
 
-            {/* Value */}
-            <div className={`text-3xl font-bold mt-2 ${stat.color}`}>
-              {stat.value}
+        <div className="bg-white rounded-lg shadow p-6 border hover:shadow-md transition">
+          <div className="flex justify-between items-center">
+            <p className="text-sm text-gray-500">Upcoming Appointments</p>
+            <Calendar className="w-5 h-5 text-red-600" />
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900 mt-2">{stats.upcoming}</h2>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6 border hover:shadow-md transition">
+          <div className="flex justify-between items-center">
+            <p className="text-sm text-gray-500">Completed Transfusions</p>
+            <CheckCircle className="w-5 h-5 text-red-600" />
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900 mt-2">{stats.completed}</h2>
+        </div>
+
+      </div>
+
+      {/* ---------------- NEWS SECTION ---------------- */}
+      <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+        <ListChecks className="w-5 h-5 text-red-600" /> Patient News
+      </h2>
+
+      <div className="space-y-6">
+
+        {patientNews.map((news) => (
+          <div
+            key={news.id}
+            className="bg-white shadow rounded-lg border hover:shadow-md transition overflow-hidden"
+          >
+            {/* NEWS CARD TOP: IMAGE + TEXT */}
+            <div
+              className="flex gap-4 p-4 cursor-pointer"
+              onClick={() => toggleExpand(news.id)}
+            >
+              <img
+                src={news.img}
+                alt={news.title}
+                className="w-28 h-20 object-cover rounded"
+              />
+
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900">{news.title}</h3>
+                <p className="text-sm text-gray-600">{news.desc}</p>
+                <p className="text-xs text-gray-400 mt-1">{news.date}</p>
+
+                <span className="text-red-600 text-sm mt-2 inline-block hover:underline">
+                  {expandedId === news.id ? "Hide Article ▲" : "Read Article ▼"}
+                </span>
+              </div>
             </div>
 
+            {/* ---------------- EMBEDDED ARTICLE ---------------- */}
+            {expandedId === news.id && (
+              <div className="bg-gray-50 border-t p-3">
+                <iframe
+                  src={news.url}
+                  className="w-full h-96 rounded border"
+                  title={`Article-${news.id}`}
+                ></iframe>
+              </div>
+            )}
           </div>
         ))}
 
       </div>
-
-      {/* NEWS SECTION */}
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-semibold mb-4">Patient News</h2>
-
-        {/* Loop through mockNews array and display each item */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-          {mockNews.map((item) => (
-            <div key={item.id} className="border rounded-lg px-4 py-3">
-              
-              {/* News title */}
-              <h3 className="font-semibold">{item.title}</h3>
-
-              {/* Short description */}
-              <p className="text-sm text-gray-600 mt-1">{item.excerpt}</p>
-
-              {/* Date published */}
-              <p className="text-xs text-gray-400 mt-2">{item.date}</p>
-
-            </div>
-          ))}
-
-        </div>
-      </div>
-
     </div>
   );
 }
-
 
