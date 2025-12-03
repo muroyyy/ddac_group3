@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 // This page displays *mock appointment data* for the patient.
 // Later, you will replace this with a real API call.
 // For now, this helps you complete the frontend layout.
