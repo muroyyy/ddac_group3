@@ -127,19 +127,13 @@ export const authAPI = {
     });
     
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-      
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
-        signal: controller.signal
       });
-      
-      clearTimeout(timeoutId);
       
       console.log('📡 Response received:', {
         status: response.status,
@@ -160,8 +154,8 @@ export const authAPI = {
         formData: data
       });
       
-      // Check if it's a connection timeout or network error
-      if (error instanceof Error && (error.name === 'AbortError' || error.message.includes('Failed to fetch'))) {
+      // Check if it's a network error
+      if (error instanceof Error && error.message.includes('Failed to fetch')) {
         throw new Error(`Cannot connect to backend server at ${API_BASE_URL}. Please check if the server is running.`);
       }
       
