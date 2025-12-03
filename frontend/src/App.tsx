@@ -47,6 +47,7 @@ import LoadingSpinner from './components/LoadingSpinner';
 import ProtectedRoute from './components/ProtectedRoute';
 import SessionProvider from './components/SessionProvider';
 import AuthRedirect from './components/AuthRedirect';
+import DashboardRedirect from './components/DashboardRedirect';
 
 // Patient Layout Wrapper
 const PatientLayout = () => (
@@ -73,7 +74,11 @@ const AppContent: React.FC = () => {
       <Routes>
         {/* Public Routes */}
         <Route element={<PublicLayout />}>
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={
+            <DashboardRedirect>
+              <LandingPage />
+            </DashboardRedirect>
+          } />
           <Route path="/login" element={
             <AuthRedirect>
               <LoginPage onLogin={login} />
