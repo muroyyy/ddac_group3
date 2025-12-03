@@ -2,6 +2,10 @@ import { sessionManager } from './sessionManager';
 
 // API Configuration with fallback
 const getApiBaseUrl = () => {
+  // Check if we're accessing via custom domain
+  if (window.location.hostname === 'bloodline.dev' || window.location.hostname === 'www.bloodline.dev') {
+    return 'https://bloodline.dev/api';
+  }
   // Check if we're in production and have EC2 IP
   if (import.meta.env.VITE_EC2_PUBLIC_IP && import.meta.env.PROD) {
     return `http://${import.meta.env.VITE_EC2_PUBLIC_IP}:5000/api`;
