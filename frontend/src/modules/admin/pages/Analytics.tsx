@@ -32,9 +32,21 @@ const Analytics: React.FC = () => {
   const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const API_BASE_URL = import.meta.env.PROD 
-    ? `http://${import.meta.env.VITE_EC2_PUBLIC_IP}:5000/api` 
-    : 'http://localhost:5000/api';
+  // API Configuration with custom domain support
+  const getApiBaseUrl = () => {
+    // Check if we're accessing via custom domain
+    if (window.location.hostname === 'bloodline.dev' || window.location.hostname === 'www.bloodline.dev') {
+      return 'https://bloodline.dev/api';
+    }
+    // Check if we're in production and have EC2 IP
+    if (import.meta.env.VITE_EC2_PUBLIC_IP && import.meta.env.PROD) {
+      return `http://${import.meta.env.VITE_EC2_PUBLIC_IP}:5000/api`;
+    }
+    // Development fallback
+    return 'http://localhost:5000/api';
+  };
+
+  const API_BASE_URL = getApiBaseUrl();
 
   const fetchAnalytics = async () => {
     try {

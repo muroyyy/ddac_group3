@@ -1,35 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Server, Database, RefreshCw } from 'lucide-react';
-
-interface Metrics {
-  ec2: {
-    cpuUtilization: number;
-    networkIn: number;
-  };
-  rds: {
-    cpuUtilization: number;
-    connections: number;
-    freeStorageGB: number;
-  };
-}
+import { monitoringAPI, type SystemMetrics } from '../services/monitoringAPI';
 
 const SystemMonitoring: React.FC = () => {
-  const [metrics, setMetrics] = useState<Metrics | null>(null);
+  const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   const fetchMetrics = async () => {
     try {
-      const API_BASE_URL = import.meta.env.PROD 
-        ? `http://${import.meta.env.VITE_EC2_PUBLIC_IP}:5000/api` 
-        : 'http://localhost:5000/api';
-      
-      const response = await fetch(`${API_BASE_URL}/monitoring/metrics`);
-      if (response.ok) {
-        const data = await response.json();
-        setMetrics(data);
-        setLastUpdate(new Date());
-      }
+      const data = await monitoringAPI.getMetrics();
+      setMetrics(data);
+      setLastUpdate(new Date());
     } catch (error) {
       console.error('Error fetching metrics:', error);
     } finally {

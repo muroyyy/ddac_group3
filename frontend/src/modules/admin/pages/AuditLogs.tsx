@@ -1,15 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Download, RefreshCw, Search, Filter } from 'lucide-react';
-
-interface AuditLog {
-  logId: number;
-  actionType: string;
-  performedBy: number | null;
-  userName: string;
-  userEmail: string | null;
-  userRole: string | null;
-  timestamp: string;
-}
+import { auditLogsAPI, type AuditLog } from '../services/auditLogsAPI';
 
 const AuditLogs: React.FC = () => {
   const [logs, setLogs] = useState<AuditLog[]>([]);
@@ -26,29 +17,19 @@ const AuditLogs: React.FC = () => {
     searchTerm: ''
   });
 
-  const API_BASE_URL = import.meta.env.PROD 
-    ? `http://${import.meta.env.VITE_EC2_PUBLIC_IP}:5000/api` 
-    : 'http://localhost:5000/api';
-
   const fetchLogs = async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        pageSize: '50'
+      const data = await auditLogsAPI.getLogs({
+        page,
+        pageSize: 50,
+        actionType: filters.actionType || undefined,
+        startDate: filters.startDate || undefined,
+        endDate: filters.endDate || undefined
       });
-      
-      if (filters.actionType) params.append('actionType', filters.actionType);
-      if (filters.startDate) params.append('startDate', new Date(filters.startDate).toISOString());
-      if (filters.endDate) params.append('endDate', new Date(filters.endDate).toISOString());
-
-      const response = await fetch(`${API_BASE_URL}/audit/logs?${params}`);
-      if (response.ok) {
-        const data = await response.json();
-        setLogs(data.logs);
-        setTotalCount(data.totalCount);
-        setTotalPages(data.totalPages);
-      }
+      setLogs(data.logs);
+      setTotalCount(data.totalCount);
+      setTotalPages(data.totalPages);
     } catch (error) {
       console.error('Error fetching audit logs:', error);
     } finally {
@@ -58,11 +39,8 @@ const AuditLogs: React.FC = () => {
 
   const fetchActionTypes = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/audit/action-types`);
-      if (response.ok) {
-        const data = await response.json();
-        setActionTypes(data);
-      }
+      const data = await auditLogsAPI.getActionTypes();
+      setActionTypes(data);
     } catch (error) {
       console.error('Error fetching action types:', error);
     }
@@ -70,23 +48,19 @@ const AuditLogs: React.FC = () => {
 
   const handleExport = async () => {
     try {
-      const params = new URLSearchParams();
-      if (filters.actionType) params.append('actionType', filters.actionType);
-      if (filters.startDate) params.append('startDate', new Date(filters.startDate).toISOString());
-      if (filters.endDate) params.append('endDate', new Date(filters.endDate).toISOString());
-
-      const response = await fetch(`${API_BASE_URL}/audit/export?${params}`);
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `audit_logs_${new Date().toISOString().split('T')[0]}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      }
+      const blob = await auditLogsAPI.exportLogs({
+        actionType: filters.actionType || undefined,
+        startDate: filters.startDate || undefined,
+        endDate: filters.endDate || undefined
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `audit_logs_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
     } catch (error) {
       console.error('Error exporting logs:', error);
     }
