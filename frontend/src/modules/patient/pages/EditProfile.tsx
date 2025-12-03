@@ -15,7 +15,12 @@ export default function EditProfile() {
     setLoading(true);
     try {
       const data = await patientAPI.getPatientProfile(user!.id);
-      setFormData({ fullName: data.fullName, phone: data.phone || '', bloodType: data.bloodType || '', location: data.location || '' });
+      setFormData({
+        fullName: data.fullName || '',
+        phone: data.phone || '',
+        bloodType: data.bloodType || '',
+        location: data.location || '',
+      });
     } catch (err) {
       console.error('Error loading profile for edit:', err);
     } finally {
