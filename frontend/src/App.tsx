@@ -6,6 +6,7 @@ import PublicLayout from './layouts/PublicLayout';
 import AdminLayout from './layouts/AdminLayout';
 import DonorLayout from './layouts/DonorLayout';
 import HospitalLayout from './layouts/HospitalLayout';
+import PatientLayout from './layouts/PatientLayout';
 
 // Pages
 import LandingPage from './layouts/Landing';
@@ -25,14 +26,6 @@ import PatientProfile from './modules/patient/pages/Profile';
 import Notifications from './modules/patient/pages/Notifications';
 import Insights from './modules/patient/pages/Insights';
 import Logout from './modules/patient/pages/Logout';
-import { Outlet } from 'react-router-dom';
-
-// Simple patient layout wrapper
-const PatientLayout = () => (
-  <div className="patient-layout">
-    <Outlet />
-  </div>
-);
 
 // Donor Pages
 import DonorDashboard from './modules/donor/pages/DonorDashboard';
