@@ -27,6 +27,18 @@ async function parseJsonResponse(response: Response): Promise<any> {
   return response.json();
 }
 
+// Allow running frontend without backend by setting VITE_NO_BACKEND=true
+const USE_MOCK = import.meta.env.VITE_NO_BACKEND === 'true';
+
+const MOCK_DASHBOARD = {
+  totalRequests: 0,
+  pending: 0,
+  approved: 0,
+  rejected: 0,
+  fulfilled: 0,
+  upcomingAppointments: 0,
+};
+
 export const PatientService = {
   createRequest: async (patientId: number, payload: any) => {
     const res = await fetch(`${API_BASE_URL}/patient/${patientId}/request`, {
@@ -46,9 +58,22 @@ export const PatientService = {
 
   getDashboard: async (patientId: number) => {
     console.log(`📡 Fetching patient dashboard from: ${API_BASE_URL}/patient/${patientId}/dashboard`);
-    const res = await fetch(`${API_BASE_URL}/patient/${patientId}/dashboard`);
-    console.log('📨 Response status:', res.status, res.statusText);
-    return parseJsonResponse(res);
+    if (USE_MOCK) {
+      console.warn('⚠️ VITE_NO_BACKEND is true — returning mock patient dashboard data');
+      // simulate network latency
+      await new Promise((r) => setTimeout(r, 200));
+      return MOCK_DASHBOARD;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/patient/${patientId}/dashboard`);
+      console.log('📨 Response status:', res.status, res.statusText);
+      return await parseJsonResponse(res);
+    } catch (err) {
+      console.error('Error fetching patient dashboard, returning safe defaults:', err);
+      // Return safe defaults so the frontend remains functional
+      return MOCK_DASHBOARD;
+    }
   }
 };
  
