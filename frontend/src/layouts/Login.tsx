@@ -98,11 +98,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             role: normalizedRole
           };
 
-          // Store session with token if provided
-          if (response.token) {
-            const { sessionManager } = await import('../utils/sessionManager');
-            sessionManager.setSession(userData, response.token);
-          }
+          // Store session (use empty token if none provided)
+          const { sessionManager } = await import('../utils/sessionManager');
+          const token = response.token || 'no-token';
+          sessionManager.setSession(userData, token);
+          console.log('💾 Session stored:', userData);
 
           onLogin(userData);
 
