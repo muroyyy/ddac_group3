@@ -33,23 +33,30 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   // Check if user is already logged in and redirect
   React.useEffect(() => {
     const checkExistingSession = async () => {
-      const { sessionManager } = await import('../utils/sessionManager');
-      const user = sessionManager.getUser();
-      
-      if (user) {
-        console.log('🔄 User already logged in, redirecting...', user);
-        const roleRoutes: Record<string, string> = {
-          'admin': '/admin/dashboard',
-          'donor': '/donor/dashboard',
-          'patient': '/patient/dashboard',
-          'hospital': '/hospital/dashboard'
-        };
+      try {
+        const { sessionManager } = await import('../utils/sessionManager');
+        const user = sessionManager.getUser();
         
-        const targetRoute = roleRoutes[user.role] || '/dashboard';
-        console.log('🎯 Redirecting to:', targetRoute);
-        
-        // Use window.location for immediate redirect
-        window.location.href = targetRoute;
+        if (user) {
+          console.log('🔄 User already logged in, redirecting...', user);
+          const roleRoutes: Record<string, string> = {
+            'admin': '/admin/dashboard',
+            'donor': '/donor/dashboard',
+            'patient': '/patient/dashboard',
+            'hospital': '/hospital/dashboard'
+          };
+          
+          const targetRoute = roleRoutes[user.role] || '/dashboard';
+          console.log('🎯 Attempting redirect to:', targetRoute);
+          
+          // Small delay to ensure component is mounted
+          setTimeout(() => {
+            console.log('🚀 Executing redirect to:', targetRoute);
+            window.location.href = targetRoute;
+          }, 100);
+        }
+      } catch (error) {
+        console.error('❌ Redirect error:', error);
       }
     };
     
