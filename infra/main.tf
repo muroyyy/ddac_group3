@@ -117,9 +117,10 @@ module "acm" {
 module "cloudfront" {
   source = "./modules/cloudfront"
   
-  domain_name        = var.domain_name
-  project_name       = var.project_name
-  environment        = var.environment
-  origin_domain_name = module.ec2.public_dns
-  certificate_arn    = module.acm.certificate_arn
+  domain_name         = var.domain_name
+  project_name        = var.project_name
+  environment         = var.environment
+  s3_website_endpoint = module.s3.website_endpoint
+  ec2_public_dns      = module.ec2.public_dns
+  certificate_arn     = module.acm.certificate_arn
 }

@@ -13,8 +13,13 @@ variable "environment" {
   type        = string
 }
 
-variable "origin_domain_name" {
-  description = "Origin domain name (EC2 public DNS)"
+variable "s3_website_endpoint" {
+  description = "S3 website endpoint for frontend"
+  type        = string
+}
+
+variable "ec2_public_dns" {
+  description = "EC2 public DNS for API backend"
   type        = string
 }
 

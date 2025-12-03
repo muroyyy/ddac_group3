@@ -1,10 +1,24 @@
 resource "aws_cloudfront_distribution" "main" {
+  # S3 origin for frontend static files
   origin {
-    domain_name = var.origin_domain_name
-    origin_id   = "EC2-${var.project_name}-${var.environment}"
+    domain_name = var.s3_website_endpoint
+    origin_id   = "S3-${var.project_name}-${var.environment}"
 
     custom_origin_config {
       http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
+  }
+
+  # EC2 origin for API calls
+  origin {
+    domain_name = var.ec2_public_dns
+    origin_id   = "EC2-${var.project_name}-${var.environment}"
+
+    custom_origin_config {
+      http_port              = 5000
       https_port             = 443
       origin_protocol_policy = "http-only"
       origin_ssl_protocols   = ["TLSv1.2"]
@@ -18,24 +32,24 @@ resource "aws_cloudfront_distribution" "main" {
   aliases = [var.domain_name, "www.${var.domain_name}"]
 
   default_cache_behavior {
-    allowed_methods        = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = "EC2-${var.project_name}-${var.environment}"
+    target_origin_id       = "S3-${var.project_name}-${var.environment}"
     compress               = true
     viewer_protocol_policy = "redirect-to-https"
 
     forwarded_values {
-      query_string = true
-      headers      = ["Host", "Origin", "Referer"]
+      query_string = false
+      headers      = []
       
       cookies {
-        forward = "all"
+        forward = "none"
       }
     }
 
     min_ttl     = 0
-    default_ttl = 3600
-    max_ttl     = 86400
+    default_ttl = 86400
+    max_ttl     = 31536000
   }
 
   # Cache behavior for API endpoints
