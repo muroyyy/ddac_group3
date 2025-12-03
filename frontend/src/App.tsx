@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 
 // Layouts
 import PublicLayout from './layouts/PublicLayout';
@@ -65,7 +65,7 @@ const AppRoutes: React.FC = () => {
         </Route>
 
         {/* Protected Routes */}
-        <Route element={<ProtectedRoute />}>
+        <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
           {/* Patient Routes */}
           <Route path="/patient" element={<PatientLayout />}>
             <Route index element={<Navigate to="/patient/dashboard" replace />} />
