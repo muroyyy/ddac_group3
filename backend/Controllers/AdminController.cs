@@ -289,7 +289,7 @@ public class AdminController : ControllerBase
     }
 
     [HttpGet("alerts")]
-    public async Task<ActionResult<IEnumerable<object>>> GetSystemAlerts()
+    public ActionResult<IEnumerable<object>> GetSystemAlerts()
     {
         try
         {
@@ -326,15 +326,15 @@ public class AdminController : ControllerBase
     {
         try
         {
-            var logs = await _context.AuditLogs
+            var logs = await _context.AnalyticsLogs
                 .OrderByDescending(a => a.Timestamp)
                 .Take(10)
                 .Select(a => new
                 {
-                    id = a.Id,
-                    userId = a.UserId,
-                    userName = a.Action.Contains(":") ? a.Action.Split(':')[1].Trim() : "System",
-                    action = a.Action,
+                    id = a.LogId,
+                    userId = a.PerformedBy ?? 0,
+                    userName = a.ActionType.Contains(":") ? a.ActionType.Split(':')[1].Trim() : "System",
+                    action = a.ActionType,
                     timestamp = a.Timestamp.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"),
                     userRole = "Admin"
                 })
