@@ -52,6 +52,7 @@ import LoadingSpinner from './components/LoadingSpinner';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import SessionProvider from './components/SessionProvider';
+import AuthRedirect from './components/AuthRedirect';
 
 const App: React.FC = () => (
   <AuthProvider>
@@ -72,7 +73,11 @@ const AppContent: React.FC = () => {
         {/* Public Routes */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage onLogin={login} />} />
+          <Route path="/login" element={
+            <AuthRedirect>
+              <LoginPage onLogin={login} />
+            </AuthRedirect>
+          } />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
