@@ -1,6 +1,34 @@
+// Default to localhost:5269 (Kestrel HTTP) unless EC2_PUBLIC_IP is set
 const API_BASE_URL = import.meta.env.VITE_EC2_PUBLIC_IP 
-  ? `http://${import.meta.env.VITE_EC2_PUBLIC_IP}:5000/api`
-  : 'http://localhost:5000/api';
+  ? `http://${import.meta.env.VITE_EC2_PUBLIC_IP}:5269/api`
+  : 'http://localhost:5269/api';
+
+/**
+ * Helper to safely parse JSON responses, handling non-JSON errors
+ */
+async function parseJsonResponse(response: Response): Promise<any> {
+  const contentType = response.headers.get('content-type');
+  
+  // If response is not JSON, throw a descriptive error
+  if (!contentType?.includes('application/json')) {
+    let bodyText = '';
+    try {
+      bodyText = await response.text();
+      // Limit output to 200 chars to avoid huge error messages
+      if (bodyText.length > 200) {
+        bodyText = bodyText.substring(0, 200) + '...';
+      }
+    } catch {
+      bodyText = '(unable to read response body)';
+    }
+    
+    const errorMsg = `Server returned ${contentType || 'unknown content type'}: ${bodyText}`;
+    console.error('❌ Non-JSON Response:', { status: response.status, errorMsg });
+    throw new Error(errorMsg);
+  }
+  
+  return response.json();
+}
 
 export interface LoginRequest {
   email: string;
@@ -71,15 +99,8 @@ export const authAPI = {
         url: response.url
       });
       
-      if (!response.ok) {
-        console.error('❌ HTTP Error:', {
-          status: response.status,
-          statusText: response.statusText,
-          url: response.url
-        });
-      }
-      
-      const result = await response.json();
+      // Handle non-JSON responses (404, 500, etc. returning HTML error pages)
+      const result = await parseJsonResponse(response);
       console.log('📦 Response data:', result);
       
       return result;
@@ -101,7 +122,7 @@ export const authAPI = {
       },
       body: JSON.stringify(data),
     });
-    return response.json();
+    return parseJsonResponse(response);
   },
 
   forgotPassword: async (data: ForgotPasswordRequest): Promise<AuthResponse> => {
@@ -112,7 +133,7 @@ export const authAPI = {
       },
       body: JSON.stringify(data),
     });
-    return response.json();
+    return parseJsonResponse(response);
   },
 
   resetPassword: async (data: ResetPasswordRequest): Promise<AuthResponse> => {
@@ -123,7 +144,7 @@ export const authAPI = {
       },
       body: JSON.stringify(data),
     });
-    return response.json();
+    return parseJsonResponse(response);
   },
 
   registerWithFiles: async (formData: FormData): Promise<AuthResponse> => {
@@ -131,21 +152,21 @@ export const authAPI = {
       method: 'POST',
       body: formData, // No Content-Type header for FormData
     });
-    return response.json();
+    return parseJsonResponse(response);
   },
 };
 
 export const verificationAPI = {
   getPendingVerifications: async (): Promise<any> => {
     const response = await fetch(`${API_BASE_URL}/verification/pending`);
-    return response.json();
+    return parseJsonResponse(response);
   },
 
   approveUser: async (userId: number): Promise<any> => {
     const response = await fetch(`${API_BASE_URL}/verification/approve/${userId}`, {
       method: 'POST',
     });
-    return response.json();
+    return parseJsonResponse(response);
   },
 
   rejectUser: async (userId: number, reason: string): Promise<any> => {
