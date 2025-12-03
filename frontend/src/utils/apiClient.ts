@@ -1,7 +1,14 @@
-// Default to localhost:5269 (Kestrel HTTP) unless EC2_PUBLIC_IP is set
-const API_BASE_URL = import.meta.env.VITE_EC2_PUBLIC_IP 
-  ? `http://${import.meta.env.VITE_EC2_PUBLIC_IP}:5269/api`
-  : 'http://localhost:5269/api';
+// API Configuration with fallback
+const getApiBaseUrl = () => {
+  // Check if we're in production and have EC2 IP
+  if (import.meta.env.VITE_EC2_PUBLIC_IP && import.meta.env.PROD) {
+    return `http://${import.meta.env.VITE_EC2_PUBLIC_IP}:5269/api`;
+  }
+  // Development fallback
+  return 'http://localhost:5269/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 /**
  * Helper to safely parse JSON responses, handling non-JSON errors
@@ -84,13 +91,19 @@ export const authAPI = {
     });
     
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       console.log('📡 Response received:', {
         status: response.status,
@@ -105,11 +118,17 @@ export const authAPI = {
       
       return result;
     } catch (error) {
-      console.error('🚨 Network/Parse Error:', {
+      console.error('🚨 Login error caught:', {
         error: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined,
-        url: `${API_BASE_URL}/auth/login`
+        formData: data
       });
+      
+      // Check if it's a connection timeout or network error
+      if (error instanceof Error && (error.name === 'AbortError' || error.message.includes('Failed to fetch'))) {
+        throw new Error(`Cannot connect to backend server at ${API_BASE_URL}. Please check if the server is running.`);
+      }
+      
       throw error;
     }
   },
