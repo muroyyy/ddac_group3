@@ -92,18 +92,6 @@ module "iam" {
   ec2_instance_id    = module.ec2.instance_id
 }
 
-# QuickSight Module
-module "quicksight" {
-  source = "./modules/quicksight"
-  
-  aws_region        = var.aws_region
-  rds_instance_id   = module.rds.instance_id
-  database_name     = var.db_name
-  db_username       = var.db_username
-  db_password       = module.rds.db_password
-  quicksight_user   = var.quicksight_user
-}
-
 # Route53 Module
 module "route53" {
   source = "./modules/route53"

@@ -28,11 +28,7 @@ variable "db_name" {
   default     = "bloodline"
 }
 
-variable "quicksight_user" {
-  description = "QuickSight user name"
-  type        = string
-  default     = "admin"
-}
+
 
 variable "domain_name" {
   description = "Custom domain name"

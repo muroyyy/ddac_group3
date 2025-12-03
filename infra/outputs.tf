@@ -54,15 +54,7 @@ output "github_actions_secret_access_key" {
   sensitive   = true
 }
 
-output "quicksight_dashboard_id" {
-  description = "QuickSight dashboard ID"
-  value       = module.quicksight.dashboard_id
-}
 
-output "quicksight_dashboard_arn" {
-  description = "QuickSight dashboard ARN"
-  value       = module.quicksight.dashboard_arn
-}
 
 # Domain and CDN outputs
 output "domain_name" {
