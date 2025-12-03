@@ -102,6 +102,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           const roleRoutes: Record<string, string> = {
             'admin': '/admin/dashboard',
             'donor': '/donor/dashboard',
+            'patient': '/patient/dashboard',
             'hospital': '/hospital/dashboard'
           };
 

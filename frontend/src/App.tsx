@@ -16,6 +16,9 @@ import ResetPassword from './layouts/ResetPassword';
 import MockEmail from './layouts/MockEmail';
 import Unauthorized from './layouts/Unauthorized';
 
+// Patient Pages
+import PatientDashboard from './modules/patient/pages/Dashboard';
+
 // Donor Pages
 import DonorDashboard from './modules/donor/pages/DonorDashboard';
 import DonateBloodForm from './modules/donor/pages/DonateBloodForm';
@@ -55,6 +58,14 @@ const AppRoutes: React.FC = () => {
 
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
+          {/* Patient: redirect to dashboard if role is patient */}
+          {user?.role === 'patient' && (
+            <Route path="*" element={<Navigate to="/patient/dashboard" replace />} />
+          )}
+
+          {/* Patient dashboard route */}
+          <Route path="/patient/dashboard" element={<PatientDashboard />} />
+
           <Route path="/admin/dashboard" element={<AdminLayout user={user!} onLogout={logout} />} />
 
           <Route path="/donor" element={<DonorLayout />}>
