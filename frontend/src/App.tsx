@@ -28,11 +28,6 @@ import HospitalDashboard from './modules/hospital/pages/HospitalDashboard';
 import Inventory from './modules/hospital/pages/Inventory';
 import Approvals from './modules/hospital/pages/Approvals';
 
-// Patient Routes removed
-
-// Patient Pages
-import PatientDashboard from './modules/patient/pages/Dashboard';
-
 // Context & Components
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LoadingSpinner from './components/LoadingSpinner';
@@ -60,14 +55,6 @@ const AppRoutes: React.FC = () => {
 
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
-          {/* Patient: redirect to dashboard if role is patient */}
-          {user?.role === 'patient' && (
-            <Route path="*" element={<Navigate to="/patient/dashboard" replace />} />
-          )}
-
-          {/* Patient dashboard route */}
-          <Route path="/patient/dashboard" element={<PatientDashboard />} />
-
           <Route path="/admin/dashboard" element={<AdminLayout user={user!} onLogout={logout} />} />
 
           <Route path="/donor" element={<DonorLayout />}>

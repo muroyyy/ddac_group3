@@ -13,7 +13,6 @@ builder.Services.AddAWSService<IAmazonCloudWatch>();
 // builder.Services.AddAWSService<IAmazonS3>();
 builder.Services.AddScoped<DatabaseService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
-builder.Services.AddScoped<PatientService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
 // Add CORS
