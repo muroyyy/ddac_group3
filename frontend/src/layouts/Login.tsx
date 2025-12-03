@@ -258,6 +258,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
+                    autoComplete="current-password"
                     className={`w-full pl-12 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
                       errors.password ? 'border-red-500 bg-red-50' : 'border-gray-300'
                     }`}

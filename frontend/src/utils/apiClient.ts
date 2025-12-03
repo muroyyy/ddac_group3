@@ -2,10 +2,10 @@
 const getApiBaseUrl = () => {
   // Check if we're in production and have EC2 IP
   if (import.meta.env.VITE_EC2_PUBLIC_IP && import.meta.env.PROD) {
-    return `http://${import.meta.env.VITE_EC2_PUBLIC_IP}:5269/api`;
+    return `http://${import.meta.env.VITE_EC2_PUBLIC_IP}:5000/api`;
   }
   // Development fallback
-  return 'http://localhost:5269/api';
+  return 'http://localhost:5000/api';
 };
 
 const API_BASE_URL = getApiBaseUrl();
