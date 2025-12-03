@@ -23,10 +23,10 @@ const LandingPage: React.FC = () => {
             <div>
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-100 rounded-full text-red-600 text-sm font-medium mb-6">
                 <Heart className="w-4 h-4" />
-                Saving Lives Through Technologyyy
+                Saving Lives Through Technology
               </div>
               <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                Connecttt Donors & Save Lives in
+                Connect Donors & Save Lives in
                 <span className="text-red-600"> Real-Time</span>
               </h1>
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
