@@ -68,6 +68,28 @@ public class ApplicationDbContext : DbContext
         
         modelBuilder.Entity<BloodRequest>().ToTable("blood_requests");
 
+        // Explicit mapping for BloodRequest to ensure EF Core maps to the exact MySQL schema
+        modelBuilder.Entity<BloodRequest>(entity =>
+        {
+            entity.ToTable("blood_requests");
+
+            // Primary key
+            entity.HasKey(e => e.RequestId);
+            entity.Property(e => e.RequestId).HasColumnName("request_id");
+
+            // Columns (snake_case names matching DB)
+            entity.Property(e => e.PatientId).HasColumnName("patient_id");
+            entity.Property(e => e.HospitalId).HasColumnName("hospital_id");
+            entity.Property(e => e.BloodType).HasColumnName("blood_type").HasMaxLength(5).HasColumnType("varchar(5)");
+            entity.Property(e => e.UnitsRequired).HasColumnName("units_required");
+
+            // Map enum-like fields as strings in the DB to avoid enum conversion issues
+            entity.Property(e => e.Status).HasColumnName("status").HasConversion<string>().HasMaxLength(20);
+            entity.Property(e => e.UrgencyLevel).HasColumnName("urgency_level").HasConversion<string>().HasMaxLength(20);
+
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+        });
+
         modelBuilder.Entity<AnalyticsLog>(entity =>
         {
             entity.ToTable("analytics_log");

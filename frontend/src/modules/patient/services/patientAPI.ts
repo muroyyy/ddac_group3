@@ -111,7 +111,19 @@ export const patientAPI = {
       const response = await fetch(`${API_BASE_URL}/patient/${patientId}/dashboard`);
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const statusText = response.statusText || 'Unknown Error';
+        const errorMsg = `HTTP ${response.status}: ${statusText}`;
+        console.error(`❌ Dashboard API Error:`, errorMsg);
+        
+        // Log HTML response snippet if it's an error page
+        if (!response.headers.get('content-type')?.includes('application/json')) {
+          try {
+            const htmlSnippet = await response.text();
+            console.error('📄 Server returned HTML (possibly error page):', htmlSnippet.substring(0, 200));
+          } catch {}
+        }
+        
+        throw new Error(errorMsg);
       }
 
       const data = await parseJsonResponse(response);

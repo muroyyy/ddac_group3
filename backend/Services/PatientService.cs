@@ -8,10 +8,12 @@ namespace BloodLine.Services
     public class PatientService
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<PatientService> _logger;
 
-        public PatientService(ApplicationDbContext context)
+        public PatientService(ApplicationDbContext context, ILogger<PatientService> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // Create a blood request
@@ -47,16 +49,38 @@ namespace BloodLine.Services
         // Dashboard data
         public async Task<PatientDashboardDto> GetDashboardAsync(int patientId)
         {
-            var q = _context.BloodRequests.Where(r => r.PatientId == patientId);
-
-            return new PatientDashboardDto
+            try
             {
-                TotalRequests = await q.CountAsync(),
-                Pending = await q.CountAsync(r => r.Status == "Pending"),
-                Approved = await q.CountAsync(r => r.Status == "Approved"),
-                Rejected = await q.CountAsync(r => r.Status == "Rejected"),
-                Fulfilled = await q.CountAsync(r => r.Status == "Fulfilled")
-            };
+                var q = _context.BloodRequests.Where(r => r.PatientId == patientId);
+
+                var total = await q.CountAsync();
+                var pending = await q.CountAsync(r => r.Status == "Pending");
+                var approved = await q.CountAsync(r => r.Status == "Approved");
+                var rejected = await q.CountAsync(r => r.Status == "Rejected");
+                var fulfilled = await q.CountAsync(r => r.Status == "Fulfilled");
+
+                return new PatientDashboardDto
+                {
+                    TotalRequests = total,
+                    Pending = pending,
+                    Approved = approved,
+                    Rejected = rejected,
+                    Fulfilled = fulfilled
+                };
+            }
+            catch (Exception ex)
+            {
+                // Log and return a safe empty dashboard
+                _logger?.LogError(ex, "Failed to compute dashboard for patient {PatientId}", patientId);
+                return new PatientDashboardDto
+                {
+                    TotalRequests = 0,
+                    Pending = 0,
+                    Approved = 0,
+                    Rejected = 0,
+                    Fulfilled = 0
+                };
+            }
         }
     }
 }
