@@ -2,58 +2,83 @@ import { useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { Calendar, HeartPulse, ListChecks, CheckCircle } from "lucide-react";
 
-// ---------------- MOCK NEWS ITEMS ----------------
-// Each news article embeds a real external webpage.
-// "embed" = URL that loads inside an iframe.
+// -----------------------------------------------------------------------------
+// 📌 Import images from /src/assets
+// Since this file is located in:
+//    src/modules/patient/pages/PatientDashboard.tsx
+// We must navigate OUT twice: ../../
+// -----------------------------------------------------------------------------
+import bloodMattersImg from "../../../assets/blood_matteers.png";
+import bloodTransfusionImg from "../../../assets/blood_transfusion.png";
+import bloodTypeImg from "../../../assets/blood_type.png";
 
+
+// -----------------------------------------------------------------------------
+// 📌 Patient News (Static Mock Data)
+// These articles come from real websites (WHO, Red Cross, CDC).
+// Each item has an image, description, and link.
+// -----------------------------------------------------------------------------
 const patientNews = [
   {
     id: 1,
     title: "WHO: Why Blood Donation Matters",
     desc: "Learn insights from the World Health Organization about global blood donation needs.",
     date: "March 2025",
-    img: "https://www.who.int/images/default-source/health-topics/blood-safety/donor.jpg",
-    url: "https://www.who.int/campaigns/world-blood-donor-day",
+    img: bloodMattersImg,
+    url: "https://www.chaudharyhospital.in/why-blood-donation-matters-save-life-and-improve-health/",
   },
   {
     id: 2,
     title: "Red Cross – What Happens During Blood Donation?",
     desc: "Understand the step-by-step process when donating blood.",
     date: "March 2025",
-    img: "https://www.redcrossblood.org/content/dam/redcrossblood/blood-donor-hero.jpg",
-    url: "https://www.redcrossblood.org/donate-blood/blood-donation-process.html",
+    img: bloodTransfusionImg,
+    url: "https://medicalcity.ksu.edu.sa/en/sites/bloodbank/pages/about-blood-donation",
   },
   {
     id: 3,
     title: "CDC: Blood Safety Overview",
     desc: "CDC guidelines on safe blood transfusions and best practices.",
     date: "March 2025",
-    img: "https://www.cdc.gov/blood-safety/images/blood-donation.jpg",
-    url: "https://www.cdc.gov/blood-safety/",
+    img: bloodTypeImg,
+    url: "https://cdn.who.int/media/docs/default-source/blood-transfusion-safety/guidelines-and-principles-for-safe-blood-transfudion-practice.pdf?sfvrsn=f249f9a_1",
   },
 ];
+
 
 export default function PatientDashboard() {
   const { user } = useAuth();
 
-  // Track which news article is expanded (shows iframe)
+  // ---------------------------------------------------------------------------
+  // 📌 State: Track which news card is expanded to show content
+  // If expandedId === news.id → show embedded content
+  // ---------------------------------------------------------------------------
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
+  // ---------------------------------------------------------------------------
+  // 📌 Hard-coded overview stats (Mock values)
+  // Later, replace this with real API calls.
+  // ---------------------------------------------------------------------------
   const stats = {
     pending: 2,
     upcoming: 1,
     completed: 8,
   };
 
-  // Toggle open/close for embedded news iframe
+  // ---------------------------------------------------------------------------
+  // 📌 Toggle news item expansion (open/close)
+  // ---------------------------------------------------------------------------
   const toggleExpand = (id: number) => {
     setExpandedId(prev => (prev === id ? null : id));
   };
 
+
   return (
     <div className="space-y-8">
 
-      {/* ---------------- HEADER ---------------- */}
+      {/* ---------------------------------------------------------------------
+         HEADER SECTION 
+         --------------------------------------------------------------------- */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">
           Welcome back, {user?.name || "Patient"}!
@@ -63,84 +88,125 @@ export default function PatientDashboard() {
         </p>
       </div>
 
-      {/* ---------------- STAT CARDS ---------------- */}
+      {/* ---------------------------------------------------------------------
+         STAT CARDS 
+         --------------------------------------------------------------------- */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
+        {/* Pending Requests */}
         <div className="bg-white rounded-lg shadow p-6 border hover:shadow-md transition">
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-500">Pending Requests</p>
             <HeartPulse className="w-5 h-5 text-red-600" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mt-2">{stats.pending}</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mt-2">
+            {stats.pending}
+          </h2>
         </div>
 
+        {/* Upcoming Appointments */}
         <div className="bg-white rounded-lg shadow p-6 border hover:shadow-md transition">
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-500">Upcoming Appointments</p>
             <Calendar className="w-5 h-5 text-red-600" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mt-2">{stats.upcoming}</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mt-2">
+            {stats.upcoming}
+          </h2>
         </div>
 
+        {/* Completed Transfusions */}
         <div className="bg-white rounded-lg shadow p-6 border hover:shadow-md transition">
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-500">Completed Transfusions</p>
             <CheckCircle className="w-5 h-5 text-red-600" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mt-2">{stats.completed}</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mt-2">
+            {stats.completed}
+          </h2>
         </div>
 
       </div>
 
-      {/* ---------------- NEWS SECTION ---------------- */}
+
+      {/* ---------------------------------------------------------------------
+         NEWS HEADER
+         --------------------------------------------------------------------- */}
       <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-        <ListChecks className="w-5 h-5 text-red-600" /> Patient News
+        <ListChecks className="w-5 h-5 text-red-600" />
+        Patient News
       </h2>
 
+
+      {/* ---------------------------------------------------------------------
+         PATIENT NEWS SECTION
+         --------------------------------------------------------------------- */}
       <div className="space-y-6">
 
-        {patientNews.map((news) => (
-          <div
-            key={news.id}
-            className="bg-white shadow rounded-lg border hover:shadow-md transition overflow-hidden"
-          >
-            {/* NEWS CARD TOP: IMAGE + TEXT */}
+        {patientNews.map((news) => {
+          const isPDF = news.url.toLowerCase().endsWith(".pdf");
+
+          return (
             <div
-              className="flex gap-4 p-4 cursor-pointer"
-              onClick={() => toggleExpand(news.id)}
+              key={news.id}
+              className="bg-white shadow rounded-lg border hover:shadow-md transition overflow-hidden"
             >
-              <img
-                src={news.img}
-                alt={news.title}
-                className="w-28 h-20 object-cover rounded"
-              />
 
-              <div className="flex-1">
-                <h3 className="font-semibold text-gray-900">{news.title}</h3>
-                <p className="text-sm text-gray-600">{news.desc}</p>
-                <p className="text-xs text-gray-400 mt-1">{news.date}</p>
+              {/* TOP PART — IMAGE + TEXT */}
+              <div
+                className="flex gap-4 p-4 cursor-pointer"
+                onClick={() => toggleExpand(news.id)}
+              >
+                <img
+                  src={news.img}
+                  alt={news.title}
+                  className="w-28 h-20 object-cover rounded"
+                />
 
-                <span className="text-red-600 text-sm mt-2 inline-block hover:underline">
-                  {expandedId === news.id ? "Hide Article ▲" : "Read Article ▼"}
-                </span>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900">{news.title}</h3>
+                  <p className="text-sm text-gray-600">{news.desc}</p>
+                  <p className="text-xs text-gray-400 mt-1">{news.date}</p>
+
+                  <span className="text-red-600 text-sm mt-2 inline-block hover:underline">
+                    {expandedId === news.id ? "Hide Article ▲" : "Read Article ▼"}
+                  </span>
+                </div>
               </div>
+
+
+              {/* -----------------------------------------------------------------
+                 EXPANDED CONTENT — EMBED OR PDF LINK
+                 ----------------------------------------------------------------- */}
+              {expandedId === news.id && (
+                <div className="bg-gray-50 border-t p-3">
+
+                  {/* PDF cannot be embedded → show download/open link */}
+                  {isPDF ? (
+                    <a
+                      href={news.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-red-600 underline font-medium"
+                    >
+                      Open PDF – Click here
+                    </a>
+                  ) : (
+                    <iframe
+                      src={news.url}
+                      className="w-full h-96 rounded border"
+                      title={`Article-${news.id}`}
+                    ></iframe>
+                  )}
+
+                </div>
+              )}
+
             </div>
-
-            {/* ---------------- EMBEDDED ARTICLE ---------------- */}
-            {expandedId === news.id && (
-              <div className="bg-gray-50 border-t p-3">
-                <iframe
-                  src={news.url}
-                  className="w-full h-96 rounded border"
-                  title={`Article-${news.id}`}
-                ></iframe>
-              </div>
-            )}
-          </div>
-        ))}
+          );
+        })}
 
       </div>
     </div>
   );
 }
-

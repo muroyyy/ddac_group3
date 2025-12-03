@@ -23,6 +23,7 @@ import RequestBlood from './modules/patient/pages/RequestBlood';
 import ViewRequests from './modules/patient/pages/ViewRequests';
 import Appointments from './modules/patient/pages/Appointments';
 import PatientProfile from './modules/patient/pages/Profile';
+import EditProfile from './modules/patient/pages/EditProfile';
 import Notifications from './modules/patient/pages/Notifications';
 import Insights from './modules/patient/pages/Insights';
 import Logout from './modules/patient/pages/Logout';
@@ -74,6 +75,7 @@ const AppRoutes: React.FC = () => {
             <Route path="view-requests" element={<ViewRequests />} />
             <Route path="appointments" element={<Appointments />} />
             <Route path="profile" element={<PatientProfile />} />
+            <Route path="/edit-profile" element={<EditProfile />} />
             <Route path="notifications" element={<Notifications />} />
             <Route path="insights" element={<Insights />} />
             <Route path="logout" element={<Logout />} />
