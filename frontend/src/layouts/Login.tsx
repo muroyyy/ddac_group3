@@ -166,7 +166,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-lg">
         <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
           <div className="flex items-center justify-center mb-8">
             <img 
@@ -176,7 +176,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             />
           </div>
 
-            <div className="mb-8">
+            <div className="mb-8 text-center">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
                 Sign In
               </h2>
