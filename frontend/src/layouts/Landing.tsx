@@ -107,7 +107,7 @@ const StepCard: React.FC<{ number: string; title: string; desc: string; icon: Re
 );
 
 const EmotionalSection: React.FC = () => (
-  <section className="py-20 bg-gray-50">
+  <section id="who-you-help" className="py-20 bg-gray-50">
     <div className="container mx-auto px-6">
       <div className="text-center max-w-3xl mx-auto mb-16">
         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Who Your Donation Helps</h2>
@@ -169,7 +169,7 @@ const LandingPage: React.FC = () => {
     <div className="min-h-screen bg-white font-sans text-gray-900">
       <HeroSection />
 
-      <section className="py-24 bg-white">
+      <section id="why-donate" className="py-24 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-red-600 font-semibold tracking-wider uppercase text-sm">Why It Matters</span>
@@ -240,7 +240,7 @@ const LandingPage: React.FC = () => {
 
       <EmotionalSection />
 
-      <section className="py-24 bg-white">
+      <section id="faqs" className="py-24 bg-white">
         <div className="container mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-16">
             <div>
