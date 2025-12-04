@@ -16,6 +16,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<AnalyticsLog> AnalyticsLogs { get; set; }
     public DbSet<BloodRequest> BloodRequests { get; set; }
     public DbSet<UserDocument> UserDocuments { get; set; }
+    public DbSet<BloodInventory> BloodInventory { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -84,5 +85,7 @@ public class ApplicationDbContext : DbContext
                   .WithMany(e => e.Documents)
                   .HasForeignKey(e => e.UserId);
         });
+        
+        modelBuilder.Entity<BloodInventory>().ToTable("blood_inventory");
     }
 }

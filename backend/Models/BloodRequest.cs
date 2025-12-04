@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BloodLine.Models;
 
+[Table("blood_requests")]
 public class BloodRequest
 {
     [Key]
@@ -12,15 +13,21 @@ public class BloodRequest
     [Column("patient_id")]
     public int PatientId { get; set; }
 
+    [Column("hospital_id")]
+    public int HospitalId { get; set; }
+
     [Column("blood_type")]
     public string BloodType { get; set; } = string.Empty;
+
+    [Column("units_required")]
+    public int UnitsRequired { get; set; }
+
+    [Column("status")]
+    public string Status { get; set; } = "Pending";
 
     [Column("urgency_level")]
     public string UrgencyLevel { get; set; } = string.Empty;
 
-    [Column("request_status")]
-    public string RequestStatus { get; set; } = "Pending";
-
-    [Column("requested_at")]
-    public DateTime RequestedAt { get; set; } = DateTime.UtcNow;
+    [Column("created_at")]
+    public DateTime? CreatedAt { get; set; }
 }
