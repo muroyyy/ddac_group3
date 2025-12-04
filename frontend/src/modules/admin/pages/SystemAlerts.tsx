@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, Filter, Search, RefreshCw, X } from 'lucide-react';
+import { AlertTriangle, Search, RefreshCw, X } from 'lucide-react';
 
 interface Alert {
   id: string;
