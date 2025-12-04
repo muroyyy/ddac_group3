@@ -123,7 +123,7 @@ const EmotionalSection: React.FC = () => (
           { icon: <ShieldCheck className="w-8 h-8" />, title: "Cancer Patients", desc: "Essential for those undergoing chemotherapy." },
           { icon: <Heart className="w-8 h-8" />, title: "Anemic Children", desc: "Lifesaving support for severe anemia cases." }
         ].map((item, idx) => (
-          <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-red-500 hover:shadow-lg transition-all">
+          <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-red-500 hover:shadow-lg hover:-translate-y-2 transition-all duration-300">
             <div className="text-red-600 mb-4 bg-red-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
               {item.icon}
             </div>
@@ -141,7 +141,7 @@ const FaqItem: React.FC<{ question: string; answer: string }> = ({ question, ans
   return (
     <div className="border-b border-gray-200 last:border-0">
       <button 
-        className="w-full flex items-center justify-between py-5 text-left focus:outline-none group"
+        className="w-full flex items-center justify-between py-5 text-left focus:outline-none group cursor-pointer"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className="text-lg font-semibold text-gray-800 group-hover:text-red-700 transition-colors">{question}</span>
