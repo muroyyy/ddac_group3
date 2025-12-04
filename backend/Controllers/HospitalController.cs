@@ -31,21 +31,22 @@ public class HospitalController : ControllerBase
                 .Where(bi => bi.HospitalId == hospitalId)
                 .SumAsync(bi => bi.QuantityUnits);
 
-            // Pending blood requests (approvals to review)
-            var pendingApprovals = await _context.Set<BloodRequest>()
-                .Where(br => br.HospitalId == hospitalId && br.Status == "Pending")
+            // Pending blood requests from active_blood_requests table
+            var pendingApprovals = await _context.Set<ActiveBloodRequest>()
+                .Where(abr => abr.Status == "Pending")
                 .CountAsync();
 
-            // Low stock alerts (less than 5 units of any blood type)
-            var lowStockCount = await _context.Set<BloodInventory>()
-                .Where(bi => bi.HospitalId == hospitalId && bi.QuantityUnits < 5)
-                .CountAsync();
+            // Low stock alerts (blood types with less than 10 units)
+            var lowStockAlerts = await _context.Set<BloodInventory>()
+                .Where(bi => bi.HospitalId == hospitalId && bi.QuantityUnits < 10)
+                .Select(bi => $"{bi.BloodType}: {bi.QuantityUnits}")
+                .ToListAsync();
 
             var stats = new
             {
                 totalInventory = totalInventory,
                 pendingApprovals = pendingApprovals,
-                lowStockCount = lowStockCount,
+                lowStockAlerts = lowStockAlerts,
                 systemHealth = "Healthy"
             };
 

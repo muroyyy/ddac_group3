@@ -17,6 +17,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<BloodRequest> BloodRequests { get; set; }
     public DbSet<UserDocument> UserDocuments { get; set; }
     public DbSet<BloodInventory> BloodInventory { get; set; }
+    public DbSet<ActiveBloodRequest> ActiveBloodRequests { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -87,5 +88,7 @@ public class ApplicationDbContext : DbContext
         });
         
         modelBuilder.Entity<BloodInventory>().ToTable("blood_inventory");
+        
+        modelBuilder.Entity<ActiveBloodRequest>().ToTable("active_blood_requests");
     }
 }
