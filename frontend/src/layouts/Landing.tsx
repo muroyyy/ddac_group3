@@ -43,14 +43,14 @@ const HeroSection: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <button 
               onClick={() => navigate('/register')}
-              className="px-8 py-4 bg-white text-red-700 font-bold rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.2)] hover:shadow-[0_15px_35px_rgba(0,0,0,0.3)] hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 group"
+              className="px-8 py-4 bg-white text-red-700 font-bold rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.2)] hover:shadow-[0_15px_35px_rgba(0,0,0,0.3)] hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 group cursor-pointer"
             >
               Become a Donor Today
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
             <button 
               onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-8 py-4 bg-transparent border-2 border-red-300 text-red-50 font-semibold rounded-xl hover:bg-red-700/50 hover:border-red-200 transition-all duration-300"
+              className="px-8 py-4 bg-transparent border-2 border-red-300 text-red-50 font-semibold rounded-xl hover:bg-red-700/50 hover:border-red-200 transition-all duration-300 cursor-pointer"
             >
               Learn More
             </button>
@@ -289,7 +289,7 @@ const LandingPage: React.FC = () => {
           </p>
           <button 
             onClick={() => navigate('/register')}
-            className="px-10 py-4 bg-white text-red-900 text-lg font-bold rounded-full hover:bg-red-50 hover:scale-105 transition-all duration-300 shadow-2xl"
+            className="px-10 py-4 bg-white text-red-900 text-lg font-bold rounded-full hover:bg-red-50 hover:scale-105 transition-all duration-300 shadow-2xl cursor-pointer"
           >
             Become a Donor
           </button>
