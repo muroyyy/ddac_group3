@@ -54,17 +54,6 @@ public class ApplicationDbContext : DbContext
                   .HasForeignKey<PatientProfile>(e => e.UserId);
         });
         
-        modelBuilder.Entity<PatientProfile>(entity =>
-        {
-            entity.ToTable("patient_profile");
-            entity.HasKey(e => e.PatientId);
-            entity.HasIndex(e => e.UserId).IsUnique();
-            entity.Property(e => e.UrgencyLevel).HasConversion<string>();
-            entity.HasOne(e => e.User)
-                  .WithOne()
-                  .HasForeignKey<PatientProfile>(e => e.UserId);
-        });
-        
         modelBuilder.Entity<Hospital>(entity =>
         {
             entity.ToTable("hospital");
@@ -74,8 +63,6 @@ public class ApplicationDbContext : DbContext
                   .WithOne()
                   .HasForeignKey<Hospital>(e => e.UserId);
         });
-        
-        modelBuilder.Entity<BloodRequest>().ToTable("blood_requests");
         
         modelBuilder.Entity<BloodRequest>().ToTable("blood_requests");
         
