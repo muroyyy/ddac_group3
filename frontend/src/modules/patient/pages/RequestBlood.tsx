@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { patientAPI } from "../../../utils/apiClient";
 
 // ---------------------------------------------------------------------------
 // PATIENT BLOOD REQUEST FORM
@@ -29,21 +30,31 @@ export default function RequestBlood() {
   ];
 
   // --------------------- HANDLE FORM SUBMISSION ---------------------
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    // For now, we only show a confirmation.
-    // Later: POST request to backend.
-    setSubmitted(true);
-
-    console.log("Blood request submitted (mock):", {
-      bloodType,
-      units,
-      urgency,
-      hospital,
-      notes,
-    });
+  const payload = {
+    bloodType,
+    unitsRequired: Number(units),
+    urgencyLevel: urgency,
+    hospitalId: Number(hospital),
+    notes,
   };
+
+  try {
+    const response = await patientAPI.createBloodRequest(payload);
+
+    if (response.success) {
+      setSubmitted(true);
+    } else {
+      alert(response.message || "Something went wrong.");
+    }
+  } catch (error) {
+    console.error("API error:", error);
+    alert("Failed to submit blood request.");
+  }
+};
+
 
   // ---------------------------------------------------------------------------
   // UI DESIGN — Upgraded & Professional

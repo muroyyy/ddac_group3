@@ -231,6 +231,20 @@ export const verificationAPI = {
   },
 };
 
+
+//Patient API endpoints
+
+export const patientAPI = {
+  createBloodRequest: async (data: any): Promise<any> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/patient/blood-request`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+    return parseJsonResponse(response);
+  },
+};
+
+
 // Donor API endpoints
 export const donorAPI = {
   getDashboard: async (): Promise<any> => {

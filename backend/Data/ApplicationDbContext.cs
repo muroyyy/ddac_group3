@@ -14,6 +14,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
     public DbSet<AnalyticsLog> AnalyticsLogs { get; set; }
     public DbSet<UserDocument> UserDocuments { get; set; }
+    public DbSet<BloodRequest> BloodRequests { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -29,6 +30,11 @@ public class ApplicationDbContext : DbContext
                   .WithOne(e => e.User)
                   .HasForeignKey(e => e.UserId);
         });
+
+       //Map Blood request Table --- Patient
+
+        modelBuilder.Entity<BloodRequest>().ToTable("blood_requests");
+
 
       //BloodRequest Table  
         modelBuilder.Entity<DonorProfile>(entity =>
