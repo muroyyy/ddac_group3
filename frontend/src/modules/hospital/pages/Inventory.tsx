@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
 import { hospitalAPI } from '../services/hospitalAPI';
 import type { BloodInventoryItem } from '../services/hospitalAPI';
-import { useAuth } from '../../../context/AuthContext';
 
 export default function Inventory() {
-  const { user } = useAuth();
   const hospitalId = 1; // All hospital users use hospital_id 1
 
   const [items, setItems] = useState<BloodInventoryItem[]>([]);
