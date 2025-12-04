@@ -322,11 +322,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 Back to home
               </button>
             </div>
-          </div>
-
-          <div className="lg:hidden mt-6 text-center text-sm text-gray-600">
-            <p>Secure • HIPAA Compliant • 24/7 Support</p>
-          </div>
         </div>
       </div>
     </div>
