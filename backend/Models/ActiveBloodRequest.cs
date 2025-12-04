@@ -6,6 +6,7 @@ namespace BloodLine.Models;
 [Table("active_blood_requests")]
 public class ActiveBloodRequest
 {
+    [Key]
     [Column("request_id")]
     public int RequestId { get; set; }
 

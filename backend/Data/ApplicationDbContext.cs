@@ -89,6 +89,10 @@ public class ApplicationDbContext : DbContext
         
         modelBuilder.Entity<BloodInventory>().ToTable("blood_inventory");
         
-        modelBuilder.Entity<ActiveBloodRequest>().ToTable("active_blood_requests");
+        modelBuilder.Entity<ActiveBloodRequest>(entity =>
+        {
+            entity.ToTable("active_blood_requests");
+            entity.HasKey(e => e.RequestId);
+        });
     }
 }

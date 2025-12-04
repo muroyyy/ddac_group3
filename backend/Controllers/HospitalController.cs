@@ -36,17 +36,16 @@ public class HospitalController : ControllerBase
                 .Where(abr => abr.Status == "Pending")
                 .CountAsync();
 
-            // Low stock alerts (blood types with less than 10 units)
-            var lowStockAlerts = await _context.Set<BloodInventory>()
+            // Low stock count (blood types with less than 10 units)
+            var lowStockCount = await _context.Set<BloodInventory>()
                 .Where(bi => bi.HospitalId == hospitalId && bi.QuantityUnits < 10)
-                .Select(bi => $"{bi.BloodType}: {bi.QuantityUnits}")
-                .ToListAsync();
+                .CountAsync();
 
             var stats = new
             {
                 totalInventory = totalInventory,
                 pendingApprovals = pendingApprovals,
-                lowStockAlerts = lowStockAlerts,
+                lowStockCount = lowStockCount,
                 systemHealth = "Healthy"
             };
 
