@@ -9,9 +9,9 @@ namespace BloodLine.Controllers
     [Route("api/patient")]
     public class PatientController : ControllerBase
     {
-        private readonly AppDbContext _db;
+        private readonly ApplicationDbContext _db;
 
-        public PatientController(AppDbContext db)
+        public PatientController(ApplicationDbContext db)
         {
             _db = db;
         }
