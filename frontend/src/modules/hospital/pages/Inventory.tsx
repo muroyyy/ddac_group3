@@ -101,10 +101,10 @@ export default function Inventory() {
             ) : (
               items.map(item => (
                 <tr key={item.id} className="border-t">
-                  <td className="p-3">{item.bloodType}</td>
-                  <td className="p-3">{item.units}</td>
-                  <td className="p-3">{item.status}</td>
-                  <td className="p-3">{new Date(item.lastUpdated).toLocaleString()}</td>
+                  <td className="p-3 text-red-600">{item.bloodType}</td>
+                  <td className="p-3 text-red-600">{item.units}</td>
+                  <td className="p-3 text-red-600">{item.status}</td>
+                  <td className="p-3 text-red-600">{new Date(item.lastUpdated).toLocaleString()}</td>
                   <td className="p-3">
                     <button className="mr-2 text-blue-600" onClick={() => handleEditUnits(item.id, item.units)}>Edit</button>
                     <button className="text-red-600" onClick={() => handleDelete(item.id)}>Delete</button>
