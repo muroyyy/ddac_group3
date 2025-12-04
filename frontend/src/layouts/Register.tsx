@@ -448,7 +448,7 @@ const RegisterPage: React.FC = () => {
                       name="bloodType"
                       value={formData.bloodType}
                       onChange={handleChange}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all cursor-pointer ${
                         errors.bloodType ? 'border-red-500 bg-red-50' : 'border-gray-300'
                       }`}
                     >
@@ -627,7 +627,7 @@ const RegisterPage: React.FC = () => {
                       name="agreeToTerms"
                       checked={formData.agreeToTerms}
                       onChange={handleChange}
-                      className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500 mt-1"
+                      className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500 mt-1 cursor-pointer"
                     />
                     <span className="text-sm text-gray-700">
                       I agree to the{' '}
@@ -652,7 +652,7 @@ const RegisterPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={handlePrevStep}
-                    className="flex-1 py-3 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all font-semibold"
+                    className="flex-1 py-3 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all font-semibold cursor-pointer"
                   >
                     Back
                   </button>
@@ -660,7 +660,7 @@ const RegisterPage: React.FC = () => {
                     type="button"
                     onClick={handleSubmit}
                     disabled={isLoading}
-                    className="flex-1 py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="flex-1 py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                   >
                     {isLoading ? (
                       <>

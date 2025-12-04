@@ -179,10 +179,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             </div>
             
             <h2 className="text-4xl font-bold mb-4">
-              Welcome Back!
+              BloodLine
             </h2>
             <p className="text-red-100 text-lg mb-8">
-              Sign in to continue managing your blood bank operations and saving lives.
+              Connecting donors, patients, and hospitals for life-saving blood management.
             </p>
             
             <div className="space-y-6">
