@@ -180,16 +180,17 @@ public class HospitalController : ControllerBase
         {
             var requests = await _context.Set<BloodRequest>()
                 .Where(br => hospitalId == 0 || br.HospitalId == hospitalId)
-                .Select(br => new
+                .Join(_context.Set<PatientProfile>(), br => br.PatientId, pp => pp.PatientId, (br, pp) => new { br, pp })
+                .Join(_context.Users, x => x.pp.UserId, u => u.Id, (x, u) => new
                 {
-                    id = br.RequestId,
-                    userId = br.PatientId,
-                    userName = "", // Will be populated from patient_profile
-                    userEmail = "", // Will be populated from users
+                    id = x.br.RequestId,
+                    userId = x.br.PatientId,
+                    userName = u.FullName,
+                    userEmail = u.Email,
                     requestType = "Blood Request",
-                    bloodType = br.BloodType,
-                    status = br.Status,
-                    createdAt = br.CreatedAt
+                    bloodType = x.br.BloodType,
+                    status = x.br.Status,
+                    createdAt = x.br.CreatedAt
                 })
                 .ToListAsync();
 
