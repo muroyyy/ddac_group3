@@ -73,7 +73,7 @@ public class HospitalController : ControllerBase
                     id = bi.InventoryId,
                     bloodType = bi.BloodType,
                     units = bi.QuantityUnits,
-                    status = bi.QuantityUnits < 5 ? "Low" : (bi.QuantityUnits < 10 ? "Medium" : "Good"),
+                    status = bi.Status,
                     lastUpdated = bi.LastUpdated,
                     hospitalId = bi.HospitalId
                 })

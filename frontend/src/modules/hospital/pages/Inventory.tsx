@@ -5,7 +5,7 @@ import { useAuth } from '../../../context/AuthContext';
 
 export default function Inventory() {
   const { user } = useAuth();
-  const hospitalId = user?.id || 0;
+  const hospitalId = 1; // All hospital users use hospital_id 1
 
   const [items, setItems] = useState<BloodInventoryItem[]>([]);
   const [loading, setLoading] = useState(true);

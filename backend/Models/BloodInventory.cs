@@ -19,6 +19,9 @@ public class BloodInventory
     [Column("quantity_units")]
     public int QuantityUnits { get; set; }
 
+    [Column("status")]
+    public string Status { get; set; } = "Approved";
+
     [Column("last_updated")]
     public DateTime? LastUpdated { get; set; }
 }
