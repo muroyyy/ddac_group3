@@ -5,7 +5,7 @@ import { useAuth } from '../../../context/AuthContext';
 
 export default function Inventory() {
   const { user } = useAuth();
-  const [hospitalId, setHospitalId] = useState(0);
+  const hospitalId = user?.id || 0;
 
   const [items, setItems] = useState<BloodInventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,24 +24,6 @@ export default function Inventory() {
     }
   };
 
-  useEffect(() => {
-    const fetchHospitalId = async () => {
-      if (user?.id) {
-        try {
-          // Get hospital_id from hospital table using user_id
-          const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://bloodline.dev/api'}/hospital/profile?userId=${user.id}`);
-          const hospital = await response.json();
-          setHospitalId(hospital.hospital_id || user.id);
-        } catch (e) {
-          console.error('Failed to fetch hospital ID:', e);
-          setHospitalId(user.id); // Fallback to user.id
-        }
-      }
-    };
-    
-    fetchHospitalId();
-  }, [user?.id]);
-  
   useEffect(() => {
     if (hospitalId) load();
   }, [hospitalId]);
