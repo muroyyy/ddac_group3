@@ -6,24 +6,19 @@ const Footer: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-
-
   const scrollToSection = (sectionId: string) => {
-    // If not on landing page, navigate there first
     if (location.pathname !== '/') {
       navigate('/');
-      // Wait for navigation to complete, then scroll
       setTimeout(() => {
         const element = document.getElementById(sectionId);
         if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          element.scrollIntoView({ behavior: 'smooth' });
         }
       }, 100);
     } else {
-      // Already on landing page, just scroll
       const element = document.getElementById(sectionId);
       if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        element.scrollIntoView({ behavior: 'smooth' });
       }
     }
   };
@@ -32,77 +27,78 @@ const Footer: React.FC = () => {
     <footer className="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="grid md:grid-cols-4 gap-8 mb-8">
-          {/* Brand Section */}
+          
+          {/* Brand */}
           <div>
             <div className="mb-4">
-              <img 
-                src={bloodlineLogo} 
-                alt="BloodLine Logo" 
+              <img
+                src={bloodlineLogo}
+                alt="BloodLine Logo"
                 className="w-10 h-10 rounded-lg object-cover"
               />
             </div>
             <p className="text-gray-400">
-              Connecting donors and saving lives through cloud technology.
+              Inspiring more people to donate and save lives every day.
             </p>
           </div>
 
-          {/* Product Links */}
+          {/* Awareness Links */}
           <div>
-            <h4 className="font-bold mb-4">Product</h4>
+            <h4 className="font-bold mb-4">Learn</h4>
             <ul className="space-y-2 text-gray-400">
               <li>
-                <button 
-                  onClick={() => scrollToSection('features')} 
+                <button
+                  onClick={() => scrollToSection('why-donate')}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  Features
+                  Why Donate?
                 </button>
               </li>
               <li>
-                <button 
-                  onClick={() => scrollToSection('how-it-works')} 
+                <button
+                  onClick={() => scrollToSection('how-it-works')}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
                   How It Works
                 </button>
               </li>
               <li>
-                <button className="hover:text-white transition-colors cursor-pointer">
-                  Pricing
+                <button
+                  onClick={() => scrollToSection('who-you-help')}
+                  className="hover:text-white transition-colors cursor-pointer"
+                >
+                  Who You Help
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Company Links */}
+          {/* FAQ & Resources */}
           <div>
-            <h4 className="font-bold mb-4">Company</h4>
+            <h4 className="font-bold mb-4">Resources</h4>
             <ul className="space-y-2 text-gray-400">
               <li>
-                <button 
-                  onClick={() => scrollToSection('about')} 
+                <button
+                  onClick={() => scrollToSection('faqs')}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  About
+                  FAQs
                 </button>
               </li>
               <li>
                 <button className="hover:text-white transition-colors cursor-pointer">
-                  Careers
+                  Eligibility Requirements
                 </button>
               </li>
               <li>
-                <button 
-                  onClick={() => scrollToSection('contact')} 
-                  className="hover:text-white transition-colors cursor-pointer"
-                >
-                  Contact
+                <button className="hover:text-white transition-colors cursor-pointer">
+                  Blood Compatibility Chart
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Legal Links */}
+          {/* Legal */}
           <div>
             <h4 className="font-bold mb-4">Legal</h4>
             <ul className="space-y-2 text-gray-400">
@@ -114,11 +110,6 @@ const Footer: React.FC = () => {
               <li>
                 <button className="hover:text-white transition-colors cursor-pointer">
                   Terms of Service
-                </button>
-              </li>
-              <li>
-                <button className="hover:text-white transition-colors cursor-pointer">
-                  HIPAA Compliance
                 </button>
               </li>
             </ul>
