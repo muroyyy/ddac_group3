@@ -142,7 +142,7 @@ const Navbar: React.FC = () => {
                 onClick={() => handleNavigation('/register')}
                 className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
               >
-                Become a Donor
+                Register
               </button>
             </div>
           </div>
