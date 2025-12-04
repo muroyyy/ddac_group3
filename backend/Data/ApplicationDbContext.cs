@@ -10,9 +10,11 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<User> Users { get; set; }
     public DbSet<DonorProfile> DonorProfiles { get; set; }
+    public DbSet<PatientProfile> PatientProfiles { get; set; }
     public DbSet<Hospital> Hospitals { get; set; }
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
     public DbSet<AnalyticsLog> AnalyticsLogs { get; set; }
+    public DbSet<BloodRequest> BloodRequests { get; set; }
     public DbSet<UserDocument> UserDocuments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -41,6 +43,28 @@ public class ApplicationDbContext : DbContext
                   .HasForeignKey<DonorProfile>(e => e.UserId);
         });
         
+        modelBuilder.Entity<PatientProfile>(entity =>
+        {
+            entity.ToTable("patient_profile");
+            entity.HasKey(e => e.PatientId);
+            entity.HasIndex(e => e.UserId).IsUnique();
+            entity.Property(e => e.UrgencyLevel).HasConversion<string>();
+            entity.HasOne(e => e.User)
+                  .WithOne()
+                  .HasForeignKey<PatientProfile>(e => e.UserId);
+        });
+        
+        modelBuilder.Entity<PatientProfile>(entity =>
+        {
+            entity.ToTable("patient_profile");
+            entity.HasKey(e => e.PatientId);
+            entity.HasIndex(e => e.UserId).IsUnique();
+            entity.Property(e => e.UrgencyLevel).HasConversion<string>();
+            entity.HasOne(e => e.User)
+                  .WithOne()
+                  .HasForeignKey<PatientProfile>(e => e.UserId);
+        });
+        
         modelBuilder.Entity<Hospital>(entity =>
         {
             entity.ToTable("hospital");
@@ -50,6 +74,10 @@ public class ApplicationDbContext : DbContext
                   .WithOne()
                   .HasForeignKey<Hospital>(e => e.UserId);
         });
+        
+        modelBuilder.Entity<BloodRequest>().ToTable("blood_requests");
+        
+        modelBuilder.Entity<BloodRequest>().ToTable("blood_requests");
         
         modelBuilder.Entity<AnalyticsLog>(entity =>
         {
