@@ -5,6 +5,7 @@ import { monitoringAPI, type SystemMetrics } from '../services/monitoringAPI';
 const SystemMonitoring: React.FC = () => {
   const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
 
@@ -20,11 +21,13 @@ const SystemMonitoring: React.FC = () => {
 
   const fetchMetrics = async () => {
     try {
+      setError(null);
       const data = await monitoringAPI.getMetrics();
       setMetrics(data);
       setLastUpdate(new Date());
     } catch (error) {
       console.error('Error fetching metrics:', error);
+      setError('Failed to load system metrics. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -40,6 +43,26 @@ const SystemMonitoring: React.FC = () => {
     return (
       <div className="p-6 flex items-center justify-center h-64">
         <RefreshCw className="w-8 h-8 text-red-600 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error || !metrics) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+          <div className="text-red-600 mb-2">
+            <Server className="w-12 h-12 mx-auto mb-2" />
+          </div>
+          <h3 className="text-lg font-semibold text-red-800 mb-2">Unable to Load Metrics</h3>
+          <p className="text-red-600 mb-4">{error || 'No data available'}</p>
+          <button 
+            onClick={fetchMetrics}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
@@ -84,11 +107,11 @@ const SystemMonitoring: React.FC = () => {
             <div className="mt-4 grid grid-cols-2 gap-4">
               <div>
                 <span className="text-sm text-gray-600">CPU</span>
-                <p className="text-xl font-bold text-gray-900">{metrics?.ec2.cpuUtilization.toFixed(1)}%</p>
+                <p className="text-xl font-bold text-gray-900">{metrics.ec2.cpuUtilization.toFixed(1)}%</p>
               </div>
               <div>
                 <span className="text-sm text-gray-600">Network In</span>
-                <p className="text-xl font-bold text-gray-900">{metrics?.ec2.networkIn.toFixed(2)} MB</p>
+                <p className="text-xl font-bold text-gray-900">{metrics.ec2.networkIn.toFixed(2)} MB</p>
               </div>
             </div>
           </div>
@@ -99,21 +122,21 @@ const SystemMonitoring: React.FC = () => {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-600">CPU Utilization</span>
-                    <span className="text-lg font-bold text-gray-900">{metrics?.ec2.cpuUtilization.toFixed(1)}%</span>
+                    <span className="text-lg font-bold text-gray-900">{metrics.ec2.cpuUtilization.toFixed(1)}%</span>
                   </div>
                   <div className="bg-gray-200 rounded-full h-2">
-                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${metrics?.ec2.cpuUtilization}%` }}></div>
+                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${metrics.ec2.cpuUtilization}%` }}></div>
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <span className="text-sm text-gray-600">Network In</span>
-                    <p className="text-lg font-bold text-gray-900">{metrics?.ec2.networkIn.toFixed(2)} MB</p>
+                    <p className="text-lg font-bold text-gray-900">{metrics.ec2.networkIn.toFixed(2)} MB</p>
                   </div>
                   <div>
                     <span className="text-sm text-gray-600">Network Out</span>
-                    <p className="text-lg font-bold text-gray-900">{(metrics?.ec2.networkIn * 0.8).toFixed(2)} MB</p>
+                    <p className="text-lg font-bold text-gray-900">{(metrics.ec2.networkOut).toFixed(2)} MB</p>
                   </div>
                 </div>
                 
@@ -155,11 +178,11 @@ const SystemMonitoring: React.FC = () => {
             <div className="mt-4 grid grid-cols-2 gap-4">
               <div>
                 <span className="text-sm text-gray-600">CPU</span>
-                <p className="text-xl font-bold text-gray-900">{metrics?.rds.cpuUtilization.toFixed(1)}%</p>
+                <p className="text-xl font-bold text-gray-900">{metrics.rds.cpuUtilization.toFixed(1)}%</p>
               </div>
               <div>
                 <span className="text-sm text-gray-600">Connections</span>
-                <p className="text-xl font-bold text-gray-900">{metrics?.rds.connections}</p>
+                <p className="text-xl font-bold text-gray-900">{metrics.rds.connections}</p>
               </div>
             </div>
           </div>
@@ -170,17 +193,17 @@ const SystemMonitoring: React.FC = () => {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-600">CPU Utilization</span>
-                    <span className="text-lg font-bold text-gray-900">{metrics?.rds.cpuUtilization.toFixed(1)}%</span>
+                    <span className="text-lg font-bold text-gray-900">{metrics.rds.cpuUtilization.toFixed(1)}%</span>
                   </div>
                   <div className="bg-gray-200 rounded-full h-2">
-                    <div className="bg-green-600 h-2 rounded-full" style={{ width: `${metrics?.rds.cpuUtilization}%` }}></div>
+                    <div className="bg-green-600 h-2 rounded-full" style={{ width: `${metrics.rds.cpuUtilization}%` }}></div>
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <span className="text-sm text-gray-600">Active Connections</span>
-                    <p className="text-lg font-bold text-gray-900">{metrics?.rds.connections}</p>
+                    <p className="text-lg font-bold text-gray-900">{metrics.rds.connections}</p>
                   </div>
                   <div>
                     <span className="text-sm text-gray-600">Max Connections</span>
@@ -191,7 +214,7 @@ const SystemMonitoring: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <span className="text-sm text-gray-600">Free Storage</span>
-                    <p className="text-lg font-bold text-gray-900">{metrics?.rds.freeStorageGB.toFixed(2)} GB</p>
+                    <p className="text-lg font-bold text-gray-900">{metrics.rds.freeStorageGB.toFixed(2)} GB</p>
                   </div>
                   <div>
                     <span className="text-sm text-gray-600">Read IOPS</span>
