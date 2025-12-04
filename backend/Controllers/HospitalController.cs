@@ -228,6 +228,31 @@ public class HospitalController : ControllerBase
             return StatusCode(500, new { error = "Failed to update approval request" });
         }
     }
+
+    /// <summary>
+    /// Get hospital profile by user ID.
+    /// </summary>
+    [HttpGet("profile")]
+    public async Task<IActionResult> GetHospitalProfile([FromQuery] int userId)
+    {
+        try
+        {
+            var hospital = await _context.Set<Hospital>()
+                .Where(h => h.UserId == userId)
+                .Select(h => new { hospital_id = h.HospitalId, user_id = h.UserId, hospital_name = h.HospitalName })
+                .FirstOrDefaultAsync();
+
+            if (hospital == null)
+                return NotFound(new { error = "Hospital not found" });
+
+            return Ok(hospital);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error fetching hospital profile: {ex.Message}");
+            return StatusCode(500, new { error = "Failed to fetch hospital profile" });
+        }
+    }
 }
 
 public class AddInventoryRequest

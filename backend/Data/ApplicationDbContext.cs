@@ -18,6 +18,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<UserDocument> UserDocuments { get; set; }
     public DbSet<BloodInventory> BloodInventory { get; set; }
     public DbSet<ActiveBloodRequest> ActiveBloodRequests { get; set; }
+    public DbSet<Hospital> Hospitals { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
