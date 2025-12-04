@@ -39,6 +39,7 @@ import CompletedDonations from './modules/donor/pages/CompletedDonations';
 import HospitalDashboard from './modules/hospital/pages/HospitalDashboard';
 import Inventory from './modules/hospital/pages/Inventory';
 import Approvals from './modules/hospital/pages/Approvals';
+import HospitalProfile from './modules/hospital/pages/Profile';
 
 // Context & Components
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -101,6 +102,7 @@ const AppRoutes: React.FC = () => {
               <Route path="dashboard" element={<HospitalDashboard user={user!} />} />
               <Route path="inventory" element={<Inventory />} />
               <Route path="approvals" element={<Approvals />} />
+              <Route path="profile" element={<HospitalProfile />} />
             </Route>
           </Route>
         </Route>

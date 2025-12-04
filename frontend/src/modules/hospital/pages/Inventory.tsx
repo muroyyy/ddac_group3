@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
 import { hospitalAPI } from '../services/hospitalAPI';
 import type { BloodInventoryItem } from '../services/hospitalAPI';
-import { useAuth } from '../../../context/AuthContext';
 
 export default function Inventory() {
-  const { user } = useAuth();
-  const hospitalId = user?.id || 0;
+  const hospitalId = 1; // All hospital users use hospital_id 1
 
   const [items, setItems] = useState<BloodInventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,15 +37,7 @@ export default function Inventory() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Delete this inventory item?')) return;
-    try {
-      await hospitalAPI.deleteBloodInventory(id);
-      load();
-    } catch (e) {
-      console.error(e);
-    }
-  };
+
 
   const handleEditUnits = async (id: number, current: number) => {
     const v = prompt('Enter new units', String(current));
@@ -101,13 +91,12 @@ export default function Inventory() {
             ) : (
               items.map(item => (
                 <tr key={item.id} className="border-t">
-                  <td className="p-3">{item.bloodType}</td>
-                  <td className="p-3">{item.units}</td>
-                  <td className="p-3">{item.status}</td>
-                  <td className="p-3">{new Date(item.lastUpdated).toLocaleString()}</td>
+                  <td className="p-3 text-gray-800">{item.bloodType}</td>
+                  <td className="p-3 text-gray-800">{item.units}</td>
+                  <td className="p-3 text-gray-800">{item.status}</td>
+                  <td className="p-3 text-gray-800">{new Date(item.lastUpdated).toLocaleString()}</td>
                   <td className="p-3">
-                    <button className="mr-2 text-blue-600" onClick={() => handleEditUnits(item.id, item.units)}>Edit</button>
-                    <button className="text-red-600" onClick={() => handleDelete(item.id)}>Delete</button>
+                    <button className="text-blue-600" onClick={() => handleEditUnits(item.id, item.units)}>Edit</button>
                   </td>
                 </tr>
               ))

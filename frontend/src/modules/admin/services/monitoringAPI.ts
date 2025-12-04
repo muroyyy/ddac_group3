@@ -18,11 +18,47 @@ export interface SystemMetrics {
   ec2: {
     cpuUtilization: number;
     networkIn: number;
+    networkOut: number;
+    memoryUsage: number;
+    diskIOPS: number;
   };
   rds: {
     cpuUtilization: number;
     connections: number;
+    maxConnections: number;
     freeStorageGB: number;
+    readIOPS: number;
+  };
+  s3: {
+    frontendBucket: {
+      sizeGB: number;
+      objects: number;
+      getRequests: number;
+      putRequests: number;
+    };
+    assetsBucket: {
+      sizeGB: number;
+      objects: number;
+      getRequests: number;
+      putRequests: number;
+    };
+    totalDataTransferGB: number;
+  };
+  cloudfront: {
+    cacheHitRate: number;
+    requests: number;
+    originLatencyMs: number;
+    errorRate: number;
+    dataTransferGB: number;
+    sslCertificateStatus: string;
+  };
+  route53: {
+    queryCount24h: number;
+    responseTimeMs: number;
+    healthCheckStatus: string;
+    hostedZoneStatus: string;
+    recordTypes: string[];
+    averageTTL: number;
   };
 }
 

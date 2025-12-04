@@ -240,7 +240,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user: _, onNavigate }) 
         <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">System Alerts</h2>
-            <button className="text-sm text-red-600 hover:text-red-700 font-medium flex items-center gap-1 cursor-pointer">
+            <button 
+              onClick={() => onNavigate('alerts')}
+              className="text-sm text-red-600 hover:text-red-700 font-medium flex items-center gap-1 cursor-pointer"
+            >
               View All
               <ChevronRight className="w-4 h-4" />
             </button>

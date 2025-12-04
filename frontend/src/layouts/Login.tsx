@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Mail, 
@@ -29,6 +29,16 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Load saved credentials on component mount
+  useEffect(() => {
+    const savedCredentials = localStorage.getItem('bloodline_remember_me');
+    if (savedCredentials) {
+      const { email, password } = JSON.parse(savedCredentials);
+      setFormData({ email, password });
+      setRememberMe(true);
+    }
+  }, []);
 
 
 
@@ -87,6 +97,16 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
         if (response.success && response.user) {
           console.log('✅ Login successful, user data:', response.user);
+          
+          // Handle remember me functionality
+          if (rememberMe) {
+            localStorage.setItem('bloodline_remember_me', JSON.stringify({
+              email: formData.email,
+              password: formData.password
+            }));
+          } else {
+            localStorage.removeItem('bloodline_remember_me');
+          }
           
           // Normalize role to lowercase for internal checks and storage
           const normalizedRole = (response.user.role || '').toString().toLowerCase();
