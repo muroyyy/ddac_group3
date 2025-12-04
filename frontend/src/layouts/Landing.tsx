@@ -16,6 +16,16 @@ import BloodTable from './BloodTable';
 
 const HeroSection: React.FC = () => {
   const navigate = useNavigate();
+  
+  const bloodDonationImages = [
+    "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&h=600&fit=crop&crop=center",
+    "https://images.unsplash.com/photo-1615461066841-6116e61058f4?w=800&h=600&fit=crop&crop=center", 
+    "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=800&h=600&fit=crop&crop=center",
+    "https://images.unsplash.com/photo-1631815588090-d4bfec5b1ccb?w=800&h=600&fit=crop&crop=center"
+  ];
+  
+  const randomImage = bloodDonationImages[Math.floor(Math.random() * bloodDonationImages.length)];
+  
   return (
     <section className="relative w-full bg-gradient-to-br from-red-600 to-red-800 text-white pt-24 pb-32 overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-10 pointer-events-none">
@@ -60,7 +70,7 @@ const HeroSection: React.FC = () => {
         <div className="relative hidden lg:block">
           <div className="relative z-10 bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20 shadow-2xl transform rotate-2 hover:rotate-0 transition-all duration-500">
              <img 
-               src="https://picsum.photos/800/600?grayscale" 
+               src={randomImage} 
                alt="Donor smiling" 
                className="rounded-2xl shadow-lg mb-6 opacity-80 mix-blend-luminosity hover:mix-blend-normal transition-all duration-500 w-full h-64 object-cover"
              />
