@@ -49,3 +49,63 @@ resource "aws_s3_bucket_policy" "frontend" {
 
   depends_on = [aws_s3_bucket_public_access_block.frontend]
 }
+
+# Assets bucket for file uploads and storage
+resource "aws_s3_bucket" "assets" {
+  bucket = "${var.environment}-${var.project_name}-assets-${random_id.bucket_suffix.hex}"
+
+  tags = {
+    Name = "${var.environment}-${var.project_name}-assets"
+  }
+}
+
+resource "aws_s3_bucket_versioning" "assets" {
+  bucket = aws_s3_bucket.assets.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "assets" {
+  bucket = aws_s3_bucket.assets.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "assets" {
+  bucket = aws_s3_bucket.assets.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# Create folder structure using S3 objects
+resource "aws_s3_object" "admin_folder" {
+  bucket = aws_s3_bucket.assets.id
+  key    = "admin/"
+  content = ""
+}
+
+resource "aws_s3_object" "donor_folder" {
+  bucket = aws_s3_bucket.assets.id
+  key    = "donor/"
+  content = ""
+}
+
+resource "aws_s3_object" "patient_folder" {
+  bucket = aws_s3_bucket.assets.id
+  key    = "patient/"
+  content = ""
+}
+
+resource "aws_s3_object" "hospital_folder" {
+  bucket = aws_s3_bucket.assets.id
+  key    = "hospital/"
+  content = ""
+}
