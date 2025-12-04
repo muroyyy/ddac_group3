@@ -166,75 +166,15 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
-        
-        <div className="hidden lg:block">
-          <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-3xl p-12 text-white shadow-2xl">
-            <div className="mb-8">
-              <img 
-                src={bloodlineLogo} 
-                alt="BloodLine Logo" 
-                className="w-14 h-14 rounded-xl object-cover"
-              />
-            </div>
-            
-            <h2 className="text-4xl font-bold mb-4">
-              BloodLine
-            </h2>
-            <p className="text-red-100 text-lg mb-8">
-              Connecting donors, patients, and hospitals for life-saving blood management.
-            </p>
-            
-            <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Mail className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg mb-1">Secure Access</h3>
-                  <p className="text-red-100 text-sm">Your data is protected with enterprise-grade security.</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Lock className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg mb-1">HIPAA Compliant</h3>
-                  <p className="text-red-100 text-sm">Built to meet healthcare industry standards.</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-12 pt-8 border-t border-white border-opacity-20">
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className="text-3xl font-bold mb-1">2.8K+</div>
-                  <div className="text-red-100 text-sm">Users</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold mb-1">1.2K+</div>
-                  <div className="text-red-100 text-sm">Donors</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold mb-1">99.8%</div>
-                  <div className="text-red-100 text-sm">Uptime</div>
-                </div>
-              </div>
-            </div>
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
+          <div className="flex items-center justify-center mb-8">
+            <img 
+              src={bloodlineLogo} 
+              alt="BloodLine Logo" 
+              className="w-12 h-12 rounded-xl object-cover"
+            />
           </div>
-        </div>
-
-        <div className="w-full">
-          <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
-            <div className="lg:hidden flex items-center justify-center mb-8">
-              <img 
-                src={bloodlineLogo} 
-                alt="BloodLine Logo" 
-                className="w-12 h-12 rounded-xl object-cover"
-              />
-            </div>
 
             <div className="mb-8">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
