@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <defs>
+    <linearGradient id="rds-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3F48CC"/>
+      <stop offset="100%" style="stop-color:#2937B8"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="24" cy="12" rx="16" ry="4" fill="url(#rds-gradient)"/>
+  <path d="M8 12v24c0 2.2 7.2 4 16 4s16-1.8 16-4V12" stroke="url(#rds-gradient)" strokeWidth="2" fill="none"/>
+  <ellipse cx="24" cy="24" rx="16" ry="4" fill="url(#rds-gradient)" opacity="0.7"/>
+  <ellipse cx="24" cy="36" rx="16" ry="4" fill="url(#rds-gradient)" opacity="0.7"/>
+</svg>

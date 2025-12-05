@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <defs>
+    <linearGradient id="cf-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF9900"/>
+      <stop offset="100%" style="stop-color:#FF6600"/>
+    </linearGradient>
+  </defs>
+  <circle cx="24" cy="24" r="20" fill="url(#cf-gradient)" opacity="0.1" stroke="url(#cf-gradient)" strokeWidth="2"/>
+  <circle cx="24" cy="24" r="12" fill="url(#cf-gradient)" opacity="0.2" stroke="url(#cf-gradient)" strokeWidth="1"/>
+  <circle cx="24" cy="24" r="4" fill="url(#cf-gradient)"/>
+  <path d="M24 4v8M24 36v8M44 24h-8M12 24H4" stroke="url(#cf-gradient)" strokeWidth="2"/>
+  <path d="M38.14 9.86l-5.66 5.66M15.52 32.48l-5.66 5.66M38.14 38.14l-5.66-5.66M15.52 15.52L9.86 9.86" stroke="url(#cf-gradient)" strokeWidth="1"/>
+</svg>

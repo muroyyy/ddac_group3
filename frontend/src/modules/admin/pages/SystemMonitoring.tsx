@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, ChevronRight, ChevronDown } from 'lucide-react';
-import { EC2Icon, RDSIcon, S3Icon, CloudFrontIcon, Route53Icon } from '../../../components/aws-icons/AwsIcons';
 import { monitoringAPI, type SystemMetrics } from '../services/monitoringAPI';
+import ec2Icon from '../../../assets/aws-icons/ec2.svg';
+import rdsIcon from '../../../assets/aws-icons/rds.svg';
+import s3Icon from '../../../assets/aws-icons/s3.svg';
+import cloudfrontIcon from '../../../assets/aws-icons/cloudfront.svg';
+import route53Icon from '../../../assets/aws-icons/route53.svg';
 
 const SystemMonitoring: React.FC = () => {
   const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
@@ -53,7 +57,7 @@ const SystemMonitoring: React.FC = () => {
       <div className="p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
           <div className="text-red-600 mb-2">
-            <EC2Icon className="w-12 h-12 mx-auto mb-2" />
+            <img src={ec2Icon} alt="EC2" className="w-12 h-12 mx-auto mb-2" />
           </div>
           <h3 className="text-lg font-semibold text-red-800 mb-2">Unable to Load Metrics</h3>
           <p className="text-red-600 mb-4">{error || 'Invalid data structure received'}</p>
@@ -93,7 +97,7 @@ const SystemMonitoring: React.FC = () => {
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <EC2Icon className="w-8 h-8" />
+                <img src={ec2Icon} alt="EC2" className="w-8 h-8" />
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">EC2 Instance</h3>
                   <p className="text-xs text-gray-500">i-04b9defc7f7f5c03c</p>
@@ -164,7 +168,7 @@ const SystemMonitoring: React.FC = () => {
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <RDSIcon className="w-8 h-8" />
+                <img src={rdsIcon} alt="RDS" className="w-8 h-8" />
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">RDS Instance</h3>
                   <p className="text-xs text-gray-500">dev-bloodline-rds</p>
@@ -235,7 +239,7 @@ const SystemMonitoring: React.FC = () => {
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <S3Icon className="w-8 h-8" />
+                <img src={s3Icon} alt="S3" className="w-8 h-8" />
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">S3 Storage</h3>
                   <p className="text-xs text-gray-500">Frontend + Assets Buckets</p>
@@ -310,7 +314,7 @@ const SystemMonitoring: React.FC = () => {
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <CloudFrontIcon className="w-8 h-8" />
+                <img src={cloudfrontIcon} alt="CloudFront" className="w-8 h-8" />
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">CloudFront CDN</h3>
                   <p className="text-xs text-gray-500">bloodline.dev distribution</p>
@@ -381,7 +385,7 @@ const SystemMonitoring: React.FC = () => {
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Route53Icon className="w-8 h-8" />
+                <img src={route53Icon} alt="Route53" className="w-8 h-8" />
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Route53 DNS</h3>
                   <p className="text-xs text-gray-500">bloodline.dev zone</p>
@@ -459,28 +463,28 @@ const SystemMonitoring: React.FC = () => {
           </div>
           <div className="text-center">
             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
-              <EC2Icon className="w-6 h-6" />
+              <img src={ec2Icon} alt="EC2" className="w-6 h-6" />
             </div>
             <p className="text-sm font-medium text-gray-900">EC2</p>
             <p className="text-xs text-gray-500">Running</p>
           </div>
           <div className="text-center">
             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
-              <RDSIcon className="w-6 h-6" />
+              <img src={rdsIcon} alt="RDS" className="w-6 h-6" />
             </div>
             <p className="text-sm font-medium text-gray-900">RDS</p>
             <p className="text-xs text-gray-500">Available</p>
           </div>
           <div className="text-center">
             <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
-              <CloudFrontIcon className="w-6 h-6" />
+              <img src={cloudfrontIcon} alt="CloudFront" className="w-6 h-6" />
             </div>
             <p className="text-sm font-medium text-gray-900">CDN</p>
             <p className="text-xs text-gray-500">Active</p>
           </div>
           <div className="text-center">
             <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-2">
-              <S3Icon className="w-6 h-6" />
+              <img src={s3Icon} alt="S3" className="w-6 h-6" />
             </div>
             <p className="text-sm font-medium text-gray-900">S3</p>
             <p className="text-xs text-gray-500">Healthy</p>
