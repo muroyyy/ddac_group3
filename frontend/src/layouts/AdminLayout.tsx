@@ -14,6 +14,7 @@ import {
   LogOut,
   Settings
 } from 'lucide-react';
+import bloodlineLogo from '../assets/bloodline_logo.svg';
 
 // Import admin components
 import AdminDashboard from '../modules/admin/pages/Dashboard';
@@ -90,8 +91,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
       <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out`}>
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
-            <Droplet className="w-8 h-8 text-red-600" />
-            <span className="text-xl font-bold text-gray-900">BloodLine</span>
+            <img 
+              src={bloodlineLogo} 
+              alt="BloodLine Logo" 
+              className="w-auto h-8"
+            />
           </div>
           <button onClick={() => setSidebarOpen(false)} className="cursor-pointer">
             <X className="w-6 h-6 text-gray-500" />
