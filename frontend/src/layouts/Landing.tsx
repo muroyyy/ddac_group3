@@ -92,8 +92,8 @@ const HeroSection: React.FC = () => {
 };
 
 const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; desc: string }> = ({ icon, title, desc }) => (
-  <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-red-100 transition-all duration-300 group">
-    <div className="w-14 h-14 bg-red-50 rounded-xl flex items-center justify-center mb-6 group-hover:bg-red-600 transition-colors duration-300">
+  <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-red-100 transition-all duration-300 group text-center md:text-left">
+    <div className="w-14 h-14 bg-red-50 rounded-xl flex items-center justify-center mb-6 group-hover:bg-red-600 transition-colors duration-300 mx-auto md:mx-0">
       <div className="text-red-600 group-hover:text-white transition-colors duration-300">
         {icon}
       </div>
@@ -104,7 +104,7 @@ const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; desc: string
 );
 
 const StepCard: React.FC<{ number: string; title: string; desc: string; icon: React.ReactNode }> = ({ number, title, desc, icon }) => (
-  <div className="relative flex flex-col items-center text-center max-w-sm">
+  <div className="relative flex flex-col items-center text-center max-w-sm mx-auto">
     <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-red-700 rounded-full flex items-center justify-center text-white shadow-lg mb-6 relative z-10">
       {icon}
       <div className="absolute -top-2 -right-2 w-8 h-8 bg-white border-2 border-red-600 rounded-full flex items-center justify-center text-red-700 font-bold text-sm">
