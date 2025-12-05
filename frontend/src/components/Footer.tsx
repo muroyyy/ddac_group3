@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import bloodlineLogo from '../assets/bloodline_logo.jpg';
+import bloodlineLogo from '../assets/bloodline_logo.svg';
 
 const Footer: React.FC = () => {
   const navigate = useNavigate();
@@ -24,20 +24,20 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
+    <footer className="bg-white text-gray-900 py-12 px-4 sm:px-6 lg:px-8 border-t border-gray-200">
       <div className="max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-4 gap-8 mb-8">
+        <div className="grid md:grid-cols-3 gap-8 mb-8">
           
           {/* Brand */}
           <div>
-            <div className="mb-4">
+            <div className="mb-4 flex justify-center md:justify-start">
               <img
                 src={bloodlineLogo}
                 alt="BloodLine Logo"
-                className="w-10 h-10 rounded-lg object-cover"
+                className="w-auto h-12"
               />
             </div>
-            <p className="text-gray-400">
+            <p className="text-gray-600">
               Inspiring more people to donate and save lives every day.
             </p>
           </div>
@@ -45,11 +45,11 @@ const Footer: React.FC = () => {
           {/* Awareness Links */}
           <div>
             <h4 className="font-bold mb-4">Learn</h4>
-            <ul className="space-y-2 text-gray-400">
+            <ul className="space-y-2 text-gray-600">
               <li>
                 <button
                   onClick={() => scrollToSection('why-donate')}
-                  className="hover:text-white transition-colors cursor-pointer"
+                  className="hover:text-gray-900 transition-colors cursor-pointer"
                 >
                   Why Donate?
                 </button>
@@ -57,7 +57,7 @@ const Footer: React.FC = () => {
               <li>
                 <button
                   onClick={() => scrollToSection('how-it-works')}
-                  className="hover:text-white transition-colors cursor-pointer"
+                  className="hover:text-gray-900 transition-colors cursor-pointer"
                 >
                   How It Works
                 </button>
@@ -65,7 +65,7 @@ const Footer: React.FC = () => {
               <li>
                 <button
                   onClick={() => scrollToSection('who-you-help')}
-                  className="hover:text-white transition-colors cursor-pointer"
+                  className="hover:text-gray-900 transition-colors cursor-pointer"
                 >
                   Who You Help
                 </button>
@@ -76,48 +76,33 @@ const Footer: React.FC = () => {
           {/* FAQ & Resources */}
           <div>
             <h4 className="font-bold mb-4">Resources</h4>
-            <ul className="space-y-2 text-gray-400">
+            <ul className="space-y-2 text-gray-600">
               <li>
                 <button
                   onClick={() => scrollToSection('faqs')}
-                  className="hover:text-white transition-colors cursor-pointer"
+                  className="hover:text-gray-900 transition-colors cursor-pointer"
                 >
                   FAQs
                 </button>
               </li>
               <li>
-                <button className="hover:text-white transition-colors cursor-pointer">
+                <button className="hover:text-gray-900 transition-colors cursor-pointer">
                   Eligibility Requirements
                 </button>
               </li>
               <li>
-                <button className="hover:text-white transition-colors cursor-pointer">
+                <button className="hover:text-gray-900 transition-colors cursor-pointer">
                   Blood Compatibility Chart
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Legal */}
-          <div>
-            <h4 className="font-bold mb-4">Legal</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li>
-                <button className="hover:text-white transition-colors cursor-pointer">
-                  Privacy Policy
-                </button>
-              </li>
-              <li>
-                <button className="hover:text-white transition-colors cursor-pointer">
-                  Terms of Service
-                </button>
-              </li>
-            </ul>
-          </div>
+
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
+        <div className="border-t border-gray-200 pt-8 text-center text-gray-600">
           <p>&copy; 2025 BloodLine. All rights reserved. Developed for CT071-3-3-DDAC at APU.</p>
         </div>
       </div>

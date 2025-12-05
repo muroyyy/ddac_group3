@@ -14,7 +14,7 @@ import {
   Upload,
   FileText
 } from 'lucide-react';
-import bloodlineLogo from '../assets/bloodline_logo.jpg';
+import bloodlineLogo from '../assets/bloodline_logo.svg';
 
 interface FormData {
   fullName: string;
@@ -236,7 +236,7 @@ const RegisterPage: React.FC = () => {
             <img 
               src={bloodlineLogo} 
               alt="BloodLine Logo" 
-              className="w-12 h-12 rounded-xl object-cover"
+              className="w-auto h-16 max-w-full mx-auto"
             />
           </div>
 
@@ -682,7 +682,7 @@ const RegisterPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/login')}
-                className="text-red-600 hover:text-red-700 font-semibold cursor-pointer"
+                className="text-red-600 hover:text-red-700 hover:underline font-semibold cursor-pointer"
               >
                 Sign in
               </button>

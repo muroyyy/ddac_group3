@@ -8,7 +8,7 @@ import {
   AlertCircle,
   ArrowLeft
 } from 'lucide-react';
-import bloodlineLogo from '../assets/bloodline_logo.jpg';
+import bloodlineLogo from '../assets/bloodline_logo.svg';
 
 interface LoginPageProps {
   onLogin: (userData: { id: number; email: string; name: string; role: string }) => void;
@@ -172,7 +172,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             <img 
               src={bloodlineLogo} 
               alt="BloodLine Logo" 
-              className="w-12 h-12 rounded-xl object-cover"
+              className="w-auto h-16 max-w-full mx-auto"
             />
           </div>
 
@@ -305,7 +305,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 <button 
                   type="button"
                   onClick={() => navigate('/register')}
-                  className="text-red-600 hover:text-red-700 font-semibold cursor-pointer"
+                  className="text-red-600 hover:text-red-700 hover:underline font-semibold cursor-pointer"
                 >
                   Sign up now
                 </button>
