@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 92" width="80" height="92">
+  <defs>
+    <linearGradient id="dropGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#E63946;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#C1121F;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Blood Drop -->
+  <path d="M 40 5 C 40 5 15 35 15 52 C 15 70 25 82 40 82 C 55 82 65 70 65 52 C 65 35 40 5 40 5 Z" 
+        fill="url(#dropGradient)" 
+        stroke="#A01820" 
+        stroke-width="2"/>
+  
+  <!-- Plus sign -->
+  <g transform="translate(40, 48)">
+    <rect x="-14" y="-4" width="28" height="8" fill="white" rx="2"/>
+    <rect x="-4" y="-14" width="8" height="28" fill="white" rx="2"/>
+  </g>
+</svg>
