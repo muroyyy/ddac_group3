@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-import bloodlineLogo from '../assets/bloodline_logo.jpg';
+import bloodlineLogo from '../assets/bloodline_logo.svg';
 
 const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -44,7 +44,7 @@ const Navbar: React.FC = () => {
             <img
               src={bloodlineLogo}
               alt="BloodLine Logo"
-              className="w-10 h-10 rounded-lg object-cover"
+              className="h-10 w-auto"
             />
           </div>
 
