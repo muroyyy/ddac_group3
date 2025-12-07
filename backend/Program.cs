@@ -17,6 +17,7 @@ builder.Services.AddAWSService<IAmazonCloudWatch>();
 builder.Services.AddScoped<DatabaseService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+builder.Services.AddScoped<DatabaseMigrationService>();
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -53,6 +54,13 @@ builder.Services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+
+// Run database migrations
+using (var scope = app.Services.CreateScope())
+{
+    var migrationService = scope.ServiceProvider.GetRequiredService<DatabaseMigrationService>();
+    await migrationService.EnsureBloodRequestsTableAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
