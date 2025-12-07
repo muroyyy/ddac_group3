@@ -29,9 +29,9 @@ namespace BloodLine.Controllers
                 {
                     PatientId = userId,
                     HospitalId = dto.HospitalId,
-                    BloodType = dto.BloodType,
-                    UnitsRequired = dto.UnitsRequired,
-                    UrgencyLevel = dto.UrgencyLevel,
+                    BloodType = dto.BloodType ?? "Unknown",
+                    UnitsRequired = dto.UnitsRequired > 0 ? dto.UnitsRequired : 1,
+                    UrgencyLevel = dto.UrgencyLevel ?? "Medium",
                     Notes = dto.Notes,
                     Status = "Pending",
                     CreatedAt = DateTime.UtcNow
