@@ -254,6 +254,17 @@ export const patientAPI = {
     );
     return parseJsonResponse(response);
   },
+
+    getAppointments: async (userId: number): Promise<any> => {
+    const response = await authenticatedFetch(
+      `${API_BASE_URL}/patient/appointments/${userId}`,
+      {
+        method: "GET",
+      }
+    );
+
+    return parseJsonResponse(response);
+  },
 };
 
 
