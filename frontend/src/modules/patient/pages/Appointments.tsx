@@ -1,38 +1,55 @@
-import { useEffect, useState } from "react";
-import { patientAPI } from "../../../utils/apiClient";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
+import { patientAPI } from "../../../utils/apiClient";
+import type { Appointment } from "../../../types/Appointment";
 
-interface Appointment {
-  appointmentId: number;
-  doctorName: string;
-  location: string;
-  appointmentDate: string;
-  status: string;
-}
-
-export default function Appointments() {
+const Appointments: React.FC = () => {
+  // logged-in user from AuthContext
   const { user } = useAuth();
-  // --------------------------------------------------------------------
-  // frontend states
-  // --------------------------------------------------------------------
+
+  // local state
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>("");
 
-  // --------------------------------------------------------------------
-  // LOAD APPOINTMENTS FROM BACKEND ON PAGE LOAD
-  // GET /api/patient/appointments/{userId}
-  // --------------------------------------------------------------------
+  // ----------------------------------------------------------
+  // Load appointments when user is available
+  // ----------------------------------------------------------
   useEffect(() => {
-    setTimeout(() => {
-      setAppointments([]);
+    // no user (not logged in) – do nothing
+    if (!user) {
       setLoading(false);
-    }, 500);
-  }, []);
+      setError("You must be logged in to view appointments.");
+      return;
+    }
 
-  // --------------------------------------------------------------------
-  // helper: returns Tailwind classes based on appointment status
-  // --------------------------------------------------------------------
+    const loadAppointments = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await patientAPI.getAppointments(user.id);
+
+        // Expecting: { success: boolean, data: Appointment[] }
+        if (response && response.success) {
+          setAppointments(response.data as Appointment[]);
+        } else {
+          setError(response?.message || "Failed to load appointments.");
+        }
+      } catch (err: any) {
+        console.error("Error loading appointments:", err);
+        setError("Unable to connect to the server.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAppointments();
+  }, [user]);
+
+  // ----------------------------------------------------------
+  // helper – Tailwind classes by status
+  // ----------------------------------------------------------
   const getStatusClass = (status: string) => {
     switch (status) {
       case "Upcoming":
@@ -50,46 +67,48 @@ export default function Appointments() {
   const upcoming = appointments.filter((a) => a.status === "Upcoming");
   const past = appointments.filter((a) => a.status !== "Upcoming");
 
-  // --------------------------------------------------------------------
-  // PAGE UI
-  // --------------------------------------------------------------------
+  // ----------------------------------------------------------
+  // RENDER
+  // ----------------------------------------------------------
   return (
     <div className="space-y-8 pb-10">
-
-      {/* --------------------- HEADER --------------------- */}
+      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">My Appointments</h1>
-        <p className="text-gray-600">Your scheduled and completed appointments.</p>
+        <p className="text-gray-600">
+          View your upcoming and past medical appointments.
+        </p>
       </div>
 
-      {/* --------------------- LOADING STATE --------------------- */}
+      {/* Loading */}
       {loading && <p className="text-gray-500">Loading appointments...</p>}
 
-      {/* --------------------- ERROR STATE ---------------------- */}
-      {error && <p className="text-red-600">{error}</p>}
+      {/* Error */}
+      {!loading && error && (
+        <p className="text-red-600 font-medium">{error}</p>
+      )}
 
-      {/* SHOW PAGE ONLY WHEN DATA IS READY */}
+      {/* Only show sections when not loading and no error */}
       {!loading && !error && (
         <>
-          {/* ======================================================
-             UPCOMING APPOINTMENTS
-          ====================================================== */}
+          {/* Upcoming */}
           <section>
-            <h2 className="text-2xl font-semibold mb-4">Upcoming Appointments</h2>
+            <h2 className="text-2xl font-semibold mb-4">
+              Upcoming Appointments
+            </h2>
 
-            {/* No upcoming appointments */}
             {upcoming.length === 0 && (
-              <p className="text-gray-500 italic">No upcoming appointments.</p>
+              <p className="text-gray-500 italic">
+                No upcoming appointments scheduled.
+              </p>
             )}
 
-            {/* responsive grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {upcoming.map((appt) => (
                 <div
                   key={appt.appointmentId}
                   className="p-5 bg-white rounded-xl shadow hover:shadow-lg transition hover:-translate-y-1 border border-gray-200"
                 >
-                  {/* top row */}
                   <div className="flex justify-between items-center">
                     <h3 className="text-lg font-semibold">
                       Appointment #{appt.appointmentId}
@@ -103,7 +122,6 @@ export default function Appointments() {
                     </span>
                   </div>
 
-                  {/* details */}
                   <div className="mt-4 text-sm space-y-2">
                     <p>
                       <strong>Doctor:</strong> {appt.doctorName}
@@ -116,7 +134,6 @@ export default function Appointments() {
                     </p>
                   </div>
 
-                  {/* optional button */}
                   <div className="mt-4">
                     <button className="w-full py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">
                       View Details
@@ -127,18 +144,14 @@ export default function Appointments() {
             </div>
           </section>
 
-          {/* ======================================================
-             PAST APPOINTMENTS
-          ====================================================== */}
+          {/* Past */}
           <section>
             <h2 className="text-2xl font-semibold mb-4">Past Appointments</h2>
 
-            {/* No past appointments */}
             {past.length === 0 && (
-              <p className="text-gray-500 italic">No past appointments found.</p>
+              <p className="text-gray-500 italic">No past appointments.</p>
             )}
 
-            {/* responsive grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {past.map((appt) => (
                 <div
@@ -183,4 +196,6 @@ export default function Appointments() {
       )}
     </div>
   );
-}
+};
+
+export default Appointments;
