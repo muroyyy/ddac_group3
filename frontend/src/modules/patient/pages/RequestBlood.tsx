@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { patientAPI } from "../../../utils/apiClient";
+import { useAuth } from "../../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 // ---------------------------------------------------------------------------
 // PATIENT BLOOD REQUEST FORM
@@ -9,6 +11,18 @@ import { patientAPI } from "../../../utils/apiClient";
 // ---------------------------------------------------------------------------
 
 export default function RequestBlood() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  
+  // Check if user is a patient
+  useEffect(() => {
+    if (!user || user.role !== 'patient') {
+      alert('Only patients can access this page. Please log in with a patient account.');
+      navigate('/login');
+      return;
+    }
+  }, [user, navigate]);
+
   // --------------------- FORM STATE ---------------------
   // These values represent what the user types or selects.
   // Later: Replace with backend state or pre-filled suggestions.
@@ -33,6 +47,12 @@ export default function RequestBlood() {
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
+  if (!user?.id) {
+    alert('User session not found. Please log in again.');
+    navigate('/login');
+    return;
+  }
+
   const payload = {
     bloodType,
     unitsRequired: Number(units),
@@ -42,7 +62,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   };
 
   try {
-    const response = await patientAPI.createBloodRequest(payload);
+    const response = await patientAPI.createBloodRequest(user.id, payload);
 
     if (response.success) {
       setSubmitted(true);
