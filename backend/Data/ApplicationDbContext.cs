@@ -18,6 +18,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<UserDocument> UserDocuments { get; set; }
     public DbSet<BloodInventory> BloodInventory { get; set; }
     public DbSet<ActiveBloodRequest> ActiveBloodRequests { get; set; }
+    public DbSet<PatientAppointment> PatientAppointments { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -100,5 +101,7 @@ public class ApplicationDbContext : DbContext
             entity.ToTable("active_blood_requests");
             entity.HasKey(e => e.RequestId);
         });
+
+        modelBuilder.Entity<PatientAppointment>().ToTable("patient_appointments");
     }
 }
