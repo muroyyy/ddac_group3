@@ -234,18 +234,24 @@ export const verificationAPI = {
 
 // Patient API endpoints
 export const patientAPI = {
-  createBloodRequest: async (data: any): Promise<any> => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/patient/blood-request`, {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+  createBloodRequest: async (userId: number, data: any): Promise<any> => {
+    const response = await authenticatedFetch(
+      `${API_BASE_URL}/patient/blood-request/${userId}`,
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    );
     return parseJsonResponse(response);
   },
 
-  getMyRequests: async (): Promise<any> => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/patient/blood-requests`, {
-      method: "GET",
-    });
+  getMyRequests: async (userId: number): Promise<any> => {
+    const response = await authenticatedFetch(
+      `${API_BASE_URL}/patient/blood-requests/${userId}`,
+      {
+        method: 'GET',
+      }
+    );
     return parseJsonResponse(response);
   },
 };

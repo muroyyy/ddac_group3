@@ -17,37 +17,21 @@ namespace BloodLine.Controllers
             _db = db;
         }
 
-        // Simple test endpoint
-        [HttpGet("test")]
-        public IActionResult Test()
-        {
-            return Ok(new { message = "Patient controller is working!", timestamp = DateTime.UtcNow });
-        }
-
-        // ----------------------------------------------------------------------
-        // POST: api/patient/blood-request
-        // TEMPORARY VERSION: Always uses patientId = 9 for testing.
-        // ----------------------------------------------------------------------
-        [HttpPost("blood-request")]
-        public async Task<IActionResult> CreateBloodRequest([FromBody] CreateBloodRequestDto dto)
+        [HttpPost("blood-request/{userId}")]
+        public async Task<IActionResult> CreateBloodRequest(int userId, [FromBody] CreateBloodRequestDto dto)
         {
             try
             {
-                // 🔥 TEMPORARY FIX — use patientId 9
-                int patientId = 9;
-
-                if (dto == null)
-                {
-                    return BadRequest(new { success = false, message = "Request data is required." });
-                }
+                if (userId <= 0)
+                    return BadRequest(new { success = false, message = "Invalid patient ID." });
 
                 var newRequest = new BloodRequest
                 {
-                    PatientId = patientId,  // 👈 STATIC TEST VALUE
+                    PatientId = userId,
                     HospitalId = dto.HospitalId,
-                    BloodType = dto.BloodType ?? "Unknown",
-                    UnitsRequired = dto.UnitsRequired > 0 ? dto.UnitsRequired : 1,
-                    UrgencyLevel = dto.UrgencyLevel ?? "Medium",
+                    BloodType = dto.BloodType,
+                    UnitsRequired = dto.UnitsRequired,
+                    UrgencyLevel = dto.UrgencyLevel,
                     Notes = dto.Notes,
                     Status = "Pending",
                     CreatedAt = DateTime.UtcNow
@@ -56,40 +40,34 @@ namespace BloodLine.Controllers
                 _db.BloodRequests.Add(newRequest);
                 await _db.SaveChangesAsync();
 
-                return Ok(new
-                {
-                    success = true,
-                    message = "Blood request created successfully.",
-                    requestId = newRequest.RequestId
-                });
+                return Ok(new { success = true, requestId = newRequest.RequestId });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error creating blood request: {ex.Message}");
-
                 return StatusCode(500, new
                 {
                     success = false,
-                    message = "Failed to create blood request. Please try again.",
+                    message = "Error submitting blood request.",
                     error = ex.Message
                 });
             }
         }
 
+
         // ----------------------------------------------------------------------
         // GET: api/patient/blood-requests
         // TEMPORARY VERSION: Always loads requests for patientId = 9
         // ----------------------------------------------------------------------
-        [HttpGet("blood-requests")]
-        public async Task<IActionResult> GetBloodRequests()
+       [HttpGet("blood-requests/{userId}")]
+        public async Task<IActionResult> GetBloodRequests(int userId)
         {
             try
             {
-                // 🔥 TEMPORARY FIX — use patientId 9
-                int patientId = 9;
+                if (userId <= 0)
+                    return BadRequest(new { success = false, message = "Invalid patient ID." });
 
                 var requests = await _db.BloodRequests
-                    .Where(r => r.PatientId == patientId)
+                    .Where(r => r.PatientId == userId)
                     .OrderByDescending(r => r.CreatedAt)
                     .Select(r => new
                     {
@@ -99,8 +77,7 @@ namespace BloodLine.Controllers
                         urgency = r.UrgencyLevel,
                         hospitalId = r.HospitalId,
                         status = r.Status,
-                        date = r.CreatedAt.HasValue ? r.CreatedAt.Value.ToString("yyyy-MM-dd") : "N/A",
-                        notes = r.Notes
+                        date = r.CreatedAt.Value.ToString("yyyy-MM-dd")
                     })
                     .ToListAsync();
 
@@ -108,15 +85,14 @@ namespace BloodLine.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error getting blood requests: {ex.Message}");
-
                 return StatusCode(500, new
                 {
                     success = false,
-                    message = "Failed to retrieve blood requests.",
+                    message = "Error loading requests.",
                     error = ex.Message
                 });
             }
         }
+ 
     }
 }

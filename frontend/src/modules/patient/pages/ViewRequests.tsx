@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
 import { patientAPI } from "../../../utils/apiClient";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function ViewRequests() {
+  const { user } = useAuth(); // ✅ GET LOGGED-IN USER
   const [requests, setRequests] = useState<any[]>([]);
   const [filter, setFilter] = useState("All");
   const [loading, setLoading] = useState(true);
 
   // Load real requests from backend
   useEffect(() => {
+    if (!user?.id) return; // ⛔ prevent calling API before user loads
+
     const loadRequests = async () => {
       try {
-        const res = await patientAPI.getMyRequests();
+        const res = await patientAPI.getMyRequests(user.id); // ✅ now user.id exists
 
         if (res.success) {
           setRequests(res.data);
@@ -23,7 +27,7 @@ export default function ViewRequests() {
     };
 
     loadRequests();
-  }, []);
+  }, [user]); // ✅ re-run when user becomes available
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -71,10 +75,10 @@ export default function ViewRequests() {
         ))}
       </div>
 
-      {/* LOADING STATE */}
+      {/* LOADING */}
       {loading && <p className="text-center text-gray-600 py-10">Loading...</p>}
 
-      {/* EMPTY STATE */}
+      {/* EMPTY */}
       {!loading && filteredRequests.length === 0 && (
         <p className="text-center text-gray-600 py-10">No requests found.</p>
       )}
