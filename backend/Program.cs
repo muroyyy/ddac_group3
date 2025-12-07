@@ -7,6 +7,9 @@ using Amazon.CloudWatch;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure to listen on port 8080 (matches Docker internal port)
+builder.WebHost.UseUrls("http://*:8080");
+
 // Add AWS Services
 builder.Services.AddAWSService<IAmazonSecretsManager>();
 builder.Services.AddAWSService<IAmazonCloudWatch>();
@@ -59,7 +62,8 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// Disable HTTPS redirect for API-only deployment
+// app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseCors("AllowFrontend");

@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-EXPOSE 5000
+EXPOSE 8080
 
 # Install AWS CLI v2 with timeout and retry
 RUN apt-get update -qq && apt-get install -y --no-install-recommends curl unzip ca-certificates \
