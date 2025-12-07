@@ -234,6 +234,8 @@ export const verificationAPI = {
 
 //Patient API endpoints
 
+
+// Endpoints to submit blood requests
 export const patientAPI = {
   createBloodRequest: async (data: any): Promise<any> => {
     const response = await authenticatedFetch(`${API_BASE_URL}/patient/blood-request`, {
@@ -242,7 +244,24 @@ export const patientAPI = {
     });
     return parseJsonResponse(response);
   },
+
+  // Get all blood requests for logged-in user
+  getMyRequests: async (): Promise<any> => {
+    const user = sessionManager.getUser();
+    const userId = user?.id;
+
+    if (!userId) {
+      throw new Error("User ID not found in session.");
+    }
+
+    const response = await authenticatedFetch(
+      `${API_BASE_URL}/patient/blood-requests/${userId}`
+    );
+
+    return parseJsonResponse(response);
+  },
 };
+
 
 
 // Donor API endpoints
