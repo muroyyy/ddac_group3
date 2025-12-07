@@ -1,51 +1,26 @@
-import React, { useEffect, useState } from "react";
-import { useAuth } from "../../../context/AuthContext";
-import { patientAPI } from "../../../utils/apiClient";
-import type { Appointment } from "../../../types/Appointment";
+import { useEffect, useState } from "react";
 
-const Appointments: React.FC = () => {
-  // logged-in user from AuthContext
-  const { user } = useAuth();
+interface Appointment {
+  appointmentId: number;
+  doctorName: string;
+  location: string;
+  appointmentDate: string;
+  status: string;
+}
+
+export default function Appointments() {
 
   // local state
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
-  // ----------------------------------------------------------
-  // Load appointments when user is available
-  // ----------------------------------------------------------
   useEffect(() => {
-    // no user (not logged in) – do nothing
-    if (!user) {
+    setTimeout(() => {
+      setAppointments([]);
       setLoading(false);
-      setError("You must be logged in to view appointments.");
-      return;
-    }
-
-    const loadAppointments = async () => {
-      try {
-        setLoading(true);
-        setError("");
-
-        const response = await patientAPI.getAppointments(user.id);
-
-        // Expecting: { success: boolean, data: Appointment[] }
-        if (response && response.success) {
-          setAppointments(response.data as Appointment[]);
-        } else {
-          setError(response?.message || "Failed to load appointments.");
-        }
-      } catch (err: any) {
-        console.error("Error loading appointments:", err);
-        setError("Unable to connect to the server.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadAppointments();
-  }, [user]);
+    }, 300);
+  }, []);
 
   // ----------------------------------------------------------
   // helper – Tailwind classes by status
@@ -196,6 +171,4 @@ const Appointments: React.FC = () => {
       )}
     </div>
   );
-};
-
-export default Appointments;
+}
