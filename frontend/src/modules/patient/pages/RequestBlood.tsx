@@ -62,7 +62,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   };
 
   try {
-    const response = await patientAPI.createBloodRequest(user.id, payload);
+    const response = await patientAPI.createBloodRequest(payload);
 
     if (response.success) {
       setSubmitted(true);

@@ -232,32 +232,46 @@ export const verificationAPI = {
 };
 
 
-//Patient API endpoints
-
-
-// Endpoints to submit blood requests
+// Patient API endpoints
 export const patientAPI = {
-  createBloodRequest: async (userId: number, data: any): Promise<any> => {
+  createBloodRequest: async (data: any): Promise<any> => {
+    // Get userId from AuthContext session storage
+    const stored = localStorage.getItem('bloodline_session');
+    if (!stored) {
+      throw new Error('User session not found. Please login again.');
+    }
+    
+    const session = JSON.parse(stored);
+    const userId = session.user?.id;
+    
+    if (!userId) {
+      throw new Error('User ID not found in session.');
+    }
+
     const response = await authenticatedFetch(`${API_BASE_URL}/patient/blood-request/${userId}`, {
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify(data),
     });
     return parseJsonResponse(response);
   },
 
-  // Get all blood requests for logged-in user
   getMyRequests: async (): Promise<any> => {
-    const user = sessionManager.getUser();
-    const userId = user?.id;
-
+    // Get userId from AuthContext session storage
+    const stored = localStorage.getItem('bloodline_session');
+    if (!stored) {
+      throw new Error('User session not found. Please login again.');
+    }
+    
+    const session = JSON.parse(stored);
+    const userId = session.user?.id;
+    
     if (!userId) {
-      throw new Error("User ID not found in session.");
+      throw new Error('User ID not found in session.');
     }
 
     const response = await authenticatedFetch(
       `${API_BASE_URL}/patient/blood-requests/${userId}`
     );
-
     return parseJsonResponse(response);
   },
 };
