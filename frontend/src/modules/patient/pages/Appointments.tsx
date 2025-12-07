@@ -24,32 +24,10 @@ export default function Appointments() {
   // GET /api/patient/appointments/{userId}
   // --------------------------------------------------------------------
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-
-        if (!user?.id) {
-          setError("User session not found.");
-          return;
-        }
-
-        // call API
-        const res = await patientAPI.getAppointments(user.id);
-
-        // backend sends: { success: true, data: [...] }
-        if (res.success) {
-          setAppointments(res.data);
-        } else {
-          setError("Failed to load appointments.");
-        }
-      } catch (err) {
-        setError("Unable to connect to the server.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
+    setTimeout(() => {
+      setAppointments([]);
+      setLoading(false);
+    }, 500);
   }, []);
 
   // --------------------------------------------------------------------
