@@ -25,37 +25,25 @@ namespace BloodLine.Controllers
         }
 
         // ----------------------------------------------------------------------
-        // POST: api/patient/blood-request/{userId}
-        // Creates a new blood request for a specific patient.
-        // This follows the same structure as DonorController (using userId).
+        // POST: api/patient/blood-request
+        // TEMPORARY VERSION: Always uses patientId = 9 for testing.
         // ----------------------------------------------------------------------
-        [HttpPost("blood-request/{userId}")]
-        public async Task<IActionResult> CreateBloodRequest(int userId, [FromBody] CreateBloodRequestDto dto)
+        [HttpPost("blood-request")]
+        public async Task<IActionResult> CreateBloodRequest([FromBody] CreateBloodRequestDto dto)
         {
             try
             {
-                // 1. Validate input
+                // 🔥 TEMPORARY FIX — use patientId 9
+                int patientId = 9;
+
                 if (dto == null)
                 {
                     return BadRequest(new { success = false, message = "Request data is required." });
                 }
 
-                if (userId <= 0)
-                {
-                    return BadRequest(new { success = false, message = "Valid user ID is required." });
-                }
-
-                // 2. Skip user validation for now (might not exist in Users table)
-                // var user = await _db.Users.FindAsync(userId);
-                // if (user == null)
-                // {
-                //     return NotFound(new { success = false, message = "Patient not found." });
-                // }
-
-                // 3. Create a new BloodRequest entity
                 var newRequest = new BloodRequest
                 {
-                    PatientId = userId,
+                    PatientId = patientId,  // 👈 STATIC TEST VALUE
                     HospitalId = dto.HospitalId,
                     BloodType = dto.BloodType ?? "Unknown",
                     UnitsRequired = dto.UnitsRequired > 0 ? dto.UnitsRequired : 1,
@@ -65,11 +53,9 @@ namespace BloodLine.Controllers
                     CreatedAt = DateTime.UtcNow
                 };
 
-                // 4. Save to database with error handling
                 _db.BloodRequests.Add(newRequest);
                 await _db.SaveChangesAsync();
 
-                // 5. Return success response
                 return Ok(new
                 {
                     success = true,
@@ -79,38 +65,31 @@ namespace BloodLine.Controllers
             }
             catch (Exception ex)
             {
-                // Log the error and return a safe response
                 Console.WriteLine($"Error creating blood request: {ex.Message}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                
+
                 return StatusCode(500, new
                 {
                     success = false,
                     message = "Failed to create blood request. Please try again.",
-                    error = ex.Message // Remove this in production
+                    error = ex.Message
                 });
             }
         }
 
-
-
         // ----------------------------------------------------------------------
-        // GET: api/patient/blood-requests/{userId}
-        // Returns all blood requests submitted by this patient.
-        // Sorted newest -> oldest.
+        // GET: api/patient/blood-requests
+        // TEMPORARY VERSION: Always loads requests for patientId = 9
         // ----------------------------------------------------------------------
-        [HttpGet("blood-requests/{userId}")]
-        public async Task<IActionResult> GetBloodRequests(int userId)
+        [HttpGet("blood-requests")]
+        public async Task<IActionResult> GetBloodRequests()
         {
             try
             {
-                if (userId <= 0)
-                {
-                    return BadRequest(new { success = false, message = "Valid user ID is required." });
-                }
+                // 🔥 TEMPORARY FIX — use patientId 9
+                int patientId = 9;
 
                 var requests = await _db.BloodRequests
-                    .Where(r => r.PatientId == userId)
+                    .Where(r => r.PatientId == patientId)
                     .OrderByDescending(r => r.CreatedAt)
                     .Select(r => new
                     {
@@ -130,6 +109,7 @@ namespace BloodLine.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Error getting blood requests: {ex.Message}");
+
                 return StatusCode(500, new
                 {
                     success = false,
@@ -138,6 +118,5 @@ namespace BloodLine.Controllers
                 });
             }
         }
-
     }
 }
