@@ -238,7 +238,14 @@ export const verificationAPI = {
 // Endpoints to submit blood requests
 export const patientAPI = {
   createBloodRequest: async (data: any): Promise<any> => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/patient/blood-request`, {
+    const user = sessionManager.getUser();
+    const userId = user?.id;
+
+    if (!userId) {
+      throw new Error("User ID not found in session.");
+    }
+
+    const response = await authenticatedFetch(`${API_BASE_URL}/patient/blood-request/${userId}`, {
       method: "POST",
       body: JSON.stringify(data),
     });
