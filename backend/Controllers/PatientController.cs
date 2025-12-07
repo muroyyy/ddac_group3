@@ -17,22 +17,46 @@ namespace BloodLine.Controllers
             _db = db;
         }
 
+        // -------------------------------------------------------------------
+        Convert UserId -> PatientId
+        // -------------------------------------------------------------------
+        private async Task<int?> GetPatientIdFromUser(int userId)
+        {
+            var profile = await _db.PatientProfiles
+                .FirstOrDefaultAsync(p => p.UserId == userId);
+
+            return profile?.PatientId;
+        }
+
+        // -------------------------------------------------------------------
+        // POST: /api/patient/blood-request/{userId}
+        // -------------------------------------------------------------------
         [HttpPost("blood-request/{userId}")]
         public async Task<IActionResult> CreateBloodRequest(int userId, [FromBody] CreateBloodRequestDto dto)
         {
             try
             {
                 if (userId <= 0)
-                    return BadRequest(new { success = false, message = "Invalid patient ID." });
+                    return BadRequest(new { success = false, message = "Invalid user ID." });
 
                 if (dto == null)
                     return BadRequest(new { success = false, message = "Request data is required." });
 
-                Console.WriteLine($"Creating blood request for userId={userId}, bloodType={dto.BloodType}, units={dto.UnitsRequired}");
+                // 🔥 Convert userId → patientId
+                var patientId = await GetPatientIdFromUser(userId);
+
+                if (patientId == null)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Patient profile not found for this user."
+                    });
+                }
 
                 var newRequest = new BloodRequest
                 {
-                    PatientId = userId,
+                    PatientId = patientId.Value,
                     HospitalId = dto.HospitalId,
                     BloodType = dto.BloodType ?? "Unknown",
                     UnitsRequired = dto.UnitsRequired > 0 ? dto.UnitsRequired : 1,
@@ -45,35 +69,49 @@ namespace BloodLine.Controllers
                 _db.BloodRequests.Add(newRequest);
                 await _db.SaveChangesAsync();
 
-                Console.WriteLine($"Blood request created successfully with ID={newRequest.RequestId}");
-
-                return Ok(new { success = true, message = "Blood request created successfully.", requestId = newRequest.RequestId });
+                return Ok(new
+                {
+                    success = true,
+                    message = "Blood request created successfully.",
+                    requestId = newRequest.RequestId
+                });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ERROR creating blood request: {ex.Message}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                
                 return StatusCode(500, new
                 {
                     success = false,
                     message = "Error submitting blood request.",
-                    error = ex.Message,
-                    details = ex.InnerException?.Message
+                    error = ex.Message
                 });
             }
         }
 
+        // -------------------------------------------------------------------
+        // GET: /api/patient/blood-requests/{userId}
+        // -------------------------------------------------------------------
         [HttpGet("blood-requests/{userId}")]
         public async Task<IActionResult> GetBloodRequests(int userId)
         {
             try
             {
                 if (userId <= 0)
-                    return BadRequest(new { success = false, message = "Invalid patient ID." });
+                    return BadRequest(new { success = false, message = "Invalid user ID." });
+
+                // 🔥 Convert userId → patientId
+                var patientId = await GetPatientIdFromUser(userId);
+
+                if (patientId == null)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Patient profile not found."
+                    });
+                }
 
                 var requests = await _db.BloodRequests
-                    .Where(r => r.PatientId == userId)
+                    .Where(r => r.PatientId == patientId.Value)
                     .OrderByDescending(r => r.CreatedAt)
                     .Select(r => new
                     {
@@ -83,7 +121,10 @@ namespace BloodLine.Controllers
                         urgency = r.UrgencyLevel,
                         hospitalId = r.HospitalId,
                         status = r.Status,
-                        date = r.CreatedAt.Value.ToString("yyyy-MM-dd")
+                        date = r.CreatedAt.HasValue
+                            ? r.CreatedAt.Value.ToString("yyyy-MM-dd")
+                            : "N/A",
+                        notes = r.Notes
                     })
                     .ToListAsync();
 
@@ -94,7 +135,56 @@ namespace BloodLine.Controllers
                 return StatusCode(500, new
                 {
                     success = false,
-                    message = "Error loading requests.",
+                    message = "Error loading blood requests.",
+                    error = ex.Message
+                });
+            }
+        }
+
+        // -------------------------------------------------------------------
+        // GET: /api/patient/appointments/{userId}
+        // -------------------------------------------------------------------
+        [HttpGet("appointments/{userId}")]
+        public async Task<IActionResult> GetAppointments(int userId)
+        {
+            try
+            {
+                if (userId <= 0)
+                    return BadRequest(new { success = false, message = "Invalid user ID." });
+
+                // 🔥 Convert userId → patientId
+                var patientId = await GetPatientIdFromUser(userId);
+
+                if (patientId == null)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Patient profile not found."
+                    });
+                }
+
+                var appts = await _db.PatientAppointments
+                    .Where(a => a.PatientId == patientId.Value)
+                    .OrderByDescending(a => a.AppointmentDate)
+                    .Select(a => new
+                    {
+                        appointmentId = a.AppointmentId,
+                        doctorName = a.DoctorName,
+                        location = a.Location,
+                        appointmentDate = a.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
+                        status = a.Status
+                    })
+                    .ToListAsync();
+
+                return Ok(new { success = true, data = appts });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Error loading appointments.",
                     error = ex.Message
                 });
             }
