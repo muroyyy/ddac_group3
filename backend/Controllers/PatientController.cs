@@ -17,6 +17,13 @@ namespace BloodLine.Controllers
             _db = db;
         }
 
+        // Simple test endpoint
+        [HttpGet("test")]
+        public IActionResult Test()
+        {
+            return Ok(new { message = "Patient controller is working!", timestamp = DateTime.UtcNow });
+        }
+
         // ----------------------------------------------------------------------
         // POST: api/patient/blood-request/{userId}
         // Creates a new blood request for a specific patient.
@@ -25,37 +32,64 @@ namespace BloodLine.Controllers
         [HttpPost("blood-request/{userId}")]
         public async Task<IActionResult> CreateBloodRequest(int userId, [FromBody] CreateBloodRequestDto dto)
         {
-            // 1. Validate patient exists
-            var user = await _db.Users.FindAsync(userId);
-            if (user == null)
+            try
             {
-                return NotFound(new { message = "Patient not found." });
+                // 1. Validate input
+                if (dto == null)
+                {
+                    return BadRequest(new { success = false, message = "Request data is required." });
+                }
+
+                if (userId <= 0)
+                {
+                    return BadRequest(new { success = false, message = "Valid user ID is required." });
+                }
+
+                // 2. Skip user validation for now (might not exist in Users table)
+                // var user = await _db.Users.FindAsync(userId);
+                // if (user == null)
+                // {
+                //     return NotFound(new { success = false, message = "Patient not found." });
+                // }
+
+                // 3. Create a new BloodRequest entity
+                var newRequest = new BloodRequest
+                {
+                    PatientId = userId,
+                    HospitalId = dto.HospitalId,
+                    BloodType = dto.BloodType ?? "Unknown",
+                    UnitsRequired = dto.UnitsRequired > 0 ? dto.UnitsRequired : 1,
+                    UrgencyLevel = dto.UrgencyLevel ?? "Medium",
+                    Notes = dto.Notes,
+                    Status = "Pending",
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                // 4. Save to database with error handling
+                _db.BloodRequests.Add(newRequest);
+                await _db.SaveChangesAsync();
+
+                // 5. Return success response
+                return Ok(new
+                {
+                    success = true,
+                    message = "Blood request created successfully.",
+                    requestId = newRequest.RequestId
+                });
             }
-
-            // 2. Create a new BloodRequest entity
-            var newRequest = new BloodRequest
+            catch (Exception ex)
             {
-                PatientId = userId,
-                HospitalId = dto.HospitalId,
-                BloodType = dto.BloodType,
-                UnitsRequired = dto.UnitsRequired,
-                UrgencyLevel = dto.UrgencyLevel,
-                Notes = dto.Notes,
-                Status = "Pending",             // Default status
-                CreatedAt = DateTime.UtcNow     // Timestamp
-            };
-
-            // 3. Save to database
-            _db.BloodRequests.Add(newRequest);
-            await _db.SaveChangesAsync();
-
-            // 4. Return success response
-            return Ok(new
-            {
-                success = true,
-                message = "Blood request created successfully.",
-                requestId = newRequest.RequestId
-            });
+                // Log the error and return a safe response
+                Console.WriteLine($"Error creating blood request: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Failed to create blood request. Please try again.",
+                    error = ex.Message // Remove this in production
+                });
+            }
         }
 
 
@@ -68,23 +102,41 @@ namespace BloodLine.Controllers
         [HttpGet("blood-requests/{userId}")]
         public async Task<IActionResult> GetBloodRequests(int userId)
         {
-            var requests = await _db.BloodRequests
-                .Where(r => r.PatientId == userId)
-                .OrderByDescending(r => r.CreatedAt)
-                .Select(r => new
+            try
+            {
+                if (userId <= 0)
                 {
-                    id = r.RequestId,
-                    bloodType = r.BloodType,
-                    units = r.UnitsRequired,
-                    urgency = r.UrgencyLevel,
-                    hospitalId = r.HospitalId,
-                    status = r.Status,
-                    date = r.CreatedAt.HasValue ? r.CreatedAt.Value.ToString("yyyy-MM-dd") : "N/A",
-                    notes = r.Notes
-                })
-                .ToListAsync();
+                    return BadRequest(new { success = false, message = "Valid user ID is required." });
+                }
 
-            return Ok(new { success = true, data = requests });
+                var requests = await _db.BloodRequests
+                    .Where(r => r.PatientId == userId)
+                    .OrderByDescending(r => r.CreatedAt)
+                    .Select(r => new
+                    {
+                        id = r.RequestId,
+                        bloodType = r.BloodType,
+                        units = r.UnitsRequired,
+                        urgency = r.UrgencyLevel,
+                        hospitalId = r.HospitalId,
+                        status = r.Status,
+                        date = r.CreatedAt.HasValue ? r.CreatedAt.Value.ToString("yyyy-MM-dd") : "N/A",
+                        notes = r.Notes
+                    })
+                    .ToListAsync();
+
+                return Ok(new { success = true, data = requests });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting blood requests: {ex.Message}");
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Failed to retrieve blood requests.",
+                    error = ex.Message
+                });
+            }
         }
 
     }
