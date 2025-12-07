@@ -18,7 +18,7 @@ namespace BloodLine.Controllers
         }
 
         // -------------------------------------------------------------------
-        Convert UserId -> PatientId
+        // Convert UserId -> PatientId
         // -------------------------------------------------------------------
         private async Task<int?> GetPatientIdFromUser(int userId)
         {
