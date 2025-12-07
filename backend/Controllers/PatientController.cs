@@ -141,53 +141,6 @@ namespace BloodLine.Controllers
             }
         }
 
-        // -------------------------------------------------------------------
-        // GET: /api/patient/appointments/{userId}
-        // -------------------------------------------------------------------
-        [HttpGet("appointments/{userId}")]
-        public async Task<IActionResult> GetAppointments(int userId)
-        {
-            try
-            {
-                if (userId <= 0)
-                    return BadRequest(new { success = false, message = "Invalid user ID." });
 
-                // 🔥 Convert userId → patientId
-                var patientId = await GetPatientIdFromUser(userId);
-
-                if (patientId == null)
-                {
-                    return BadRequest(new
-                    {
-                        success = false,
-                        message = "Patient profile not found."
-                    });
-                }
-
-                var appts = await _db.PatientAppointments
-                    .Where(a => a.PatientId == patientId.Value)
-                    .OrderByDescending(a => a.AppointmentDate)
-                    .Select(a => new
-                    {
-                        appointmentId = a.AppointmentId,
-                        doctorName = a.DoctorName,
-                        location = a.Location,
-                        appointmentDate = a.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
-                        status = a.Status
-                    })
-                    .ToListAsync();
-
-                return Ok(new { success = true, data = appts });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    success = false,
-                    message = "Error loading appointments.",
-                    error = ex.Message
-                });
-            }
-        }
     }
 }
