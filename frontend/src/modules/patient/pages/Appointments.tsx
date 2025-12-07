@@ -1,27 +1,43 @@
 import { useEffect, useState } from "react";
+import { patientAPI } from "../../../utils/apiClient";
+import { useAuth } from "../../../context/AuthContext";
+import type { Appointment } from "../../../types/Appointment";
 
-interface Appointment {
-  appointmentId: number;
-  doctorName: string;
-  location: string;
-  appointmentDate: string;
-  status: string;
-}
+
 
 export default function Appointments() {
+  const { user } = useAuth();
 
-  // local state
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    setTimeout(() => {
-      setAppointments([]);
-      setLoading(false);
-    }, 300);
-  }, []);
+    const loadAppointments = async () => {
+      try {
+        if (!user?.id) {
+          setError("User session not found.");
+          setLoading(false);
+          return;
+        }
 
+        const result = await patientAPI.getAppointments(user.id);
+
+        if (!result.success) {
+          setError(result.message || "Failed to load appointments.");
+        } else {
+          setAppointments(result.data || []);
+        }
+      } catch (err) {
+        setError("Error loading appointments.");
+        console.error("Appointment load error:", err);
+      }
+
+      setLoading(false);
+    };
+
+    loadAppointments();
+  }, [user]);
   // ----------------------------------------------------------
   // helper – Tailwind classes by status
   // ----------------------------------------------------------
