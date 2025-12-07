@@ -79,7 +79,7 @@ namespace BloodLine.Controllers
                     urgency = r.UrgencyLevel,
                     hospitalId = r.HospitalId,
                     status = r.Status,
-                    date = r.CreatedAt.ToShortDateString(),
+                    date = r.CreatedAt?.ToString("yyyy-MM-dd") ?? "N/A",
                     notes = r.Notes
                 })
                 .ToListAsync();
