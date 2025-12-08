@@ -20,20 +20,20 @@ public class PatientAppointment
     public int HospitalId { get; set; }
 
     [Column("doctor_name")]
-    public string DoctorName { get; set; } = string.Empty;
+    public string? DoctorName { get; set; }
 
     [Column("appointment_date")]
     public DateTime AppointmentDate { get; set; }
 
     [Column("location")]
-    public string Location { get; set; } = string.Empty;
+    public string? Location { get; set; }
 
     [Column("status")]
-    public string Status { get; set; } = string.Empty;
+    public string Status { get; set; } = "Upcoming";
+
+    [Column("created_at")]
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     [Column("doctor_notes")]
     public string? DoctorNotes { get; set; }
-
-    [Column("created_at")]
-    public DateTime CreatedAt { get; set; }
 }
