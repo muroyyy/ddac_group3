@@ -1,35 +1,64 @@
-import { useState } from "react";
-
-// Edit Profile page for patient.
-// UI has been upgraded to match a modern medical dashboard design.
+import { useState, useEffect } from "react";
+import { useAuth } from "../../../context/AuthContext";
+import { patientAPI } from "../../../utils/apiClient";
+import { useNavigate } from "react-router-dom";
 
 export default function EditProfile() {
-  // ---------------- INITIAL MOCK VALUES --------------------
-  const [fullName, setFullName] = useState("Sharveen Patient");
-  const [email, setEmail] = useState("patient@example.com");
-  const [phone, setPhone] = useState("012-3456789");
-  const [bloodTypeNeeded, setBloodTypeNeeded] = useState("O+");
-  const [urgencyLevel, setUrgencyLevel] = useState("High");
-  const [conditionDescription, setConditionDescription] = useState(
-    "Requires regular transfusion for chronic anemia."
-  );
-
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [bloodTypeNeeded, setBloodTypeNeeded] = useState("");
+  const [medicalCondition, setMedicalCondition] = useState("");
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
 
-  // ---------------- HANDLE FORM SUBMISSION --------------------
-  const handleSave = (e: React.FormEvent) => {
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!user?.id) return;
+      try {
+        const result = await patientAPI.getProfile(user.id);
+        if (result.success) {
+          setFullName(result.data.fullName || "");
+          setEmail(result.data.email || "");
+          setPhone(result.data.phone || "");
+          setBloodTypeNeeded(result.data.bloodTypeNeeded || "");
+          setMedicalCondition(result.data.medicalCondition || "");
+        }
+      } catch (err) {
+        setError("Failed to load profile");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProfile();
+  }, [user]);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaved(true);
-
-    console.log("Mock profile update submitted:", {
-      fullName,
-      email,
-      phone,
-      bloodTypeNeeded,
-      urgencyLevel,
-      conditionDescription,
-    });
+    if (!user?.id) return;
+    try {
+      const result = await patientAPI.updateProfile(user.id, {
+        fullName,
+        email,
+        phone,
+        bloodTypeNeeded,
+        medicalCondition,
+      });
+      if (result.success) {
+        setSaved(true);
+        setTimeout(() => navigate("/patient/profile"), 2000);
+      } else {
+        setError(result.message || "Failed to update profile");
+      }
+    } catch (err) {
+      setError("Error updating profile");
+    }
   };
+
+  if (loading) return <div className="p-6">Loading...</div>;
 
   return (
     <div className="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-md space-y-6 border border-gray-200">
@@ -42,11 +71,14 @@ export default function EditProfile() {
         </p>
       </div>
 
-      {/* ---------------- SUCCESS MESSAGE ---------------- */}
       {saved && (
         <div className="p-4 bg-green-50 border border-green-300 text-green-700 rounded-lg shadow-sm">
           <strong>✔ Profile updated successfully!</strong>
-          <p className="text-sm">This is currently mock-only. Backend integration coming later.</p>
+        </div>
+      )}
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-300 text-red-700 rounded-lg shadow-sm">
+          {error}
         </div>
       )}
 
@@ -128,26 +160,8 @@ export default function EditProfile() {
               </select>
             </div>
 
-            {/* URGENCY LEVEL */}
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Urgency Level
-              </label>
-              <select
-                className="border rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-red-400"
-                value={urgencyLevel}
-                onChange={(e) => setUrgencyLevel(e.target.value)}
-              >
-                <option>Low</option>
-                <option>Medium</option>
-                <option>High</option>
-                <option>Critical</option>
-              </select>
-            </div>
-
           </div>
 
-          {/* CONDITION DESCRIPTION */}
           <div className="mt-4">
             <label className="block text-sm font-medium text-gray-600 mb-1">
               Medical Condition
@@ -155,8 +169,8 @@ export default function EditProfile() {
             <textarea
               rows={4}
               className="border rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-red-400"
-              value={conditionDescription}
-              onChange={(e) => setConditionDescription(e.target.value)}
+              value={medicalCondition}
+              onChange={(e) => setMedicalCondition(e.target.value)}
             ></textarea>
           </div>
         </div>

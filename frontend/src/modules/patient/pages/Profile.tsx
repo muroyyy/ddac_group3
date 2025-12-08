@@ -17,18 +17,18 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);       // Loading state
   const [error, setError] = useState<string | null>(null); // Error handling state
 
-  // Fetch profile data from backend (replace with real API)
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!user) return;
+      if (!user?.id) return;
 
       try {
-        const response = await fetch(`/api/patient/${user.id}/profile`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch profile data');
+        const { patientAPI } = await import('../../../utils/apiClient');
+        const result = await patientAPI.getProfile(user.id);
+        if (result.success) {
+          setProfile(result.data);
+        } else {
+          setError(result.message || 'Failed to fetch profile');
         }
-        const data = await response.json();
-        setProfile(data);
       } catch (error: any) {
         setError(error.message || "An error occurred");
       } finally {
