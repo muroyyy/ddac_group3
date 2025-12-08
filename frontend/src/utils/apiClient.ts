@@ -234,6 +234,16 @@ export const verificationAPI = {
 
 // Patient API endpoints
 export const patientAPI = {
+  getInsights: async (userId: number): Promise<any> => {
+    const response = await authenticatedFetch(
+      `${API_BASE_URL}/insights/${userId}`,
+      {
+        method: 'GET',
+      }
+    );
+    return parseJsonResponse(response);
+  },
+
   createBloodRequest: async (userId: number, data: any): Promise<any> => {
     const response = await authenticatedFetch(
       `${API_BASE_URL}/patient/blood-request/${userId}`,
