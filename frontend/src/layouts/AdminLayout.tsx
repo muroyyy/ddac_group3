@@ -180,14 +180,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
 
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-20 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow-xl max-w-sm w-full">
-            <h2 className="text-xl font-bold text-gray-900 mb-3">Confirm Logout</h2>
-            <p className="text-gray-600 mb-6">Are you sure you want to logout?</p>
-            <div className="flex gap-3">
+        <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full">
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">Confirm Logout</h2>
+            <p className="text-gray-600 mb-8">Are you sure you want to logout?</p>
+            <div className="flex gap-4">
               <button
                 onClick={() => setShowLogoutConfirm(false)}
-                className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition"
+                className="flex-1 px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition font-medium"
               >
                 Cancel
               </button>
@@ -197,7 +197,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
                   await sessionAPI.logout();
                   onLogout();
                 }}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                className="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium"
               >
                 Logout
               </button>
