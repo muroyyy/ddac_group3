@@ -36,10 +36,10 @@ namespace BloodLine.Controllers
                 var fulfilled = requests.Count(r => r.Status == "Fulfilled");
                 var pending = requests.Count(r => r.Status == "Pending");
 
-                // Calculate monthly trend (last 6 months)
-                var sixMonthsAgo = DateTime.UtcNow.AddMonths(-6);
+                // Calculate monthly trend (last 1 month)
+                var oneMonthAgo = DateTime.UtcNow.AddMonths(-1);
                 var monthlyData = requests
-                    .Where(r => r.CreatedAt >= sixMonthsAgo)
+                    .Where(r => r.CreatedAt >= oneMonthAgo)
                     .GroupBy(r => new { r.CreatedAt.Value.Year, r.CreatedAt.Value.Month })
                     .Select(g => new
                     {

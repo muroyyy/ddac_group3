@@ -101,7 +101,7 @@ export default function PatientDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         {/* Pending Requests */}
-        <div className="bg-white rounded-lg shadow p-6 border hover:shadow-md transition">
+        <div className="bg-white rounded-lg shadow p-6 border hover:shadow-md transition cursor-pointer">
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-500">Pending Requests</p>
             <HeartPulse className="w-5 h-5 text-red-600" />
@@ -112,7 +112,7 @@ export default function PatientDashboard() {
         </div>
 
         {/* Upcoming Appointments */}
-        <div className="bg-white rounded-lg shadow p-6 border hover:shadow-md transition">
+        <div className="bg-white rounded-lg shadow p-6 border hover:shadow-md transition cursor-pointer">
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-500">Upcoming Appointments</p>
             <Calendar className="w-5 h-5 text-red-600" />
@@ -123,7 +123,7 @@ export default function PatientDashboard() {
         </div>
 
         {/* Completed Transfusions */}
-        <div className="bg-white rounded-lg shadow p-6 border hover:shadow-md transition">
+        <div className="bg-white rounded-lg shadow p-6 border hover:shadow-md transition cursor-pointer">
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-500">Completed Transfusions</p>
             <CheckCircle className="w-5 h-5 text-red-600" />
