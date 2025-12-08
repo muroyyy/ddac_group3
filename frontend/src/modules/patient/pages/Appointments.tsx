@@ -201,11 +201,25 @@ export default function Appointments() {
 
             <div className="flex gap-3">
               <button
-                onClick={() => {
-                  // Call backend cancel appointment API
-                  console.log("Cancel confirmed (TODO: backend API)");
-                  setShowConfirmCancel(false);
-                  setShowModal(false);
+                onClick={async () => {
+                  try {
+                    if (!selectedAppt) return;
+                    const result = await patientAPI.cancelAppointment(selectedAppt.appointmentId);
+                    if (result.success) {
+                      setAppointments(prev => prev.map(a => 
+                        a.appointmentId === selectedAppt.appointmentId 
+                          ? { ...a, status: "Cancelled" } 
+                          : a
+                      ));
+                      setShowConfirmCancel(false);
+                      setShowModal(false);
+                    } else {
+                      alert(result.message || "Failed to cancel appointment");
+                    }
+                  } catch (err) {
+                    console.error("Cancel error:", err);
+                    alert("Error cancelling appointment");
+                  }
                 }}
                 className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
               >
