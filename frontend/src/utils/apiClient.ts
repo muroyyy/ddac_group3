@@ -276,47 +276,26 @@ export const patientAPI = {
     return parseJsonResponse(response);
   },
 
+  getProfile: async (userId: number): Promise<any> => {
+    const response = await authenticatedFetch(
+      `${API_BASE_URL}/patient/profile/${userId}`,
+      {
+        method: 'GET',
+      }
+    );
+    return parseJsonResponse(response);
+  },
 
-
-  // Fetch patient profile data from the backend
-export const getPatientProfile = async (userId: number) => {
-  try {
-    const response = await fetch(`${BASE_URL}/${userId}/profile`);
-    
-    if (!response.ok) {
-      throw new Error("Failed to fetch profile data");
-    }
-
-    const profileData = await response.json();
-    return profileData;
-  } catch (error) {
-    console.error("Error fetching profile data:", error);
-    throw error; // Rethrow the error so the caller can handle it
-  }
-};
-
-// Update patient profile data
-export const updatePatientProfile = async (userId: number, profileData: any) => {
-  try {
-    const response = await fetch(`${BASE_URL}/${userId}/profile`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(profileData),
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to update profile data");
-    }
-
-    const updatedProfile = await response.json();
-    return updatedProfile;
-  } catch (error) {
-    console.error("Error updating profile:", error);
-    throw error;
-  }
-}
+  updateProfile: async (userId: number, data: any): Promise<any> => {
+    const response = await authenticatedFetch(
+      `${API_BASE_URL}/patient/profile/${userId}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }
+    );
+    return parseJsonResponse(response);
+  },
 };
 
 
