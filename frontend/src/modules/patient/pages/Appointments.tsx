@@ -147,9 +147,6 @@ export default function Appointments() {
                       <p><strong>Doctor Notes:</strong> {appt.doctorNotes}</p>
                     )}
                   </div>
-
-                  {/* No action available for past appointments */}
-                  <p className="text-gray-500 italic mt-4">No action available for past appointments.</p>
                 </div>
               ))}
             </div>
