@@ -246,8 +246,7 @@ namespace BloodLine.Controllers
                         medicalCondition = patientProfile.MedicalCondition,
                         dateOfBirth = patientProfile.DateOfBirth?.ToString("yyyy-MM-dd"),
                         address = patientProfile.Address,
-                        emergencyContactName = patientProfile.EmergencyContactName,
-                        emergencyContactPhone = patientProfile.EmergencyContactPhone,
+                        emergencyContact = patientProfile.EmergencyContact,
                         allergies = patientProfile.Allergies
                     }
                 });
@@ -285,10 +284,8 @@ namespace BloodLine.Controllers
                     patientProfile.DateOfBirth = dto.DateOfBirth;
                 if (dto.Address != null)
                     patientProfile.Address = dto.Address;
-                if (dto.EmergencyContactName != null)
-                    patientProfile.EmergencyContactName = dto.EmergencyContactName;
-                if (dto.EmergencyContactPhone != null)
-                    patientProfile.EmergencyContactPhone = dto.EmergencyContactPhone;
+                if (dto.EmergencyContact != null)
+                    patientProfile.EmergencyContact = dto.EmergencyContact;
                 if (dto.Allergies != null)
                     patientProfile.Allergies = dto.Allergies;
 

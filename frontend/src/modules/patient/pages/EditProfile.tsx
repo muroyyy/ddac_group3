@@ -14,8 +14,7 @@ export default function EditProfile() {
   const [medicalCondition, setMedicalCondition] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [address, setAddress] = useState("");
-  const [emergencyContactName, setEmergencyContactName] = useState("");
-  const [emergencyContactPhone, setEmergencyContactPhone] = useState("");
+  const [emergencyContact, setEmergencyContact] = useState("");
   const [allergies, setAllergies] = useState("");
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
@@ -33,8 +32,7 @@ export default function EditProfile() {
           setMedicalCondition(result.data.medicalCondition || "");
           setDateOfBirth(result.data.dateOfBirth || "");
           setAddress(result.data.address || "");
-          setEmergencyContactName(result.data.emergencyContactName || "");
-          setEmergencyContactPhone(result.data.emergencyContactPhone || "");
+          setEmergencyContact(result.data.emergencyContact || "");
           setAllergies(result.data.allergies || "");
         }
       } catch (err) {
@@ -58,8 +56,7 @@ export default function EditProfile() {
         medicalCondition,
         dateOfBirth,
         address,
-        emergencyContactName,
-        emergencyContactPhone,
+        emergencyContact,
         allergies,
       });
       if (result.success) {
@@ -182,28 +179,16 @@ export default function EditProfile() {
             Emergency Contact
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Contact Name
-              </label>
-              <input
-                className="border rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-red-400"
-                value={emergencyContactName}
-                onChange={(e) => setEmergencyContactName(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Contact Phone
-              </label>
-              <input
-                className="border rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-red-400"
-                value={emergencyContactPhone}
-                onChange={(e) => setEmergencyContactPhone(e.target.value)}
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Emergency Contact Phone
+            </label>
+            <input
+              placeholder="e.g., 012-3456789"
+              className="border rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-red-400"
+              value={emergencyContact}
+              onChange={(e) => setEmergencyContact(e.target.value)}
+            />
           </div>
         </div>
 

@@ -126,8 +126,7 @@ export default function Profile() {
         {/* EMERGENCY CONTACT */}
         <div>
           <h2 className="text-sm font-semibold text-gray-500">Emergency Contact</h2>
-          <p>{profile?.emergencyContactName ?? "N/A"}</p>
-          <p className="text-sm text-gray-600">{profile?.emergencyContactPhone ?? "N/A"}</p>
+          <p>{profile?.emergencyContact ?? "N/A"}</p>
         </div>
       </div>
 

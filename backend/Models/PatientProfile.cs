@@ -33,15 +33,11 @@ public class PatientProfile
     [Column("address")]
     public string? Address { get; set; }
 
-    [StringLength(100)]
-    [Column("emergency_contact_name")]
-    public string? EmergencyContactName { get; set; }
-
     [StringLength(15)]
-    [Column("emergency_contact_phone")]
-    public string? EmergencyContactPhone { get; set; }
+    [Column("emergency_contact")]
+    public string? EmergencyContact { get; set; }
 
-    [StringLength(500)]
+    [StringLength(255)]
     [Column("allergies")]
     public string? Allergies { get; set; }
 
