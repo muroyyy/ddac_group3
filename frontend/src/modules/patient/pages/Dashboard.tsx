@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
+import { patientAPI } from "../../../utils/apiClient";
 import { Calendar, HeartPulse, ListChecks, CheckCircle } from "lucide-react";
 
 // -----------------------------------------------------------------------------
@@ -48,22 +49,26 @@ const patientNews = [
 
 export default function PatientDashboard() {
   const { user } = useAuth();
-
-  // ---------------------------------------------------------------------------
-  // 📌 State: Track which news card is expanded to show content
-  // If expandedId === news.id → show embedded content
-  // ---------------------------------------------------------------------------
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [stats, setStats] = useState({ pending: 0, upcoming: 0, completed: 0 });
+  const [loading, setLoading] = useState(true);
 
-  // ---------------------------------------------------------------------------
-  // 📌 Hard-coded overview stats (Mock values)
-  // Later, replace this with real API calls.
-  // ---------------------------------------------------------------------------
-  const stats = {
-    pending: 2,
-    upcoming: 1,
-    completed: 8,
-  };
+  useEffect(() => {
+    const loadDashboard = async () => {
+      if (!user?.id) return;
+      try {
+        const result = await patientAPI.getDashboard(user.id);
+        if (result.success) {
+          setStats(result.data);
+        }
+      } catch (err) {
+        console.error("Error loading dashboard:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadDashboard();
+  }, [user]);
 
   // ---------------------------------------------------------------------------
   // 📌 Toggle news item expansion (open/close)
@@ -72,6 +77,8 @@ export default function PatientDashboard() {
     setExpandedId(prev => (prev === id ? null : id));
   };
 
+
+  if (loading) return <div className="p-6">Loading dashboard...</div>;
 
   return (
     <div className="space-y-8">

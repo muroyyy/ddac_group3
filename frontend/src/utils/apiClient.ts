@@ -234,6 +234,16 @@ export const verificationAPI = {
 
 // Patient API endpoints
 export const patientAPI = {
+  getDashboard: async (userId: number): Promise<any> => {
+    const response = await authenticatedFetch(
+      `${API_BASE_URL}/dashboard/patient/${userId}`,
+      {
+        method: 'GET',
+      }
+    );
+    return parseJsonResponse(response);
+  },
+
   getInsights: async (userId: number): Promise<any> => {
     const response = await authenticatedFetch(
       `${API_BASE_URL}/insights/${userId}`,
