@@ -1,6 +1,9 @@
 using BloodLine.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Amazon.BedrockRuntime;
+using Amazon.BedrockRuntime.Model;
+using System.Text.Json;
 
 namespace BloodLine.Controllers
 {
@@ -9,10 +12,12 @@ namespace BloodLine.Controllers
     public class InsightsController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
+        private readonly IConfiguration _config;
 
-        public InsightsController(ApplicationDbContext db)
+        public InsightsController(ApplicationDbContext db, IConfiguration config)
         {
             _db = db;
+            _config = config;
         }
 
         [HttpGet("{userId}")]
@@ -66,6 +71,9 @@ namespace BloodLine.Controllers
                     avgDaysBetween = (int)(totalDays / (sortedDates.Count - 1));
                 }
 
+                // Generate AI insight using OpenAI GPT
+                var aiInsight = await GenerateAIInsight(totalRequests, approved, rejected, fulfilled, pending, avgApprovalHours, avgDaysBetween);
+
                 return Ok(new
                 {
                     success = true,
@@ -79,7 +87,7 @@ namespace BloodLine.Controllers
                         avgApprovalTimeHours = avgApprovalHours,
                         avgDaysBetweenRequests = avgDaysBetween,
                         monthlyTrend = monthlyData,
-                        aiInsight = $"Based on your request history, most of your requests are approved within about {avgApprovalHours} hours. You typically submit a new request every {avgDaysBetween} days. Try to plan future requests at least 2-3 days in advance to give hospitals enough time to prepare blood safely."
+                        aiInsight
                     }
                 });
             }
@@ -92,6 +100,59 @@ namespace BloodLine.Controllers
                     error = ex.Message
                 });
             }
+        }
+
+        private async Task<string> GenerateAIInsight(int total, int approved, int rejected, int fulfilled, int pending, int avgHours, int avgDays)
+        {
+            try
+            {
+                var client = new AmazonBedrockRuntimeClient(Amazon.RegionEndpoint.USEast1);
+                
+                var prompt = $@"You are a healthcare assistant analyzing a patient's blood request history. 
+Generate a brief, empathetic insight (2-3 sentences) based on these statistics:
+- Total requests: {total}
+- Approved: {approved}
+- Rejected: {rejected}
+- Fulfilled: {fulfilled}
+- Pending: {pending}
+- Average approval time: {avgHours} hours
+- Average days between requests: {avgDays} days
+
+Provide actionable advice for the patient. Be concise, supportive, and focus on practical tips.";
+
+                var requestBody = new
+                {
+                    anthropic_version = "bedrock-2023-05-31",
+                    max_tokens = 200,
+                    messages = new[]
+                    {
+                        new { role = "user", content = prompt }
+                    }
+                };
+
+                var request = new InvokeModelRequest
+                {
+                    ModelId = "anthropic.claude-3-haiku-20240307-v1:0",
+                    ContentType = "application/json",
+                    Accept = "application/json",
+                    Body = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(requestBody)))
+                };
+
+                var response = await client.InvokeModelAsync(request);
+                var responseBody = await JsonSerializer.DeserializeAsync<JsonElement>(response.Body);
+                var content = responseBody.GetProperty("content")[0].GetProperty("text").GetString();
+                
+                return content ?? GetFallbackInsight(avgHours, avgDays);
+            }
+            catch
+            {
+                return GetFallbackInsight(avgHours, avgDays);
+            }
+        }
+
+        private string GetFallbackInsight(int avgHours, int avgDays)
+        {
+            return $"Based on your request history, most of your requests are approved within about {avgHours} hours. You typically submit a new request every {avgDays} days. Try to plan future requests at least 2-3 days in advance to give hospitals enough time to prepare blood safely.";
         }
     }
 }
