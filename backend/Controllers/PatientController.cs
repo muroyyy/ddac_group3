@@ -266,15 +266,15 @@ namespace BloodLine.Controllers
                 if (patientProfile == null)
                     return NotFound(new { success = false, message = "Patient profile not found." });
 
-                if (!string.IsNullOrEmpty(dto.FullName))
+                if (dto.FullName != null)
                     user.FullName = dto.FullName;
-                if (!string.IsNullOrEmpty(dto.Email))
+                if (dto.Email != null)
                     user.Email = dto.Email;
-                if (!string.IsNullOrEmpty(dto.Phone))
+                if (dto.Phone != null)
                     user.Phone = dto.Phone;
-                if (!string.IsNullOrEmpty(dto.BloodTypeNeeded))
+                if (dto.BloodTypeNeeded != null)
                     patientProfile.BloodTypeNeeded = dto.BloodTypeNeeded;
-                if (!string.IsNullOrEmpty(dto.MedicalCondition))
+                if (dto.MedicalCondition != null)
                     patientProfile.MedicalCondition = dto.MedicalCondition;
 
                 await _db.SaveChangesAsync();

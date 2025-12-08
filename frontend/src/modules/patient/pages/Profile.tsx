@@ -99,22 +99,8 @@ export default function Profile() {
         <div>
           <h2 className="text-sm font-semibold text-gray-500">Medical Condition</h2>
           <p className="leading-relaxed text-gray-700">
-            {profile?.conditionDescription ?? "N/A"}
+            {profile?.medicalCondition ?? "N/A"}
           </p>
-        </div>
-
-        {/* URGENCY LEVEL */}
-        <div>
-          <h2 className="text-sm font-semibold text-gray-500">Urgency Level</h2>
-          <p className="text-red-600 font-semibold">
-            {profile?.urgencyLevel ?? "N/A"}
-          </p>
-        </div>
-
-        {/* PREFERRED HOSPITAL */}
-        <div>
-          <h2 className="text-sm font-semibold text-gray-500">Preferred Hospital</h2>
-          <p>{profile?.hospitalPreference ?? "N/A"}</p>
         </div>
       </div>
 
