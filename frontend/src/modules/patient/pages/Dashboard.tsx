@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { patientAPI } from "../../../utils/apiClient";
 import { Calendar, HeartPulse, ListChecks, CheckCircle } from "lucide-react";
@@ -49,6 +50,7 @@ const patientNews = [
 
 export default function PatientDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [stats, setStats] = useState({ pending: 0, upcoming: 0, completed: 0 });
   const [loading, setLoading] = useState(true);
@@ -101,7 +103,7 @@ export default function PatientDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         {/* Pending Requests */}
-        <div className="bg-white rounded-lg shadow p-6 border hover:shadow-md transition cursor-pointer">
+        <div onClick={() => navigate('/patient/view-requests?filter=Pending')} className="bg-white rounded-lg shadow p-6 border hover:shadow-md transition cursor-pointer">
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-500">Pending Requests</p>
             <HeartPulse className="w-5 h-5 text-red-600" />
@@ -112,7 +114,7 @@ export default function PatientDashboard() {
         </div>
 
         {/* Upcoming Appointments */}
-        <div className="bg-white rounded-lg shadow p-6 border hover:shadow-md transition cursor-pointer">
+        <div onClick={() => navigate('/patient/appointments')} className="bg-white rounded-lg shadow p-6 border hover:shadow-md transition cursor-pointer">
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-500">Upcoming Appointments</p>
             <Calendar className="w-5 h-5 text-red-600" />
@@ -123,7 +125,7 @@ export default function PatientDashboard() {
         </div>
 
         {/* Completed Transfusions */}
-        <div className="bg-white rounded-lg shadow p-6 border hover:shadow-md transition cursor-pointer">
+        <div onClick={() => navigate('/patient/view-requests?filter=Fulfilled')} className="bg-white rounded-lg shadow p-6 border hover:shadow-md transition cursor-pointer">
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-500">Completed Transfusions</p>
             <CheckCircle className="w-5 h-5 text-red-600" />

@@ -54,7 +54,7 @@ export default function Insights() {
       {/* TOP SUMMARY CARDS (4) */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Total Requests */}
-        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 cursor-pointer">
           <p className="text-sm font-medium text-blue-800">Total Requests</p>
           <p className="mt-2 text-3xl font-bold text-blue-900">
             {totalRequests}
@@ -65,7 +65,7 @@ export default function Insights() {
         </div>
 
         {/* Approved */}
-        <div className="bg-green-50 border border-green-100 rounded-xl p-4">
+        <div className="bg-green-50 border border-green-100 rounded-xl p-4 cursor-pointer">
           <p className="text-sm font-medium text-green-800">Approved</p>
           <p className="mt-2 text-3xl font-bold text-green-900">
             {approved}
@@ -76,7 +76,7 @@ export default function Insights() {
         </div>
 
         {/* Rejected */}
-        <div className="bg-red-50 border border-red-100 rounded-xl p-4">
+        <div className="bg-red-50 border border-red-100 rounded-xl p-4 cursor-pointer">
           <p className="text-sm font-medium text-red-800">Rejected</p>
           <p className="mt-2 text-3xl font-bold text-red-900">{rejected}</p>
           <p className="mt-1 text-xs text-red-700">
@@ -85,7 +85,7 @@ export default function Insights() {
         </div>
 
         {/* Fulfilled */}
-        <div className="bg-purple-50 border border-purple-100 rounded-xl p-4">
+        <div className="bg-purple-50 border border-purple-100 rounded-xl p-4 cursor-pointer">
           <p className="text-sm font-medium text-purple-800">Fulfilled</p>
           <p className="mt-2 text-3xl font-bold text-purple-900">
             {fulfilled}
@@ -125,7 +125,7 @@ export default function Insights() {
       {/* MONTHLY TREND (very simple bar chart) */}
       <div className="bg-white rounded-xl shadow p-6">
         <h2 className="text-lg font-semibold text-gray-900">
-          Requests Over the Last 6 Months
+          Requests Over the Last Month
         </h2>
         <p className="text-sm text-gray-600 mb-4">
           Helps you see busy periods and patterns.

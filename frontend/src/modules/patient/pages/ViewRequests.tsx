@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { patientAPI } from "../../../utils/apiClient";
 import { useAuth } from "../../../context/AuthContext";
 
 export default function ViewRequests() {
-  const { user } = useAuth(); // ✅ GET LOGGED-IN USER
+  const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [requests, setRequests] = useState<any[]>([]);
-  const [filter, setFilter] = useState("All");
+  const [filter, setFilter] = useState(searchParams.get("filter") || "All");
   const [loading, setLoading] = useState(true);
 
   // Load real requests from backend
@@ -101,12 +103,12 @@ export default function ViewRequests() {
 
             <tbody>
               {filteredRequests.map((req) => (
-                <tr key={req.id} className="border-b hover:bg-gray-50 transition">
+                <tr key={req.id} className="border-b hover:bg-gray-50 transition cursor-pointer">
                   <td className="px-6 py-3">{req.id}</td>
                   <td className="px-6 py-3 font-medium">{req.bloodType}</td>
                   <td className="px-6 py-3">{req.units}</td>
                   <td className="px-6 py-3">{req.urgency}</td>
-                  <td className="px-6 py-3">{req.hospitalId}</td>
+                  <td className="px-6 py-3">{req.hospitalName || `Hospital ${req.hospitalId}`}</td>
                   <td className="px-6 py-3">
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(

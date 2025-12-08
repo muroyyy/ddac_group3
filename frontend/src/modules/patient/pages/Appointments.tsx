@@ -86,10 +86,10 @@ export default function Appointments() {
               {upcoming.map((appt) => (
                 <div
                   key={appt.appointmentId}
-                  className="p-5 bg-white rounded-xl shadow hover:shadow-lg transition hover:-translate-y-1 border border-gray-200"
+                  className="p-5 bg-white rounded-xl shadow hover:shadow-lg transition hover:-translate-y-1 border border-gray-200 cursor-pointer"
                 >
                   <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-semibold">Appointment #{appt.appointmentId}</h3>
+                    <h3 className="text-lg font-semibold">Appointment {appt.appointmentId}</h3>
                     <span className={`px-3 py-1 text-sm rounded-full font-medium ${getStatusClass(appt.status)}`}>
                       {appt.status}
                     </span>
@@ -130,10 +130,10 @@ export default function Appointments() {
               {past.map((appt) => (
                 <div
                   key={appt.appointmentId}
-                  className="p-5 bg-gray-50 rounded-xl border shadow-sm hover:shadow-md transition hover:-translate-y-1"
+                  className="p-5 bg-gray-50 rounded-xl border shadow-sm hover:shadow-md transition hover:-translate-y-1 cursor-pointer"
                 >
                   <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-semibold">Appointment #{appt.appointmentId}</h3>
+                    <h3 className="text-lg font-semibold">Appointment {appt.appointmentId}</h3>
                     <span className={`px-3 py-1 text-sm rounded-full font-medium ${getStatusClass(appt.status)}`}>
                       {appt.status}
                     </span>
@@ -159,7 +159,7 @@ export default function Appointments() {
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
             <h2 className="text-2xl font-bold mb-4">
-              Appointment #{selectedAppt.appointmentId}
+              Appointment {selectedAppt.appointmentId}
             </h2>
 
             <p><strong>Doctor:</strong> {selectedAppt.doctorName}</p>

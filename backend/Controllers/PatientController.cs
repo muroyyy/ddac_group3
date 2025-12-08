@@ -120,6 +120,7 @@ namespace BloodLine.Controllers
                         units = r.UnitsRequired,
                         urgency = r.UrgencyLevel,
                         hospitalId = r.HospitalId,
+                        hospitalName = _db.Users.Where(u => u.Id == r.HospitalId).Select(u => u.FullName).FirstOrDefault(),
                         status = r.Status,
                         date = r.CreatedAt.HasValue
                             ? r.CreatedAt.Value.ToString("yyyy-MM-dd")
