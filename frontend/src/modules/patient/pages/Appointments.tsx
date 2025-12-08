@@ -74,7 +74,7 @@ export default function Appointments() {
 
       {!loading && !error && (
         <>
-          {/* Upcoming Appointments */}
+          {/* UPCOMING APPOINTMENTS */}
           <section>
             <h2 className="text-2xl font-semibold mb-4">Upcoming Appointments</h2>
 
@@ -101,7 +101,7 @@ export default function Appointments() {
                     <p><strong>Date:</strong> {appt.appointmentDate}</p>
                   </div>
 
-                  {/* Updated button for canceling upcoming appointment */}
+                  {/* Cancel Appointment button for upcoming appointments */}
                   <div className="mt-4">
                     <button
                       onClick={() => {
@@ -118,7 +118,7 @@ export default function Appointments() {
             </div>
           </section>
 
-          {/* Past Appointments */}
+          {/* PAST APPOINTMENTS */}
           <section>
             <h2 className="text-2xl font-semibold mb-4">Past Appointments</h2>
 
@@ -143,10 +143,13 @@ export default function Appointments() {
                     <p><strong>Doctor:</strong> {appt.doctorName}</p>
                     <p><strong>Location:</strong> {appt.location}</p>
                     <p><strong>Date:</strong> {appt.appointmentDate}</p>
+                    {appt.doctorNotes && (
+                      <p><strong>Doctor Notes:</strong> {appt.doctorNotes}</p>
+                    )}
                   </div>
 
-                  {/* No button for past appointments */}
-                  <p className="text-gray-500 italic">No action available for past appointments.</p>
+                  {/* No action available for past appointments */}
+                  <p className="text-gray-500 italic mt-4">No action available for past appointments.</p>
                 </div>
               ))}
             </div>
@@ -167,7 +170,7 @@ export default function Appointments() {
             <p><strong>Date:</strong> {selectedAppt.appointmentDate}</p>
             <p><strong>Status:</strong> {selectedAppt.status}</p>
 
-            {/* Cancel button for upcoming appointments */}
+            {/* Cancel button only for upcoming appointments */}
             {selectedAppt.status === "Upcoming" && (
               <button
                 onClick={() => setShowConfirmCancel(true)}

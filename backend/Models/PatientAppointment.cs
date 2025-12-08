@@ -31,6 +31,9 @@ public class PatientAppointment
     [Column("status")]
     public string Status { get; set; } = string.Empty;
 
+    [Column("doctor_notes")]
+    public string? DoctorNotes { get; set; }
+
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
 }

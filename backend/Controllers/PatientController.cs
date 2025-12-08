@@ -169,7 +169,8 @@ namespace BloodLine.Controllers
                         doctorName = a.DoctorName,
                         location = a.Location,
                         appointmentDate = a.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
-                        status = a.Status
+                        status = a.Status,
+                        doctorNotes = a.DoctorNotes
                     })
                     .ToListAsync();
 
@@ -185,5 +186,39 @@ namespace BloodLine.Controllers
                 });
             }
         }
+
+
+        //Code to cancel upcoming appointment only
+        [HttpPut("cancel-appointment/{appointmentId}")]
+public async Task<IActionResult> CancelAppointment(int appointmentId)
+{
+    try
+    {
+        var appointment = await _db.PatientAppointments
+            .FirstOrDefaultAsync(a => a.AppointmentId == appointmentId && a.Status == "Upcoming");
+
+        if (appointment == null)
+        {
+            return BadRequest(new { success = false, message = "Appointment not found or already cancelled." });
+        }
+
+        // Update status to 'Cancelled'
+        appointment.Status = "Cancelled";
+        appointment.CreatedAt = DateTime.UtcNow; // Update timestamp to show last update
+        _db.PatientAppointments.Update(appointment);
+        await _db.SaveChangesAsync();
+
+        return Ok(new { success = true, message = "Appointment cancelled successfully." });
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new
+        {
+            success = false,
+            message = "Error cancelling appointment.",
+            error = ex.Message
+        });
+    }
+}
     }
 }

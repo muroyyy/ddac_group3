@@ -4,4 +4,5 @@ export interface Appointment {
   location: string;
   appointmentDate: string;
   status: "Upcoming" | "Completed" | "Cancelled";
+  doctorNotes?: string;
 }

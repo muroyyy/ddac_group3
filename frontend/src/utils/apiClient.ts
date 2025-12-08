@@ -265,7 +265,20 @@ export const patientAPI = {
 
     return parseJsonResponse(response);
   },
+
+    cancelAppointment: async (appointmentId: number): Promise<any> => {
+    const response = await authenticatedFetch(
+      `${API_BASE_URL}/patient/cancel-appointment/${appointmentId}`,
+      {
+        method: 'PUT',
+      }
+    );
+    return parseJsonResponse(response);
+  },
+
 };
+
+
 
 
 
