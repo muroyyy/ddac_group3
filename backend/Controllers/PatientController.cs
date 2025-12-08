@@ -243,7 +243,12 @@ namespace BloodLine.Controllers
                         email = user.Email,
                         phone = user.Phone,
                         bloodTypeNeeded = patientProfile.BloodTypeNeeded,
-                        medicalCondition = patientProfile.MedicalCondition
+                        medicalCondition = patientProfile.MedicalCondition,
+                        dateOfBirth = patientProfile.DateOfBirth?.ToString("yyyy-MM-dd"),
+                        address = patientProfile.Address,
+                        emergencyContactName = patientProfile.EmergencyContactName,
+                        emergencyContactPhone = patientProfile.EmergencyContactPhone,
+                        allergies = patientProfile.Allergies
                     }
                 });
             }
@@ -276,6 +281,16 @@ namespace BloodLine.Controllers
                     patientProfile.BloodTypeNeeded = dto.BloodTypeNeeded;
                 if (dto.MedicalCondition != null)
                     patientProfile.MedicalCondition = dto.MedicalCondition;
+                if (dto.DateOfBirth != null)
+                    patientProfile.DateOfBirth = dto.DateOfBirth;
+                if (dto.Address != null)
+                    patientProfile.Address = dto.Address;
+                if (dto.EmergencyContactName != null)
+                    patientProfile.EmergencyContactName = dto.EmergencyContactName;
+                if (dto.EmergencyContactPhone != null)
+                    patientProfile.EmergencyContactPhone = dto.EmergencyContactPhone;
+                if (dto.Allergies != null)
+                    patientProfile.Allergies = dto.Allergies;
 
                 await _db.SaveChangesAsync();
 

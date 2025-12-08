@@ -12,6 +12,11 @@ export default function EditProfile() {
   const [phone, setPhone] = useState("");
   const [bloodTypeNeeded, setBloodTypeNeeded] = useState("");
   const [medicalCondition, setMedicalCondition] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [address, setAddress] = useState("");
+  const [emergencyContactName, setEmergencyContactName] = useState("");
+  const [emergencyContactPhone, setEmergencyContactPhone] = useState("");
+  const [allergies, setAllergies] = useState("");
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
 
@@ -26,6 +31,11 @@ export default function EditProfile() {
           setPhone(result.data.phone || "");
           setBloodTypeNeeded(result.data.bloodTypeNeeded || "");
           setMedicalCondition(result.data.medicalCondition || "");
+          setDateOfBirth(result.data.dateOfBirth || "");
+          setAddress(result.data.address || "");
+          setEmergencyContactName(result.data.emergencyContactName || "");
+          setEmergencyContactPhone(result.data.emergencyContactPhone || "");
+          setAllergies(result.data.allergies || "");
         }
       } catch (err) {
         setError("Failed to load profile");
@@ -46,6 +56,11 @@ export default function EditProfile() {
         phone,
         bloodTypeNeeded,
         medicalCondition,
+        dateOfBirth,
+        address,
+        emergencyContactName,
+        emergencyContactPhone,
+        allergies,
       });
       if (result.success) {
         setSaved(true);
@@ -132,6 +147,63 @@ export default function EditProfile() {
               />
             </div>
 
+            {/* DATE OF BIRTH */}
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Date of Birth
+              </label>
+              <input
+                type="date"
+                className="border rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-red-400"
+                value={dateOfBirth}
+                onChange={(e) => setDateOfBirth(e.target.value)}
+              />
+            </div>
+
+          </div>
+
+          {/* ADDRESS */}
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Address
+            </label>
+            <textarea
+              rows={2}
+              className="border rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-red-400"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            ></textarea>
+          </div>
+        </div>
+
+        {/* SECTION: EMERGENCY CONTACT */}
+        <div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-3 border-l-4 border-red-500 pl-3">
+            Emergency Contact
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Contact Name
+              </label>
+              <input
+                className="border rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-red-400"
+                value={emergencyContactName}
+                onChange={(e) => setEmergencyContactName(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Contact Phone
+              </label>
+              <input
+                className="border rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-red-400"
+                value={emergencyContactPhone}
+                onChange={(e) => setEmergencyContactPhone(e.target.value)}
+              />
+            </div>
           </div>
         </div>
 
@@ -167,10 +239,23 @@ export default function EditProfile() {
               Medical Condition
             </label>
             <textarea
-              rows={4}
+              rows={3}
               className="border rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-red-400"
               value={medicalCondition}
               onChange={(e) => setMedicalCondition(e.target.value)}
+            ></textarea>
+          </div>
+
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Allergies
+            </label>
+            <textarea
+              rows={2}
+              placeholder="List any allergies (medications, food, etc.)"
+              className="border rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-red-400"
+              value={allergies}
+              onChange={(e) => setAllergies(e.target.value)}
             ></textarea>
           </div>
         </div>

@@ -22,9 +22,28 @@ public class PatientProfile
     [Column("condition_description")]
     public string? ConditionDescription { get; set; }
 
-    [StringLength(255)]  // Adding the medical_condition field
+    [StringLength(255)]
     [Column("medical_condition")]
-    public string? MedicalCondition { get; set; }  // New field for medical condition
+    public string? MedicalCondition { get; set; }
+
+    [Column("date_of_birth")]
+    public DateTime? DateOfBirth { get; set; }
+
+    [StringLength(255)]
+    [Column("address")]
+    public string? Address { get; set; }
+
+    [StringLength(100)]
+    [Column("emergency_contact_name")]
+    public string? EmergencyContactName { get; set; }
+
+    [StringLength(15)]
+    [Column("emergency_contact_phone")]
+    public string? EmergencyContactPhone { get; set; }
+
+    [StringLength(500)]
+    [Column("allergies")]
+    public string? Allergies { get; set; }
 
     [Required]
     [Column("urgency_level")]

@@ -102,6 +102,33 @@ export default function Profile() {
             {profile?.medicalCondition ?? "N/A"}
           </p>
         </div>
+
+        {/* DATE OF BIRTH */}
+        <div>
+          <h2 className="text-sm font-semibold text-gray-500">Date of Birth</h2>
+          <p>{profile?.dateOfBirth ?? "N/A"}</p>
+        </div>
+
+        {/* ADDRESS */}
+        <div>
+          <h2 className="text-sm font-semibold text-gray-500">Address</h2>
+          <p>{profile?.address ?? "N/A"}</p>
+        </div>
+
+        {/* ALLERGIES */}
+        <div>
+          <h2 className="text-sm font-semibold text-gray-500">Allergies</h2>
+          <p className="leading-relaxed text-gray-700">
+            {profile?.allergies ?? "None"}
+          </p>
+        </div>
+
+        {/* EMERGENCY CONTACT */}
+        <div>
+          <h2 className="text-sm font-semibold text-gray-500">Emergency Contact</h2>
+          <p>{profile?.emergencyContactName ?? "N/A"}</p>
+          <p className="text-sm text-gray-600">{profile?.emergencyContactPhone ?? "N/A"}</p>
+        </div>
       </div>
 
       {/* -------------------- EDIT PROFILE BUTTON -------------------- */}
