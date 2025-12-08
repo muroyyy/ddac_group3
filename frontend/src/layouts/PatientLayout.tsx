@@ -1,4 +1,5 @@
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import {
   LayoutDashboard,
@@ -10,11 +11,12 @@ import {
   ListChecks,
   BarChart3,
 } from "lucide-react";
-import bloodlineLogo from "../assets/bloodline_logo.jpg"; // <-- Make sure your logo file path is correct!
+import bloodlineLogo from "../assets/bloodline_logo.jpg";
 
 export default function PatientLayout() {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -102,7 +104,7 @@ export default function PatientLayout() {
 
           {/* Logout Button */}
           <button
-            onClick={handleLogout}
+            onClick={() => setShowLogoutConfirm(true)}
             className="mt-10 w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition flex items-center justify-center gap-2"
           >
             <LogOut className="w-4 h-4" />
@@ -120,6 +122,30 @@ export default function PatientLayout() {
       <footer className="w-full bg-red-600 text-white text-center py-3 text-sm mt-4">
         © BloodLine {new Date().getFullYear()} — All Rights Reserved
       </footer>
+
+      {/* ======================= LOGOUT CONFIRMATION MODAL ======================= */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl max-w-sm w-full">
+            <h2 className="text-xl font-bold text-gray-900 mb-3">Confirm Logout</h2>
+            <p className="text-gray-600 mb-6">Are you sure you want to logout?</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

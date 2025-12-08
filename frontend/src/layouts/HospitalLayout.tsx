@@ -1,10 +1,12 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { LayoutDashboard, Box, Clipboard, User, LogOut } from 'lucide-react';
 
 export default function HospitalLayout() {
 	const { logout, user } = useAuth();
 	const navigate = useNavigate();
+	const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
 	const handleLogout = async () => {
 		const { sessionAPI } = await import('../utils/apiClient');
@@ -52,7 +54,7 @@ export default function HospitalLayout() {
 								<p className="text-sm font-medium text-gray-800">{user?.name}</p>
 								<p className="text-xs text-gray-500 truncate">{user?.email}</p>
 							</div>
-							<button onClick={handleLogout} className="text-red-600 hover:text-red-800 cursor-pointer">
+							<button onClick={() => setShowLogoutConfirm(true)} className="text-red-600 hover:text-red-800 cursor-pointer">
 								<LogOut className="w-5 h-5" />
 							</button>
 						</div>
@@ -63,6 +65,30 @@ export default function HospitalLayout() {
 			<main className="flex-1 p-8">
 				<Outlet />
 			</main>
+
+			{/* Logout Confirmation Modal */}
+			{showLogoutConfirm && (
+				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+					<div className="bg-white p-6 rounded-xl shadow-xl max-w-sm w-full">
+						<h2 className="text-xl font-bold text-gray-900 mb-3">Confirm Logout</h2>
+						<p className="text-gray-600 mb-6">Are you sure you want to logout?</p>
+						<div className="flex gap-3">
+							<button
+								onClick={() => setShowLogoutConfirm(false)}
+								className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition"
+							>
+								Cancel
+							</button>
+							<button
+								onClick={handleLogout}
+								className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+							>
+								Logout
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 

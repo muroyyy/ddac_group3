@@ -1,10 +1,12 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { LayoutDashboard, Droplet, History, User, LogOut, Calendar, FileText, Clock } from 'lucide-react';
 
 export default function DonorLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleLogout = async () => {
     const { sessionAPI } = await import('../utils/apiClient');
@@ -73,7 +75,7 @@ export default function DonorLayout() {
             </div>
           </div>
           <button
-            onClick={handleLogout}
+            onClick={() => setShowLogoutConfirm(true)}
             className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
@@ -88,6 +90,30 @@ export default function DonorLayout() {
           <Outlet />
         </main>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl max-w-sm w-full">
+            <h2 className="text-xl font-bold text-gray-900 mb-3">Confirm Logout</h2>
+            <p className="text-gray-600 mb-6">Are you sure you want to logout?</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -48,6 +48,13 @@ resource "aws_iam_role_policy" "ec2_secrets_policy" {
           "secretsmanager:GetSecretValue"
         ]
         Resource = var.secrets_manager_secret_arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "bedrock:InvokeModel"
+        ]
+        Resource = "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"
       }
     ]
   })
