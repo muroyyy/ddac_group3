@@ -125,20 +125,33 @@ export default function PatientLayout() {
 
       {/* ======================= LOGOUT CONFIRMATION MODAL ======================= */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full">
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">Confirm Logout</h2>
-            <p className="text-gray-600 mb-8">Are you sure you want to logout?</p>
-            <div className="flex gap-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full transform transition-all animate-slideUp">
+            {/* Icon */}
+            <div className="flex justify-center pt-8 pb-4">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                <LogOut className="w-8 h-8 text-red-600" />
+              </div>
+            </div>
+            
+            {/* Content */}
+            <div className="px-8 pb-6 text-center">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Logout</h2>
+              <p className="text-gray-600 text-sm">Are you sure you want to logout from your account?</p>
+            </div>
+            
+            {/* Buttons */}
+            <div className="flex border-t border-gray-200">
               <button
                 onClick={() => setShowLogoutConfirm(false)}
-                className="flex-1 px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition font-medium"
+                className="flex-1 py-4 text-gray-700 font-semibold hover:bg-gray-50 transition rounded-bl-3xl"
               >
                 Cancel
               </button>
+              <div className="w-px bg-gray-200"></div>
               <button
                 onClick={handleLogout}
-                className="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium"
+                className="flex-1 py-4 text-red-600 font-semibold hover:bg-red-50 transition rounded-br-3xl"
               >
                 Logout
               </button>
