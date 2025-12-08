@@ -20,7 +20,6 @@ public class ApplicationDbContext : DbContext
     public DbSet<ActiveBloodRequest> ActiveBloodRequests { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<PatientAppointment> PatientAppointments { get; set; }
-    public DbSet<PatientAppointment> PatientAppointments { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Bell, CheckCircle, Clock, XCircle, Info } from "lucide-react";
+import { Bell, CheckCircle, XCircle, Info } from "lucide-react";
 import { useAuth } from '../../../context/AuthContext';
 
 interface Notification {
