@@ -93,7 +93,7 @@ export default function DonorLayout() {
 
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-white bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-xl shadow-xl max-w-sm w-full">
             <h2 className="text-xl font-bold text-gray-900 mb-3">Confirm Logout</h2>
             <p className="text-gray-600 mb-6">Are you sure you want to logout?</p>
