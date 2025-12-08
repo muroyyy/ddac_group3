@@ -155,7 +155,7 @@ export default function Insights() {
           <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-600 text-white text-xs font-bold">
             AI
           </span>
-          Smart Insight (Mock)
+          Smart Insights
         </h2>
         <p className="text-sm text-red-900">
           {aiInsight}
