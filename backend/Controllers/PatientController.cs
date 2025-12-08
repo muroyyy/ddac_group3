@@ -169,8 +169,7 @@ namespace BloodLine.Controllers
                         doctorName = a.DoctorName,
                         location = a.Location,
                         appointmentDate = a.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
-                        status = a.Status,
-                        doctorNotes = a.DoctorNotes
+                        status = a.Status
                     })
                     .ToListAsync();
 
@@ -190,35 +189,102 @@ namespace BloodLine.Controllers
 
         //Code to cancel upcoming appointment only
         [HttpPut("cancel-appointment/{appointmentId}")]
-public async Task<IActionResult> CancelAppointment(int appointmentId)
-{
-    try
-    {
-        var appointment = await _db.PatientAppointments
-            .FirstOrDefaultAsync(a => a.AppointmentId == appointmentId && a.Status == "Upcoming");
-
-        if (appointment == null)
+        public async Task<IActionResult> CancelAppointment(int appointmentId)
         {
-            return BadRequest(new { success = false, message = "Appointment not found or already cancelled." });
+            try
+            {
+                var appointment = await _db.PatientAppointments
+                    .FirstOrDefaultAsync(a => a.AppointmentId == appointmentId && a.Status == "Upcoming");
+
+                if (appointment == null)
+                {
+                    return BadRequest(new { success = false, message = "Appointment not found or already cancelled." });
+                }
+
+                // Update status to 'Cancelled'
+                appointment.Status = "Cancelled";
+                appointment.CreatedAt = DateTime.UtcNow; // Update timestamp to show last update
+                _db.PatientAppointments.Update(appointment);
+                await _db.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "Appointment cancelled successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Error cancelling appointment.",
+                    error = ex.Message
+                });
+            }
         }
 
-        // Update status to 'Cancelled'
-        appointment.Status = "Cancelled";
-        appointment.CreatedAt = DateTime.UtcNow; // Update timestamp to show last update
-        _db.PatientAppointments.Update(appointment);
-        await _db.SaveChangesAsync();
 
-        return Ok(new { success = true, message = "Appointment cancelled successfully." });
-    }
-    catch (Exception ex)
-    {
-        return StatusCode(500, new
+        [HttpGet("profile/{userId}")]
+        public async Task<IActionResult> GetProfile(int userId)
         {
-            success = false,
-            message = "Error cancelling appointment.",
-            error = ex.Message
-        });
-    }
-}
+            try
+            {
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                if (user == null)
+                    return NotFound(new { success = false, message = "User not found." });
+
+                var patientProfile = await _db.PatientProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
+                if (patientProfile == null)
+                    return NotFound(new { success = false, message = "Patient profile not found." });
+
+                return Ok(new
+                {
+                    success = true,
+                    data = new
+                    {
+                        fullName = user.FullName,
+                        email = user.Email,
+                        phone = user.Phone,
+                        bloodTypeNeeded = patientProfile.BloodTypeNeeded,
+                        medicalCondition = patientProfile.MedicalCondition
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Error loading profile.", error = ex.Message });
+            }
+        }
+
+        [HttpPut("profile/{userId}")]
+        public async Task<IActionResult> UpdateProfile(int userId, [FromBody] UpdatePatientProfileDto dto)
+        {
+            try
+            {
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                if (user == null)
+                    return NotFound(new { success = false, message = "User not found." });
+
+                var patientProfile = await _db.PatientProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
+                if (patientProfile == null)
+                    return NotFound(new { success = false, message = "Patient profile not found." });
+
+                if (!string.IsNullOrEmpty(dto.FullName))
+                    user.FullName = dto.FullName;
+                if (!string.IsNullOrEmpty(dto.Email))
+                    user.Email = dto.Email;
+                if (!string.IsNullOrEmpty(dto.Phone))
+                    user.Phone = dto.Phone;
+                if (!string.IsNullOrEmpty(dto.BloodTypeNeeded))
+                    patientProfile.BloodTypeNeeded = dto.BloodTypeNeeded;
+                if (!string.IsNullOrEmpty(dto.MedicalCondition))
+                    patientProfile.MedicalCondition = dto.MedicalCondition;
+
+                await _db.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "Profile updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Error updating profile.", error = ex.Message });
+            }
+        }
     }
 }

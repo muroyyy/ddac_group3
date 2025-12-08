@@ -1,44 +1,68 @@
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 /**
  * Patient Profile Page
  * ---------------------------------------------------------
  * Displays the patient's medical + personal details.
- * Uses MOCK DATA for now so the frontend can run
- * even before backend API development is completed.
- *
- * Later: Replace with GET /api/patient/{id}/profile (real backend)
+ * Replaces MOCK DATA with real data fetched from the backend.
  */
 export default function Profile() {
-
-  // Read logged-in user details from AuthContext
-  const { user } = useAuth();
-
-  // React Router navigation hook
+  const { user } = useAuth(); // Fetch user data from AuthContext
   const navigate = useNavigate();
 
-  /**
-   * MOCK PROFILE DATA
-   * -------------------------------------------------------
-   * These values will eventually come from your database.
-   * For now, they allow you to build a fully functional UI.
-   */
-  const mockProfile = {
-    fullName: user?.name ?? "Sharveen Patient",
-    email: user?.email ?? "patient@example.com",
-    phone: "012-3456789",
-    bloodTypeNeeded: "O+",
-    conditionDescription: "Requires regular transfusion for chronic anemia.",
-    urgencyLevel: "High",
-    hospitalPreference: "City General Hospital",
-  };
+  // State to manage profile data and loading/error states
+  const [profile, setProfile] = useState<any>(null);  // Store real profile data
+  const [loading, setLoading] = useState(true);       // Loading state
+  const [error, setError] = useState<string | null>(null); // Error handling state
+
+  // Fetch profile data from backend (replace with real API)
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) return;
+
+      try {
+        const response = await fetch(`/api/patient/${user.id}/profile`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch profile data');
+        }
+        const data = await response.json();
+        setProfile(data);
+      } catch (error: any) {
+        setError(error.message || "An error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
 
   // ========================== PAGE UI ==============================
 
+  // Show loading state if data is still being fetched
+  if (loading) {
+    return (
+      <div className="max-w-2xl bg-white p-6 rounded-lg shadow space-y-5">
+        <h1 className="text-2xl font-bold text-gray-900">Loading...</h1>
+      </div>
+    );
+  }
+
+  // Show error if fetching fails
+  if (error) {
+    return (
+      <div className="max-w-2xl bg-white p-6 rounded-lg shadow space-y-5">
+        <h1 className="text-2xl font-bold text-gray-900">Error</h1>
+        <p className="text-gray-600">{error}</p>
+      </div>
+    );
+  }
+
+  // Show profile data if fetched successfully
   return (
     <div className="max-w-2xl bg-white p-6 rounded-lg shadow space-y-5">
-
       {/* -------------------- PAGE HEADER -------------------- */}
       <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
       <p className="text-gray-600">
@@ -47,36 +71,35 @@ export default function Profile() {
 
       {/* -------------------- PROFILE DETAILS -------------------- */}
       <div className="space-y-4">
-
         {/* FULL NAME */}
         <div>
           <h2 className="text-sm font-semibold text-gray-500">Full Name</h2>
-          <p className="text-lg">{mockProfile.fullName}</p>
+          <p className="text-lg">{profile?.fullName ?? "N/A"}</p>
         </div>
 
         {/* EMAIL ADDRESS */}
         <div>
           <h2 className="text-sm font-semibold text-gray-500">Email Address</h2>
-          <p>{mockProfile.email}</p>
+          <p>{profile?.email ?? "N/A"}</p>
         </div>
 
         {/* PHONE NUMBER */}
         <div>
           <h2 className="text-sm font-semibold text-gray-500">Phone Number</h2>
-          <p>{mockProfile.phone}</p>
+          <p>{profile?.phone ?? "N/A"}</p>
         </div>
 
         {/* BLOOD TYPE */}
         <div>
           <h2 className="text-sm font-semibold text-gray-500">Blood Type Needed</h2>
-          <p>{mockProfile.bloodTypeNeeded}</p>
+          <p>{profile?.bloodTypeNeeded ?? "N/A"}</p>
         </div>
 
         {/* MEDICAL CONDITION */}
         <div>
           <h2 className="text-sm font-semibold text-gray-500">Medical Condition</h2>
           <p className="leading-relaxed text-gray-700">
-            {mockProfile.conditionDescription}
+            {profile?.conditionDescription ?? "N/A"}
           </p>
         </div>
 
@@ -84,16 +107,15 @@ export default function Profile() {
         <div>
           <h2 className="text-sm font-semibold text-gray-500">Urgency Level</h2>
           <p className="text-red-600 font-semibold">
-            {mockProfile.urgencyLevel}
+            {profile?.urgencyLevel ?? "N/A"}
           </p>
         </div>
 
         {/* PREFERRED HOSPITAL */}
         <div>
           <h2 className="text-sm font-semibold text-gray-500">Preferred Hospital</h2>
-          <p>{mockProfile.hospitalPreference}</p>
+          <p>{profile?.hospitalPreference ?? "N/A"}</p>
         </div>
-
       </div>
 
       {/* -------------------- EDIT PROFILE BUTTON -------------------- */}
@@ -103,7 +125,6 @@ export default function Profile() {
       >
         Edit Profile
       </button>
-
     </div>
   );
 }
