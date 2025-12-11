@@ -73,14 +73,14 @@ public class MonitoringController : ControllerBase
                 {
                     new Dimension { Name = dimensionName, Value = dimensionValue }
                 },
-                StartTimeUtc = startTime,
-                EndTimeUtc = endTime,
+                StartTime = startTime,
+                EndTime = endTime,
                 Period = 300,
                 Statistics = new List<string> { "Average" }
             };
 
             var response = await _cloudWatch.GetMetricStatisticsAsync(request);
-            return response.Datapoints.Count > 0 ? response.Datapoints.OrderByDescending(d => d.Timestamp).First().Average : 0.0;
+            return response.Datapoints.Count > 0 ? response.Datapoints.OrderByDescending(d => d.Timestamp).First().Average ?? 0.0 : 0.0;
         }
         catch
         {
