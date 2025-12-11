@@ -3,6 +3,7 @@ using BloodLine.Services;
 using Microsoft.EntityFrameworkCore;
 using Amazon.SecretsManager;
 using Amazon.CloudWatch;
+using Amazon.Runtime;
 // using Amazon.S3;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,8 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls("http://*:5000");
 
 // Add AWS Services
-builder.Services.AddAWSService<IAmazonSecretsManager>();
-builder.Services.AddAWSService<IAmazonCloudWatch>();
+builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+builder.Services.AddSingleton<IAmazonSecretsManager>(sp => new AmazonSecretsManagerClient());
+builder.Services.AddSingleton<IAmazonCloudWatch>(sp => new AmazonCloudWatchClient());
 // builder.Services.AddAWSService<IAmazonS3>();
 builder.Services.AddScoped<DatabaseService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
