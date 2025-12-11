@@ -9,7 +9,7 @@ using Amazon;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure to listen on port 5000
+// Configuree to listen on port 5000
 builder.WebHost.UseUrls("http://*:5000");
 
 // Get AWS Region from configuration
