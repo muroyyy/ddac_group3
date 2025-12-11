@@ -230,22 +230,39 @@ public class HospitalController : ControllerBase
     }
 
     /// <summary>
-    /// Get hospital profile by user ID.
+    /// Get hospital profile by user ID (joins users and hospital tables).
     /// </summary>
     [HttpGet("profile")]
     public async Task<IActionResult> GetHospitalProfile([FromQuery] int userId)
     {
         try
         {
-            var hospital = await _context.Set<Hospital>()
+            var profile = await _context.Set<Hospital>()
                 .Where(h => h.UserId == userId)
-                .Select(h => new { hospital_id = h.HospitalId, user_id = h.UserId, hospital_name = h.HospitalName })
+                .Join(_context.Users, h => h.UserId, u => u.Id, (h, u) => new
+                {
+                    // User information
+                    user_id = u.Id,
+                    full_name = u.FullName,
+                    email = u.Email,
+                    phone = u.Phone,
+                    role = u.Role.ToString(),
+                    status = u.Status.ToString(),
+                    verification_status = u.VerificationStatus.ToString(),
+                    created_at = u.CreatedAt,
+                    // Hospital information
+                    hospital_id = h.HospitalId,
+                    hospital_name = h.HospitalName,
+                    address = h.Address,
+                    contact_person = h.ContactPerson,
+                    contact_number = h.ContactNumber
+                })
                 .FirstOrDefaultAsync();
 
-            if (hospital == null)
-                return NotFound(new { error = "Hospital not found" });
+            if (profile == null)
+                return NotFound(new { error = "Hospital profile not found" });
 
-            return Ok(hospital);
+            return Ok(profile);
         }
         catch (Exception ex)
         {
