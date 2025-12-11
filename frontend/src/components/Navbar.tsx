@@ -95,7 +95,7 @@ const Navbar: React.FC = () => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2"
+            className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -108,25 +108,25 @@ const Navbar: React.FC = () => {
           <div className="px-4 py-4 space-y-3">
             <button
               onClick={() => scrollToSection('why-donate')}
-              className="block w-full text-left py-2 text-gray-600 hover:text-gray-900 font-medium"
+              className="block w-full text-left py-2 text-gray-600 hover:text-gray-900 font-medium cursor-pointer"
             >
               Why Donate?
             </button>
             <button
               onClick={() => scrollToSection('how-it-works')}
-              className="block w-full text-left py-2 text-gray-600 hover:text-gray-900 font-medium"
+              className="block w-full text-left py-2 text-gray-600 hover:text-gray-900 font-medium cursor-pointer"
             >
               How It Works
             </button>
             <button
               onClick={() => scrollToSection('who-you-help')}
-              className="block w-full text-left py-2 text-gray-600 hover:text-gray-900 font-medium"
+              className="block w-full text-left py-2 text-gray-600 hover:text-gray-900 font-medium cursor-pointer"
             >
               Who You Help
             </button>
             <button
               onClick={() => scrollToSection('faqs')}
-              className="block w-full text-left py-2 text-gray-600 hover:text-gray-900 font-medium"
+              className="block w-full text-left py-2 text-gray-600 hover:text-gray-900 font-medium cursor-pointer"
             >
               FAQs
             </button>
@@ -134,13 +134,13 @@ const Navbar: React.FC = () => {
             <div className="pt-4 border-t border-gray-200 space-y-2">
               <button
                 onClick={() => handleNavigation('/login')}
-                className="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
+                className="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium cursor-pointer"
               >
                 Login
               </button>
               <button
                 onClick={() => handleNavigation('/register')}
-                className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
+                className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium cursor-pointer"
               >
                 Register
               </button>

@@ -29,7 +29,7 @@ const Footer: React.FC = () => {
         <div className="grid md:grid-cols-3 gap-8 mb-8">
           
           {/* Brand */}
-          <div>
+          <div className="text-center md:text-left">
             <div className="mb-4 flex justify-center md:justify-start">
               <img
                 src={bloodlineLogo}
@@ -37,13 +37,13 @@ const Footer: React.FC = () => {
                 className="w-auto h-12"
               />
             </div>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-center md:text-left">
               Inspiring more people to donate and save lives every day.
             </p>
           </div>
 
           {/* Awareness Links */}
-          <div>
+          <div className="text-center md:text-left">
             <h4 className="font-bold mb-4">Learn</h4>
             <ul className="space-y-2 text-gray-600">
               <li>
@@ -74,7 +74,7 @@ const Footer: React.FC = () => {
           </div>
 
           {/* FAQ & Resources */}
-          <div>
+          <div className="text-center md:text-left">
             <h4 className="font-bold mb-4">Resources</h4>
             <ul className="space-y-2 text-gray-600">
               <li>
