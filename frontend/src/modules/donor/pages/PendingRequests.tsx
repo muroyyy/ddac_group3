@@ -29,7 +29,6 @@ export default function PendingRequests() {
 
   const loadRequests = async () => {
     try {
-      console.log('Loading requests for user ID:', user!.id);
       const response = await fetch(`${import.meta.env.VITE_EC2_PUBLIC_IP ? `http://${import.meta.env.VITE_EC2_PUBLIC_IP}:5000/api` : 'http://localhost:5000/api'}/donor/donation-requests/${user!.id}`);
       
       if (!response.ok) {
@@ -37,7 +36,6 @@ export default function PendingRequests() {
       }
       
       const data = await response.json();
-      console.log('API response:', data);
       
       // Ensure data is always an array
       setRequests(Array.isArray(data) ? data : []);

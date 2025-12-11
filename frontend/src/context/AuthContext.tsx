@@ -82,7 +82,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(userData);
     saveSession(userData);
     setIsLoading(false); // Ensure loading is false after login
-    console.log('[AuthContext] User logged in:', userData);
   };
 
   const logout = (): void => {
@@ -107,7 +106,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       setUser(session.user);
       setIsLoading(false);
-      console.log('[AuthContext] Session restored:', session.user);
     };
 
     checkSession();

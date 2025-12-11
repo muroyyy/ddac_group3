@@ -15,8 +15,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { user, isAuthenticated, isLoading } = useAuth();
 
-  console.log('🔒 ProtectedRoute checking auth:', { user, allowedRoles, isAuthenticated, isLoading });
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -26,19 +24,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   if (!isAuthenticated || !user) {
-    console.log('❌ No user found, redirecting to login');
     return <Navigate to={redirectTo} replace />;
   }
 
   // If no specific roles required, just check if authenticated
   if (allowedRoles.length === 0) {
-    console.log('✅ No role restriction, user authenticated');
     return <>{children}</>;
   }
 
   // Check if user role is allowed
   const hasPermission = allowedRoles.includes(user.role);
-  console.log('🎭 Role check:', { userRole: user.role, allowedRoles, hasPermission });
   
   if (!hasPermission) {
     return <Navigate to={redirectTo} replace />;

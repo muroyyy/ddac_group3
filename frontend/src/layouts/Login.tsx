@@ -82,21 +82,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
       setIsLoading(true);
       
       try {
-        console.log('🚀 Starting login process...', {
-          email: formData.email,
-          timestamp: new Date().toISOString()
-        });
-        
         const { authAPI } = await import('../utils/apiClient');
         const response = await authAPI.login({
           email: formData.email,
           password: formData.password
         });
 
-        console.log('📝 Login response received:', response);
-
         if (response.success && response.user) {
-          console.log('✅ Login successful, user data:', response.user);
           
           // Handle remember me functionality
           if (rememberMe) {
@@ -122,7 +114,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           const { sessionManager } = await import('../utils/sessionManager');
           const token = response.token || 'no-token';
           sessionManager.setSession(userData, token);
-          console.log('💾 Session stored:', userData);
 
           onLogin(userData);
 
@@ -135,13 +126,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           };
 
           const targetRoute = roleRoutes[normalizedRole] || '/dashboard';
-          console.log('📍 Navigating to:', targetRoute);
-          console.log('🔍 Current location before navigate:', window.location.pathname);
 
           // Use window.location for immediate redirect
           window.location.href = targetRoute;
         } else {
-          console.log('❌ Login failed:', response.message);
           setErrors({
             email: response.message,
             password: response.message

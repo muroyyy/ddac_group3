@@ -16,7 +16,6 @@ const SessionProvider: React.FC<SessionProviderProps> = ({ children }) => {
       const token = sessionManager.getToken();
       
       if (user && token) {
-        console.log('🔄 Restoring session for user:', user.email);
         login(user);
       }
       
