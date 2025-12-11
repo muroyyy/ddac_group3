@@ -125,7 +125,7 @@ export default function PatientLayout() {
 
       {/* ======================= LOGOUT CONFIRMATION MODAL ======================= */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+        <div className="fixed inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
           <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full transform transition-all animate-slideUp">
             {/* Icon */}
             <div className="flex justify-center pt-8 pb-4">
@@ -144,14 +144,14 @@ export default function PatientLayout() {
             <div className="flex border-t border-gray-200">
               <button
                 onClick={() => setShowLogoutConfirm(false)}
-                className="flex-1 py-4 text-gray-700 font-semibold hover:bg-gray-50 transition rounded-bl-3xl"
+                className="flex-1 py-4 text-gray-700 font-semibold hover:bg-gray-50 transition rounded-bl-3xl cursor-pointer"
               >
                 Cancel
               </button>
               <div className="w-px bg-gray-200"></div>
               <button
                 onClick={handleLogout}
-                className="flex-1 py-4 text-red-600 font-semibold hover:bg-red-50 transition rounded-br-3xl"
+                className="flex-1 py-4 text-red-600 font-semibold hover:bg-red-50 transition rounded-br-3xl cursor-pointer"
               >
                 Logout
               </button>
