@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Amazon.SecretsManager;
 using Amazon.CloudWatch;
 using Amazon.Runtime;
+using Amazon;
 // using Amazon.S3;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,9 +12,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Configure to listen on port 5000
 builder.WebHost.UseUrls("http://*:5000");
 
+// Get AWS Region from configuration
+var awsRegion = builder.Configuration["AWS:Region"] ?? "ap-southeast-1";
+var regionEndpoint = RegionEndpoint.GetBySystemName(awsRegion);
+
 // Add AWS Services
-builder.Services.AddSingleton<IAmazonSecretsManager, AmazonSecretsManagerClient>();
-builder.Services.AddSingleton<IAmazonCloudWatch, AmazonCloudWatchClient>();
+builder.Services.AddSingleton<IAmazonSecretsManager>(new AmazonSecretsManagerClient(regionEndpoint));
+builder.Services.AddSingleton<IAmazonCloudWatch>(new AmazonCloudWatchClient(regionEndpoint));
 // builder.Services.AddAWSService<IAmazonS3>();
 builder.Services.AddScoped<DatabaseService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
