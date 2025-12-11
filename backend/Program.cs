@@ -12,9 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls("http://*:5000");
 
 // Add AWS Services
-builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
-builder.Services.AddSingleton<IAmazonSecretsManager>(sp => new AmazonSecretsManagerClient());
-builder.Services.AddSingleton<IAmazonCloudWatch>(sp => new AmazonCloudWatchClient());
+builder.Services.AddSingleton<IAmazonSecretsManager, AmazonSecretsManagerClient>();
+builder.Services.AddSingleton<IAmazonCloudWatch, AmazonCloudWatchClient>();
 // builder.Services.AddAWSService<IAmazonS3>();
 builder.Services.AddScoped<DatabaseService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
