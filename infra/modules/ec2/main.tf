@@ -55,6 +55,26 @@ resource "aws_iam_role_policy" "ec2_secrets_policy" {
           "bedrock:InvokeModel"
         ]
         Resource = "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "sns:Publish",
+          "sns:Subscribe",
+          "sns:ListTopics"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "sqs:SendMessage",
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:GetQueueAttributes",
+          "sqs:GetQueueUrl"
+        ]
+        Resource = "*"
       }
     ]
   })
