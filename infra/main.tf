@@ -124,3 +124,11 @@ module "cloudfront" {
   ec2_public_dns      = module.ec2.public_dns
   certificate_arn     = module.acm.certificate_arn
 }
+
+# SNS Module
+module "sns" {
+  source = "./modules/sns"
+  
+  environment  = var.environment
+  project_name = var.project_name
+}
