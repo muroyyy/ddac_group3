@@ -67,6 +67,7 @@ namespace BloodLine.Controllers
             
             var pendingCount = 0;
             var completedCount = 0;
+            var lastDonationDate = (string?)null;
             
             if (donorProfile != null)
             {
@@ -77,6 +78,15 @@ namespace BloodLine.Controllers
                 completedCount = await _context.Database
                     .SqlQuery<int>($"SELECT COUNT(*) as Value FROM donor_appointments WHERE donor_id = {donorProfile.DonorId} AND status = 'Completed'")
                     .FirstOrDefaultAsync();
+                    
+                var lastDonation = await _context.Database
+                    .SqlQueryRaw<DateTime?>($"SELECT appointment_date as Value FROM donor_appointments WHERE donor_id = {donorProfile.DonorId} AND status = 'Completed' ORDER BY appointment_date DESC LIMIT 1")
+                    .FirstOrDefaultAsync();
+                    
+                if (lastDonation.HasValue)
+                {
+                    lastDonationDate = lastDonation.Value.ToString("yyyy-MM-dd");
+                }
             }
 
             return Ok(new
@@ -84,7 +94,7 @@ namespace BloodLine.Controllers
                 totalDonations = completedCount,
                 pendingRequests = pendingCount,
                 bloodType = donorProfile?.BloodType ?? "N/A",
-                lastDonation = (string?)null,
+                lastDonation = lastDonationDate,
                 urgentAlerts = 0
             });
         }
