@@ -147,7 +147,7 @@ Provide actionable advice for the patient. Be concise, supportive, and focus on 
                 var responseBody = await JsonSerializer.DeserializeAsync<JsonElement>(response.Body);
                 var content = responseBody.GetProperty("content")[0].GetProperty("text").GetString();
                 
-                Console.WriteLine($"✅ Bedrock AI insight generated: {content?.Substring(0, Math.Min(50, content.Length ?? 0))}...");
+                Console.WriteLine($"✅ Bedrock AI insight generated: {(content?.Length > 50 ? content.Substring(0, 50) + "..." : content)}");
                 return content ?? GetFallbackInsight(avgHours, avgDays);
             }
             catch (Exception ex)
