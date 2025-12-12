@@ -76,8 +76,11 @@ export default function Approvals() {
   const statuses = [...new Set(requests.map(r => r.status))];
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">Approval Requests</h2>
+    <div className="p-6 bg-gradient-to-br from-red-50 via-white to-red-50 min-h-screen">
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">Approval Requests</h2>
+        <p className="text-gray-600">Review and manage blood request approvals</p>
+      </div>
       
       {/* Search and Filters */}
       <div className="mb-4">
@@ -143,17 +146,17 @@ export default function Approvals() {
         </div>
       </div>
       
-      <div className="bg-white rounded shadow overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
         <table className="w-full text-left">
-          <thead className="bg-gray-100">
+          <thead className="bg-gradient-to-r from-red-600 to-red-700 text-white">
             <tr>
-              <th className="p-3">Name</th>
-              <th className="p-3">Email</th>
-              <th className="p-3">Request</th>
-              <th className="p-3">Type</th>
-              <th className="p-3">Doctor Note</th>
-              <th className="p-3">Created</th>
-              <th className="p-3">Actions</th>
+              <th className="p-4 font-semibold">Name</th>
+              <th className="p-4 font-semibold bg-red-500 bg-opacity-20">Email</th>
+              <th className="p-4 font-semibold">Request</th>
+              <th className="p-4 font-semibold bg-red-500 bg-opacity-20">Status</th>
+              <th className="p-4 font-semibold">Doctor Note</th>
+              <th className="p-4 font-semibold bg-red-500 bg-opacity-20">Created</th>
+              <th className="p-4 font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -162,13 +165,31 @@ export default function Approvals() {
             ) : filteredRequests.length === 0 ? (
               <tr><td colSpan={7} className="p-4">{searchTerm ? 'No matching requests found' : 'No requests'}</td></tr>
             ) : (
-              filteredRequests.map(r => (
-                <tr key={r.id} className="border-t">
-                  <td className="p-3">{r.userName}</td>
-                  <td className="p-3">{r.userEmail}</td>
-                  <td className="p-3">{r.requestType}{r.bloodType ? ` (${r.bloodType})` : ''}</td>
-                  <td className="p-3">{r.status}</td>
-                  <td className="p-3 max-w-xs">
+              filteredRequests.map((r, index) => (
+                <tr key={r.id} className={`border-t border-gray-100 hover:bg-red-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                  <td className="p-4 font-medium text-gray-900">{r.userName}</td>
+                  <td className="p-4 text-gray-600 bg-red-50 bg-opacity-30">{r.userEmail}</td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-900">{r.requestType}</span>
+                      {r.bloodType && (
+                        <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
+                          {r.bloodType}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="p-4 bg-red-50 bg-opacity-30">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      r.status.toLowerCase() === 'approved' ? 'bg-green-100 text-green-700' :
+                      r.status.toLowerCase() === 'rejected' ? 'bg-red-100 text-red-700' :
+                      r.status.toLowerCase() === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {r.status}
+                    </span>
+                  </td>
+                  <td className="p-4 max-w-xs">
                     {r.doctorNote && r.doctorNote.length > 50 ? (
                       <div>
                         <div className={expandedNotes.has(r.id) ? '' : 'truncate'}>
@@ -176,7 +197,7 @@ export default function Approvals() {
                         </div>
                         <button
                           onClick={() => toggleNoteExpansion(r.id)}
-                          className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1 mt-1"
+                          className="text-red-600 hover:text-red-800 text-sm flex items-center gap-1 mt-1 transition-colors"
                         >
                           {expandedNotes.has(r.id) ? (
                             <><ChevronUp className="w-3 h-3" /> Show less</>
@@ -186,13 +207,32 @@ export default function Approvals() {
                         </button>
                       </div>
                     ) : (
-                      <div>{r.doctorNote || 'No note'}</div>
+                      <div className="text-gray-600">{r.doctorNote || 'No note'}</div>
                     )}
                   </td>
-                  <td className="p-3">{new Date(r.createdAt).toLocaleString()}</td>
-                  <td className="p-3">
-                    <button className="mr-2 text-green-600" onClick={() => review(r.id, 'approved')}>Approve</button>
-                    <button className="text-red-600" onClick={() => review(r.id, 'rejected')}>Reject</button>
+                  <td className="p-4 text-gray-600 bg-red-50 bg-opacity-30">
+                    <div className="text-sm">
+                      {new Date(r.createdAt).toLocaleDateString()}
+                      <div className="text-xs text-gray-500">
+                        {new Date(r.createdAt).toLocaleTimeString()}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    <div className="flex gap-2">
+                      <button 
+                        className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium" 
+                        onClick={() => review(r.id, 'approved')}
+                      >
+                        Approve
+                      </button>
+                      <button 
+                        className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium" 
+                        onClick={() => review(r.id, 'rejected')}
+                      >
+                        Reject
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
