@@ -412,15 +412,13 @@ public class HospitalController : ControllerBase
     {
         try
         {
-            // Get hospital ID from user
-            var hospital = await _context.Set<Hospital>()
-                .FirstOrDefaultAsync(h => h.UserId == userId);
-            
-            if (hospital == null)
-                return BadRequest(new { error = "Hospital profile not found" });
+            // Get hospital ID from hospital staff table
+            var hospitalId = await GetHospitalIdFromUser(userId);
+            if (hospitalId == null)
+                return BadRequest(new { error = "Hospital staff not found" });
 
             var appointments = await _context.PatientAppointments
-                .Where(a => a.HospitalId == hospital.HospitalId)
+                .Where(a => a.HospitalId == hospitalId.Value)
                 .Join(_context.Set<BloodRequest>(), a => a.RequestId, br => br.RequestId, (a, br) => new { a, br })
                 .Join(_context.Set<PatientProfile>(), x => x.br.PatientId, pp => pp.PatientId, (x, pp) => new { x.a, x.br, pp })
                 .Join(_context.Users, x => x.pp.UserId, u => u.Id, (x, u) => new
@@ -436,7 +434,7 @@ public class HospitalController : ControllerBase
                 .OrderByDescending(x => x.appointmentDate)
                 .ToListAsync();
 
-            return Ok(new { success = true, data = appointments });
+            return Ok(appointments);
         }
         catch (Exception ex)
         {

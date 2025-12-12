@@ -24,7 +24,6 @@ export default function Appointments() {
   const loadAppointments = async () => {
     setLoading(true);
     try {
-      // Use user.id as hospitalId for now - this should be properly mapped
       const res = await hospitalAPI.getAppointments(user?.id || 1);
       setAppointments(res);
     } catch (error) {
