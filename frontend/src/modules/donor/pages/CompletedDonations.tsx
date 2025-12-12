@@ -20,48 +20,10 @@ export default function CompletedDonations() {
   const loadCompletedDonations = async () => {
     try {
       const completedDonations = await donorAPI.getCompletedDonations(user!.id);
-      
-      // If no completed donations from API, use mock data
-      if (completedDonations.length === 0) {
-        const mockCompletedDonations = [
-          {
-            id: 101,
-            hospitalName: 'Kuala Lumpur General Hospital',
-            date: '2023-10-15',
-            time: '10:00 AM',
-            status: 'Completed',
-            bloodType: 'O+',
-            units: 1
-          },
-          {
-            id: 102,
-            hospitalName: 'Pantai Hospital Kuala Lumpur',
-            date: '2023-07-20',
-            time: '2:30 PM',
-            status: 'Completed',
-            bloodType: 'O+',
-            units: 2
-          }
-        ];
-        setDonations(mockCompletedDonations);
-      } else {
-        setDonations(completedDonations);
-      }
+      setDonations(completedDonations);
     } catch (error) {
       console.error('Error loading completed donations:', error);
-      // Use mock data on error
-      const mockCompletedDonations = [
-        {
-          id: 101,
-          hospitalName: 'Kuala Lumpur General Hospital',
-          date: '2023-10-15',
-          time: '10:00 AM',
-          status: 'Completed',
-          bloodType: 'O+',
-          units: 1
-        }
-      ];
-      setDonations(mockCompletedDonations);
+      setDonations([]);
     } finally {
       setLoading(false);
     }
