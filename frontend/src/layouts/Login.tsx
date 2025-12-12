@@ -107,7 +107,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           const userData = {
             id: response.user.id,
             email: response.user.email,
-            name: response.user.fullName || response.user.FullName,
+            name: response.user.fullName,
             role: normalizedRole
           };
 
