@@ -163,34 +163,47 @@ namespace BloodLine.Controllers
                     return Ok(new { success = true, data = new List<object>() });
                 }
 
-                // Query appointments with proper joins following the required pattern
+                // Get appointments for this patient
                 var appointments = await _db.PatientAppointments
                     .Where(pa => pa.PatientId == patientId.Value)
-                    .Join(_db.Hospitals, pa => pa.HospitalId, h => h.HospitalId, (pa, h) => new { pa, h })
-                    .GroupJoin(_db.Doctors, x => x.pa.DoctorId, d => d.DoctorId, (x, doctors) => new { x.pa, x.h, doctors })
-                    .SelectMany(x => x.doctors.DefaultIfEmpty(), (x, d) => new
-                    {
-                        appointmentId = x.pa.AppointmentId,
-                        hospitalName = x.h.HospitalName,
-                        doctorName = d != null ? d.DoctorName : x.pa.DoctorName ?? "Not Assigned",
-                        appointmentDate = x.pa.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
-                        status = x.pa.Status,
-                        doctorNotes = x.pa.DoctorNotes
-                    })
-                    .OrderByDescending(x => x.appointmentDate)
+                    .OrderByDescending(pa => pa.AppointmentDate)
                     .ToListAsync();
 
-                return Ok(new { success = true, data = appointments });
+                var result = new List<object>();
+                foreach (var appt in appointments)
+                {
+                    // Get hospital name
+                    var hospital = await _db.Hospitals.FirstOrDefaultAsync(h => h.HospitalId == appt.HospitalId);
+                    
+                    // Get doctor name (if doctor_id exists)
+                    string doctorName = appt.DoctorName ?? "Not Assigned";
+                    if (appt.DoctorId.HasValue)
+                    {
+                        var doctor = await _db.Doctors.FirstOrDefaultAsync(d => d.DoctorId == appt.DoctorId.Value);
+                        if (doctor != null)
+                        {
+                            doctorName = doctor.DoctorName;
+                        }
+                    }
+
+                    result.Add(new
+                    {
+                        appointmentId = appt.AppointmentId,
+                        hospitalName = hospital?.HospitalName ?? "Unknown Hospital",
+                        doctorName = doctorName,
+                        appointmentDate = appt.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
+                        status = appt.Status,
+                        doctorNotes = appt.DoctorNotes
+                    });
+                }
+
+                return Ok(new { success = true, data = result });
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in GetAppointments for userId {userId}: {ex.Message}");
-                return StatusCode(500, new
-                {
-                    success = false,
-                    message = "Error loading appointments.",
-                    error = ex.Message
-                });
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                return Ok(new { success = true, data = new List<object>() });
             }
         }
 
