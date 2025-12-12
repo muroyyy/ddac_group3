@@ -1,6 +1,7 @@
 using BloodLine.Data;
 using BloodLine.DTOs;
 using BloodLine.Models;
+using BloodLine.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,10 +12,12 @@ namespace BloodLine.Controllers
     public class PatientController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
+        private readonly NotificationService _notificationService;
 
-        public PatientController(ApplicationDbContext db)
+        public PatientController(ApplicationDbContext db, NotificationService notificationService)
         {
             _db = db;
+            _notificationService = notificationService;
         }
 
         // -------------------------------------------------------------------
@@ -68,6 +71,9 @@ namespace BloodLine.Controllers
 
                 _db.BloodRequests.Add(newRequest);
                 await _db.SaveChangesAsync();
+
+                // Send confirmation notification to patient
+                await SendBloodRequestSubmissionNotification(userId, newRequest.RequestId, newRequest.BloodType, newRequest.CreatedAt ?? DateTime.UtcNow);
 
                 return Ok(new
                 {
@@ -297,6 +303,32 @@ namespace BloodLine.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { success = false, message = "Error updating profile.", error = ex.Message });
+            }
+        }
+
+        private async Task SendBloodRequestSubmissionNotification(int userId, int requestId, string bloodType, DateTime submittedAt)
+        {
+            try
+            {
+                var message = $"Your blood request for {bloodType} has been submitted successfully on {submittedAt:MMM dd, yyyy} at {submittedAt:HH:mm}. Request ID: #{requestId}";
+
+                var notification = new Notification
+                {
+                    UserId = userId,
+                    Title = "Blood Request Submitted",
+                    Message = message,
+                    Type = "blood_request_submitted",
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _db.Notifications.Add(notification);
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't fail the main operation
+                Console.WriteLine($"Failed to send submission notification: {ex.Message}");
             }
         }
     }

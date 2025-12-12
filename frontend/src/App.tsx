@@ -41,6 +41,7 @@ import Inventory from './modules/hospital/pages/Inventory';
 import Approvals from './modules/hospital/pages/Approvals';
 import BloodRequests from './modules/hospital/pages/BloodRequests';
 import HospitalAppointments from './modules/hospital/pages/Appointments';
+import TestPage from './modules/hospital/pages/TestPage';
 import HospitalProfile from './modules/hospital/pages/Profile';
 
 // Context & Components
@@ -104,6 +105,7 @@ const AppRoutes: React.FC = () => {
             <Route path="/hospital" element={<HospitalLayout />}>
               <Route index element={<Navigate to="/hospital/dashboard" replace />} />
               <Route path="dashboard" element={<HospitalDashboard user={user!} />} />
+              <Route path="test" element={<TestPage />} />
               <Route path="blood-requests" element={<BloodRequests />} />
               <Route path="appointments" element={<HospitalAppointments />} />
               <Route path="inventory" element={<Inventory />} />
