@@ -134,7 +134,8 @@ namespace BloodLine.Controllers
                     name = h.HospitalName,
                     location = h.Address,
                     phone = h.ContactNumber ?? "N/A",
-                    email = h.User.Email
+                    email = h.User.Email,
+                    contactPerson = h.ContactPerson
                 })
                 .ToListAsync();
             
