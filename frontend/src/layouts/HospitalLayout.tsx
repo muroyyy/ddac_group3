@@ -24,11 +24,11 @@ export default function HospitalLayout() {
 
 	return (
 		<div className="min-h-screen flex bg-gray-50">
-			<aside className="w-64 bg-white border-r">
+			<aside className="w-64 bg-white border-r fixed left-0 top-0 h-full z-10">
 				<div className="h-16 flex items-center px-6 border-b">
 					<span className="text-lg font-semibold">🩸 BloodLine</span>
 				</div>
-				<nav className="p-4">
+				<nav className="p-4 h-full overflow-y-auto pb-32">
 					<div className="space-y-1">
 						{navItems.map((item) => (
 							<NavLink
@@ -47,22 +47,20 @@ export default function HospitalLayout() {
 					</div>
 				</nav>
 
-				<div className="absolute bottom-6 w-64 px-4">
-					<div className="border-t pt-4">
-						<div className="flex items-center justify-between">
-							<div>
-								<p className="text-sm font-medium text-gray-800">{user?.name}</p>
-								<p className="text-xs text-gray-500 truncate">{user?.email}</p>
-							</div>
-							<button onClick={() => setShowLogoutConfirm(true)} className="text-red-600 hover:text-red-800 cursor-pointer">
-								<LogOut className="w-5 h-5" />
-							</button>
+				<div className="absolute bottom-0 left-0 w-64 px-4 py-6 bg-white border-t">
+					<div className="flex items-center justify-between">
+						<div>
+							<p className="text-sm font-medium text-gray-800">{user?.name}</p>
+							<p className="text-xs text-gray-500 truncate">{user?.email}</p>
 						</div>
+						<button onClick={() => setShowLogoutConfirm(true)} className="text-red-600 hover:text-red-800 cursor-pointer">
+							<LogOut className="w-5 h-5" />
+						</button>
 					</div>
 				</div>
 			</aside>
 
-			<main className="flex-1 p-8">
+			<main className="flex-1 ml-64 overflow-y-auto">
 				<Outlet />
 			</main>
 
