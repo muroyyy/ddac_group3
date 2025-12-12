@@ -203,4 +203,19 @@ export const hospitalAPI = {
     const response = await fetch(`${API_BASE_URL}/hospital/dashboard/stats?hospitalId=${hospitalId}`);
     return response.json();
   },
+
+  // Approval Requests
+  getApprovalRequests: async (): Promise<ApprovalRequest[]> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/approval-requests`);
+    return response.json();
+  },
+
+  updateApprovalRequest: async (id: number, status: string, reviewedBy: number): Promise<{ success: boolean }> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/approval-requests/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status, reviewedBy }),
+    });
+    return response.json();
+  },
 };
