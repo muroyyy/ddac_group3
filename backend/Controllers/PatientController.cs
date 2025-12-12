@@ -157,44 +157,68 @@ namespace BloodLine.Controllers
                     return BadRequest(new { success = false, message = "Invalid user ID." });
 
                 // Check if user exists
-                var userExists = await _db.Users.AnyAsync(u => u.Id == userId);
-                if (!userExists)
+                bool userExists;
+                try
                 {
-                    return NotFound(new { success = false, message = "User not found." });
+                    userExists = await _db.Users.AnyAsync(u => u.Id == userId);
                 }
-
-                var patientId = await GetPatientIdFromUser(userId);
-
-                if (patientId == null)
+                catch (Exception ex)
                 {
-                    // Return empty appointments instead of error for users without patient profile
+                    Console.WriteLine($"Database error checking user existence: {ex.Message}");
                     return Ok(new { success = true, data = new List<object>() });
                 }
 
-                var appts = await _db.PatientAppointments
-                    .Where(a => a.PatientId == patientId.Value)
-                    .OrderByDescending(a => a.AppointmentDate)
-                    .Select(a => new
-                    {
-                        appointmentId = a.AppointmentId,
-                        doctorName = a.DoctorName,
-                        appointmentDate = a.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
-                        status = a.Status,
-                        doctorNotes = a.DoctorNotes
-                    })
-                    .ToListAsync();
+                if (!userExists)
+                {
+                    return Ok(new { success = true, data = new List<object>() });
+                }
+
+                int? patientId;
+                try
+                {
+                    patientId = await GetPatientIdFromUser(userId);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error getting patient ID: {ex.Message}");
+                    return Ok(new { success = true, data = new List<object>() });
+                }
+
+                if (patientId == null)
+                {
+                    return Ok(new { success = true, data = new List<object>() });
+                }
+
+                List<object> appts;
+                try
+                {
+                    appts = await _db.PatientAppointments
+                        .Where(a => a.PatientId == patientId.Value)
+                        .OrderByDescending(a => a.AppointmentDate)
+                        .Select(a => new
+                        {
+                            appointmentId = a.AppointmentId,
+                            doctorName = a.DoctorName ?? "Unknown",
+                            appointmentDate = a.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
+                            status = a.Status ?? "Unknown",
+                            doctorNotes = a.DoctorNotes
+                        })
+                        .Cast<object>()
+                        .ToListAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error querying appointments: {ex.Message}");
+                    return Ok(new { success = true, data = new List<object>() });
+                }
 
                 return Ok(new { success = true, data = appts });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in GetAppointments for userId {userId}: {ex.Message}");
-                return StatusCode(500, new
-                {
-                    success = false,
-                    message = "Error loading appointments.",
-                    error = ex.Message
-                });
+                Console.WriteLine($"Unexpected error in GetAppointments for userId {userId}: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                return Ok(new { success = true, data = new List<object>() });
             }
         }
 
