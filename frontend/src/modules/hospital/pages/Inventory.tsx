@@ -136,7 +136,7 @@ export default function Inventory() {
               <tr><td colSpan={5} className="p-6 text-center text-gray-500">No inventory items found</td></tr>
             ) : (
               items.map((item, index) => (
-                <tr key={item.id} className={`border-t border-gray-100 hover:bg-red-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-red-50 bg-opacity-30'}`}>
+                <tr key={item.id} className={`border-t border-gray-100 hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-red-50 bg-opacity-30'}`}>
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">

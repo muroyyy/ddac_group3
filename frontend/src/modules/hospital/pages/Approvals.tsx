@@ -166,7 +166,7 @@ export default function Approvals() {
               <tr><td colSpan={7} className="p-4">{searchTerm ? 'No matching requests found' : 'No requests'}</td></tr>
             ) : (
               filteredRequests.map((r, index) => (
-                <tr key={r.id} className={`border-t border-gray-100 hover:bg-red-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-red-50 bg-opacity-30'}`}>
+                <tr key={r.id} className={`border-t border-gray-100 hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-red-50 bg-opacity-30'}`}>
                   <td className="p-4 font-medium text-gray-900">{r.userName}</td>
                   <td className="p-4 text-gray-600">{r.userEmail}</td>
                   <td className="p-4">
