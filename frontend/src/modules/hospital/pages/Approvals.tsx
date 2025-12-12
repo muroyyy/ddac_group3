@@ -11,6 +11,9 @@ export default function Approvals() {
   const [requests, setRequests] = useState<ApprovalRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [bloodTypeFilter, setBloodTypeFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
   const load = async () => {
     setLoading(true);
@@ -38,17 +41,30 @@ export default function Approvals() {
     }
   };
 
-  const filteredRequests = requests.filter(request => 
-    request.userName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredRequests = requests
+    .filter(request => {
+      const matchesName = request.userName.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesBloodType = !bloodTypeFilter || request.bloodType === bloodTypeFilter;
+      const matchesStatus = !statusFilter || request.status.toLowerCase() === statusFilter.toLowerCase();
+      return matchesName && matchesBloodType && matchesStatus;
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+
+  const bloodTypes = [...new Set(requests.map(r => r.bloodType).filter(Boolean))];
+  const statuses = [...new Set(requests.map(r => r.status))];
 
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4">Approval Requests</h2>
       
-      {/* Search Bar */}
-      <div className="mb-4">
-        <div className="relative max-w-md">
+      {/* Search and Filters */}
+      <div className="mb-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Search Bar */}
+        <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search className="h-5 w-5 text-gray-400" />
           </div>
@@ -60,6 +76,40 @@ export default function Approvals() {
             className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-red-500 focus:border-red-500"
           />
         </div>
+        
+        {/* Blood Type Filter */}
+        <select
+          value={bloodTypeFilter}
+          onChange={(e) => setBloodTypeFilter(e.target.value)}
+          className="block w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
+        >
+          <option value="">All Blood Types</option>
+          {bloodTypes.map(type => (
+            <option key={type} value={type}>{type}</option>
+          ))}
+        </select>
+        
+        {/* Status Filter */}
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="block w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
+        >
+          <option value="">All Statuses</option>
+          {statuses.map(status => (
+            <option key={status} value={status}>{status}</option>
+          ))}
+        </select>
+        
+        {/* Date Sort */}
+        <select
+          value={sortOrder}
+          onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}
+          className="block w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
+        >
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+        </select>
       </div>
       
       <div className="bg-white rounded shadow overflow-hidden">
