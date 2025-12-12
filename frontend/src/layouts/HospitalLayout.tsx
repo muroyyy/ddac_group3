@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Box, Clipboard, User, LogOut, Droplets, Calendar } from 'lucide-react';
+import { LayoutDashboard, Clipboard, User, LogOut, Droplets, Calendar } from 'lucide-react';
 
 export default function HospitalLayout() {
 	const { logout, user } = useAuth();

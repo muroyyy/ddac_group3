@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, X, Droplets, Calendar, User } from 'lucide-react';
+import { Search, Droplets, Calendar, User } from 'lucide-react';
 import { hospitalAPI } from '../services/hospitalAPI';
 import type { ApprovalRequest } from '../services/hospitalAPI';
 

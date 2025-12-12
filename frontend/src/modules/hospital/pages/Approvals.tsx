@@ -6,7 +6,6 @@ import { useAuth } from '../../../context/AuthContext';
 
 export default function Approvals() {
   const { user } = useAuth();
-  const reviewerId = user?.id || 0;
 
   const [requests, setRequests] = useState<ApprovalRequest[]>([]);
   const [loading, setLoading] = useState(true);
