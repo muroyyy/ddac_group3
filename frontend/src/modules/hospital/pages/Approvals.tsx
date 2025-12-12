@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, X } from 'lucide-react';
+import { Search, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { hospitalAPI } from '../services/hospitalAPI';
 import type { ApprovalRequest } from '../services/hospitalAPI';
 import { useAuth } from '../../../context/AuthContext';
@@ -14,6 +14,7 @@ export default function Approvals() {
   const [bloodTypeFilter, setBloodTypeFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [expandedNotes, setExpandedNotes] = useState<Set<number>>(new Set());
 
   const load = async () => {
     setLoading(true);
@@ -46,6 +47,16 @@ export default function Approvals() {
     setBloodTypeFilter('');
     setStatusFilter('');
     setSortOrder('newest');
+  };
+
+  const toggleNoteExpansion = (requestId: number) => {
+    const newExpanded = new Set(expandedNotes);
+    if (newExpanded.has(requestId)) {
+      newExpanded.delete(requestId);
+    } else {
+      newExpanded.add(requestId);
+    }
+    setExpandedNotes(newExpanded);
   };
 
   const filteredRequests = requests
@@ -158,9 +169,25 @@ export default function Approvals() {
                   <td className="p-3">{r.requestType}{r.bloodType ? ` (${r.bloodType})` : ''}</td>
                   <td className="p-3">{r.status}</td>
                   <td className="p-3 max-w-xs">
-                    <div className="truncate" title={r.doctorNote || 'No note'}>
-                      {r.doctorNote || 'No note'}
-                    </div>
+                    {r.doctorNote && r.doctorNote.length > 50 ? (
+                      <div>
+                        <div className={expandedNotes.has(r.id) ? '' : 'truncate'}>
+                          {expandedNotes.has(r.id) ? r.doctorNote : `${r.doctorNote.substring(0, 50)}...`}
+                        </div>
+                        <button
+                          onClick={() => toggleNoteExpansion(r.id)}
+                          className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1 mt-1"
+                        >
+                          {expandedNotes.has(r.id) ? (
+                            <><ChevronUp className="w-3 h-3" /> Show less</>
+                          ) : (
+                            <><ChevronDown className="w-3 h-3" /> Show more</>
+                          )}
+                        </button>
+                      </div>
+                    ) : (
+                      <div>{r.doctorNote || 'No note'}</div>
+                    )}
                   </td>
                   <td className="p-3">{new Date(r.createdAt).toLocaleString()}</td>
                   <td className="p-3">
