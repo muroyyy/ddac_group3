@@ -11,7 +11,7 @@
     <PackageReference Include="AWSSDK.Core" Version="4.0.3.5" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11" />
-    <PackageReference Include="AWSSDK.SecretsManager" Version="4.0.3.3" />
+    <PackageReference Include="AWSSDK.SecretsManager" Version="4.0.3.5" />
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.301" />
     <PackageReference Include="AWSSDK.CloudWatch" Version="4.0.4" />
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="4.0.2.9" />

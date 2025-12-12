@@ -38,9 +38,9 @@ namespace BloodLine.Services
                 // Create notification message
                 var message = newStatus switch
                 {
-                    "Created" => $"Your appointment with Dr. {appointment.DoctorName} has been scheduled for {appointment.AppointmentDate:MMM dd, yyyy}.",
-                    "Completed" => $"Your appointment {appointmentId} with Dr. {appointment.DoctorName} has been completed.",
-                    "Cancelled" => $"Your appointment {appointmentId} with Dr. {appointment.DoctorName} has been cancelled.",
+                    "Created" => $"Your appointment has been scheduled for {appointment.AppointmentDate:MMM dd, yyyy}.",
+                    "Completed" => $"Your appointment {appointmentId} has been completed.",
+                    "Cancelled" => $"Your appointment {appointmentId} has been cancelled.",
                     _ => $"Your appointment {appointmentId} status has been updated to {newStatus}."
                 };
 
