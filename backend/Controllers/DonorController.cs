@@ -68,6 +68,7 @@ namespace BloodLine.Controllers
             var pendingCount = 0;
             var completedCount = 0;
             var lastDonationDate = (string?)null;
+            var isAvailable = true;
             
             if (donorProfile != null)
             {
@@ -86,6 +87,9 @@ namespace BloodLine.Controllers
                 if (lastDonation.HasValue)
                 {
                     lastDonationDate = lastDonation.Value.ToString("yyyy-MM-dd");
+                    // Check if 3 months have passed since last donation
+                    var threeMonthsAgo = DateTime.Now.AddMonths(-3);
+                    isAvailable = lastDonation.Value <= threeMonthsAgo;
                 }
             }
 
@@ -95,6 +99,7 @@ namespace BloodLine.Controllers
                 pendingRequests = pendingCount,
                 bloodType = donorProfile?.BloodType ?? "N/A",
                 lastDonation = lastDonationDate,
+                isAvailable = isAvailable,
                 urgentAlerts = 0
             });
         }
