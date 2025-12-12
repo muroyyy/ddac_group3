@@ -123,9 +123,9 @@ export default function Inventory() {
           <thead className="bg-gradient-to-r from-red-600 to-red-700 text-white">
             <tr>
               <th className="p-4 font-semibold">Blood Type</th>
-              <th className="p-4 font-semibold bg-red-500 bg-opacity-20">Units Available</th>
+              <th className="p-4 font-semibold">Units Available</th>
               <th className="p-4 font-semibold">Status</th>
-              <th className="p-4 font-semibold bg-red-500 bg-opacity-20">Last Updated</th>
+              <th className="p-4 font-semibold">Last Updated</th>
               <th className="p-4 font-semibold">Actions</th>
             </tr>
           </thead>
@@ -136,7 +136,7 @@ export default function Inventory() {
               <tr><td colSpan={5} className="p-6 text-center text-gray-500">No inventory items found</td></tr>
             ) : (
               items.map((item, index) => (
-                <tr key={item.id} className={`border-t border-gray-100 hover:bg-red-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                <tr key={item.id} className={`border-t border-gray-100 hover:bg-red-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-red-50 bg-opacity-30'}`}>
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
@@ -145,7 +145,7 @@ export default function Inventory() {
                       <span className="font-semibold text-gray-900">{item.bloodType}</span>
                     </div>
                   </td>
-                  <td className="p-4 bg-red-50 bg-opacity-30">
+                  <td className="p-4">
                     <div className="flex items-center gap-2">
                       <span className="text-2xl font-bold text-gray-900">{item.units}</span>
                       <span className="text-sm text-gray-600">units</span>
@@ -160,7 +160,7 @@ export default function Inventory() {
                       {item.units > 20 ? 'Good Stock' : item.units > 10 ? 'Low Stock' : 'Critical'}
                     </span>
                   </td>
-                  <td className="p-4 bg-red-50 bg-opacity-30">
+                  <td className="p-4">
                     <div className="text-sm text-gray-600">
                       {new Date(item.lastUpdated).toLocaleDateString()}
                       <div className="text-xs text-gray-500">

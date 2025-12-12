@@ -151,11 +151,11 @@ export default function Approvals() {
           <thead className="bg-gradient-to-r from-red-600 to-red-700 text-white">
             <tr>
               <th className="p-4 font-semibold">Name</th>
-              <th className="p-4 font-semibold bg-red-500 bg-opacity-20">Email</th>
+              <th className="p-4 font-semibold">Email</th>
               <th className="p-4 font-semibold">Request</th>
-              <th className="p-4 font-semibold bg-red-500 bg-opacity-20">Status</th>
+              <th className="p-4 font-semibold">Status</th>
               <th className="p-4 font-semibold">Doctor Note</th>
-              <th className="p-4 font-semibold bg-red-500 bg-opacity-20">Created</th>
+              <th className="p-4 font-semibold">Created</th>
               <th className="p-4 font-semibold">Actions</th>
             </tr>
           </thead>
@@ -166,9 +166,9 @@ export default function Approvals() {
               <tr><td colSpan={7} className="p-4">{searchTerm ? 'No matching requests found' : 'No requests'}</td></tr>
             ) : (
               filteredRequests.map((r, index) => (
-                <tr key={r.id} className={`border-t border-gray-100 hover:bg-red-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                <tr key={r.id} className={`border-t border-gray-100 hover:bg-red-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-red-50 bg-opacity-30'}`}>
                   <td className="p-4 font-medium text-gray-900">{r.userName}</td>
-                  <td className="p-4 text-gray-600 bg-red-50 bg-opacity-30">{r.userEmail}</td>
+                  <td className="p-4 text-gray-600">{r.userEmail}</td>
                   <td className="p-4">
                     <div className="flex items-center gap-2">
                       <span className="text-gray-900">{r.requestType}</span>
@@ -179,7 +179,7 @@ export default function Approvals() {
                       )}
                     </div>
                   </td>
-                  <td className="p-4 bg-red-50 bg-opacity-30">
+                  <td className="p-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                       r.status.toLowerCase() === 'approved' ? 'bg-green-100 text-green-700' :
                       r.status.toLowerCase() === 'rejected' ? 'bg-red-100 text-red-700' :
@@ -210,7 +210,7 @@ export default function Approvals() {
                       <div className="text-gray-600">{r.doctorNote || 'No note'}</div>
                     )}
                   </td>
-                  <td className="p-4 text-gray-600 bg-red-50 bg-opacity-30">
+                  <td className="p-4 text-gray-600">
                     <div className="text-sm">
                       {new Date(r.createdAt).toLocaleDateString()}
                       <div className="text-xs text-gray-500">
