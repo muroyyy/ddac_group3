@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { donorAPI } from '../services/donorAPI';
 import type { Appointment } from '../services/donorAPI';
 
 export default function DonationHistory() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const shouldHighlight = searchParams.get('highlight') === 'latest';
 
   useEffect(() => {
     if (user?.id) {
@@ -67,8 +70,15 @@ export default function DonationHistory() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {appointments.map((appointment) => (
-                  <tr key={appointment.id} className="hover:bg-gray-50">
+                {appointments.map((appointment, index) => (
+                  <tr 
+                    key={appointment.id} 
+                    className={`hover:bg-gray-50 ${
+                      shouldHighlight && index === 0 && appointment.status.toLowerCase() === 'completed' 
+                        ? 'bg-yellow-100 border-2 border-yellow-400' 
+                        : ''
+                    }`}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {appointment.hospitalName}
                     </td>

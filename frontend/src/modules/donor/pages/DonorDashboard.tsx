@@ -68,7 +68,10 @@ export default function DonorDashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div 
+          onClick={() => stats?.lastDonation && navigate('/donor/history?highlight=latest')}
+          className={`bg-white p-6 rounded-lg shadow ${stats?.lastDonation ? 'cursor-pointer hover:shadow-md transition' : ''}`}
+        >
           <div className="text-sm text-gray-600">Last Donation</div>
           <div className="text-xl font-bold text-gray-700 mt-2">
             {stats?.lastDonation || "Never"}
