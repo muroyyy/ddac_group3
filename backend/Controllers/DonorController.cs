@@ -125,7 +125,7 @@ namespace BloodLine.Controllers
                       FROM donation_requests dr
                       JOIN donor_profile dp ON dr.donor_id = dp.donor_id
                       JOIN hospital h ON dr.hospital_id = h.hospital_id
-                      WHERE dr.donor_id = {0}
+                      WHERE dr.donor_id = {0} AND dr.status = 'Pending'
                       ORDER BY dr.requested_date DESC", donorProfile.DonorId)
                 .ToListAsync();
 
