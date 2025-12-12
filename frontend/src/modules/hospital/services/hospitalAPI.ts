@@ -35,11 +35,124 @@ export interface ApprovalRequest {
 }
 
 export const hospitalAPI = {
-  getDashboardStats: async (hospitalId: number): Promise<DashboardStats> => {
-    const response = await fetch(`${API_BASE_URL}/hospital/dashboard/stats?hospitalId=${hospitalId}`);
+  // Blood Requests Management
+  getBloodRequests: async (userId: number): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/blood-requests/${userId}`);
     return response.json();
   },
 
+  approveRequest: async (id: number): Promise<{ success: boolean }> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/requests/${id}/approve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return response.json();
+  },
+
+  rejectRequest: async (id: number, rejectionNotes?: string): Promise<{ success: boolean }> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/requests/${id}/reject`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rejectionNotes }),
+    });
+    return response.json();
+  },
+
+  // Patient Appointments Management
+  createAppointment: async (data: { requestId: number; doctorName: string; appointmentDate: Date; initialNotes?: string }): Promise<{ success: boolean }> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/appointments/create`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+
+  getAppointments: async (userId: number): Promise<any[]> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/appointments/${userId}`);
+    const result = await response.json();
+    return result.data || [];
+  },
+
+  completeAppointment: async (id: number, doctorNotes?: string): Promise<{ success: boolean }> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/appointments/${id}/complete`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ doctorNotes }),
+    });
+    return response.json();
+  },
+
+  cancelAppointment: async (id: number): Promise<{ success: boolean }> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/appointments/${id}/cancel`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return response.json();
+  },
+
+  // Doctors Management
+  getDoctors: async (userId: number): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/doctors/${userId}`);
+    return response.json();
+  },
+
+  // Donor Requests Management
+  getDonorRequests: async (userId: number): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/donor-requests/${userId}`);
+    return response.json();
+  },
+
+  approveDonorRequest: async (id: number): Promise<{ success: boolean }> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/donor-requests/${id}/approve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return response.json();
+  },
+
+  rejectDonorRequest: async (id: number, rejectionNotes?: string): Promise<{ success: boolean }> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/donor-requests/${id}/reject`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rejectionNotes }),
+    });
+    return response.json();
+  },
+
+  // Donor Appointments Management
+  getDonorAppointments: async (userId: number): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/donor-appointments/${userId}`);
+    return response.json();
+  },
+
+  createDonorAppointment: async (data: { donationId: number; appointmentDate: Date; appointmentTime: string }): Promise<{ success: boolean }> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/donor-appointments/create`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+
+  completeDonorAppointment: async (id: number, unitsCollected: number): Promise<{ success: boolean }> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/donor-appointments/${id}/complete`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ unitsCollected }),
+    });
+    return response.json();
+  },
+
+  cancelDonorAppointment: async (id: number): Promise<{ success: boolean }> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/donor-appointments/${id}/cancel`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return response.json();
+  },
+
+  // Blood Inventory Management
   getBloodInventory: async (hospitalId: number): Promise<BloodInventoryItem[]> => {
     const response = await fetch(`${API_BASE_URL}/hospital/blood-inventory?hospitalId=${hospitalId}`);
     return response.json();
@@ -70,57 +183,24 @@ export const hospitalAPI = {
     return response.json();
   },
 
-  getApprovalRequests: async (): Promise<ApprovalRequest[]> => {
-    const response = await fetch(`${API_BASE_URL}/hospital/approval-requests`);
+  // Staff Profile Management
+  getStaffProfile: async (userId: number): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/staff-profile/${userId}`);
     return response.json();
   },
 
-  approveRequest: async (id: number): Promise<{ success: boolean }> => {
-    const response = await fetch(`${API_BASE_URL}/hospital/requests/${id}/approve`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-    return response.json();
-  },
-
-  rejectRequest: async (id: number, rejectionNotes?: string): Promise<{ success: boolean }> => {
-    const response = await fetch(`${API_BASE_URL}/hospital/requests/${id}/reject`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ rejectionNotes }),
-    });
-    return response.json();
-  },
-
-  createAppointment: async (data: { requestId: number; doctorName: string; appointmentDate: Date; initialNotes?: string }): Promise<{ success: boolean }> => {
-    const response = await fetch(`${API_BASE_URL}/hospital/appointments/create`, {
-      method: 'POST',
+  updateStaffProfile: async (userId: number, data: { fullName?: string; email?: string; phone?: string; position?: string }): Promise<{ success: boolean }> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/staff-profile/${userId}`, {
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
     return response.json();
   },
 
-  getAppointments: async (userId: number): Promise<any[]> => {
-    const response = await fetch(`${API_BASE_URL}/hospital/appointments/${userId}`);
-    const result = await response.json();
-    return result.data || [];
-  },
-
-  completeAppointment: async (id: number, doctorNotes?: string): Promise<{ success: boolean }> => {
-    const response = await fetch(`${API_BASE_URL}/hospital/appointments/${id}/complete`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ doctorNotes }),
-    });
-    return response.json();
-  },
-
-  cancelAppointment: async (id: number): Promise<{ success: boolean }> => {
-    const response = await fetch(`${API_BASE_URL}/hospital/appointments/${id}/cancel`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
+  // Dashboard Stats
+  getDashboardStats: async (hospitalId: number): Promise<DashboardStats> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/dashboard/stats?hospitalId=${hospitalId}`);
     return response.json();
   },
 };

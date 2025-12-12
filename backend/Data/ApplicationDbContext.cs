@@ -20,6 +20,10 @@ public class ApplicationDbContext : DbContext
     public DbSet<ActiveBloodRequest> ActiveBloodRequests { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<PatientAppointment> PatientAppointments { get; set; }
+    public DbSet<HospitalStaff> HospitalStaff { get; set; }
+    public DbSet<Doctor> Doctors { get; set; }
+    public DbSet<DonationRequest> DonationRequests { get; set; }
+    public DbSet<DonorAppointment> DonorAppointments { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -106,5 +110,10 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<PatientAppointment>().ToTable("patient_appointments");
         
         modelBuilder.Entity<Notification>().ToTable("notifications");
+        
+        modelBuilder.Entity<HospitalStaff>().ToTable("hospital_staff");
+        modelBuilder.Entity<Doctor>().ToTable("doctors");
+        modelBuilder.Entity<DonationRequest>().ToTable("donation_requests");
+        modelBuilder.Entity<DonorAppointment>().ToTable("donor_appointments");
     }
 }
