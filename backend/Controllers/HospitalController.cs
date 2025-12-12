@@ -181,17 +181,19 @@ public class HospitalController : ControllerBase
             var requests = await _context.Set<BloodRequest>()
                 .Where(br => hospitalId == 0 || br.HospitalId == hospitalId)
                 .Join(_context.Set<PatientProfile>(), br => br.PatientId, pp => pp.PatientId, (br, pp) => new { br, pp })
-                .Join(_context.Users, x => x.pp.UserId, u => u.Id, (x, u) => new
+                .Join(_context.Users, x => x.pp.UserId, u => u.Id, (x, u) => new { x.br, x.pp, u })
+                .GroupJoin(_context.Set<PatientAppointment>(), x => x.br.RequestId, pa => pa.RequestId, (x, appointments) => new { x.br, x.pp, x.u, appointments })
+                .SelectMany(x => x.appointments.DefaultIfEmpty(), (x, appointment) => new
                 {
                     id = x.br.RequestId,
                     userId = x.br.PatientId,
-                    userName = u.FullName,
-                    userEmail = u.Email,
+                    userName = x.u.FullName,
+                    userEmail = x.u.Email,
                     requestType = "Blood Request",
                     bloodType = x.br.BloodType,
                     status = x.br.Status,
                     createdAt = x.br.CreatedAt,
-                    doctorNote = x.br.DoctorNote ?? ""
+                    doctorNote = appointment != null ? appointment.DoctorNotes ?? "" : ""
                 })
                 .ToListAsync();
 
