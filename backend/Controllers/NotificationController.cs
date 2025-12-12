@@ -1,69 +1,66 @@
 using BloodLine.Data;
-using BloodLine.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace BloodLine.Controllers;
-
-[Route("api/notifications")]
-[ApiController]
-public class NotificationController : ControllerBase
+namespace BloodLine.Controllers
 {
-    private readonly ApplicationDbContext _context;
-    private readonly ILogger<NotificationController> _logger;
-
-    public NotificationController(ApplicationDbContext context, ILogger<NotificationController> logger)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class NotificationController : ControllerBase
     {
-        _context = context;
-        _logger = logger;
-    }
+        private readonly ApplicationDbContext _db;
 
-    [HttpGet]
-    public async Task<IActionResult> GetNotifications([FromQuery] int userId)
-    {
-        try
+        public NotificationController(ApplicationDbContext db)
         {
-            var notifications = await _context.Notifications
-                .Where(n => n.UserId == userId)
-                .OrderByDescending(n => n.CreatedAt)
-                .Select(n => new
-                {
-                    id = n.NotificationId,
-                    message = n.Message,
-                    type = n.Type,
-                    isRead = n.IsRead,
-                    createdAt = n.CreatedAt,
-                    appointmentId = n.AppointmentId
-                })
-                .ToListAsync();
-
-            return Ok(notifications);
+            _db = db;
         }
-        catch (Exception ex)
+
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetNotifications(int userId)
         {
-            _logger.LogError(ex, "Error fetching notifications");
-            return StatusCode(500, new { error = "Failed to fetch notifications" });
+            try
+            {
+                var notifications = await _db.Notifications
+                    .Where(n => n.UserId == userId)
+                    .OrderByDescending(n => n.CreatedAt)
+                    .Select(n => new
+                    {
+                        id = n.NotificationId,
+                        title = n.Title,
+                        message = n.Message,
+                        type = n.Type,
+                        isRead = n.IsRead,
+                        createdAt = n.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
+                        appointmentId = n.AppointmentId
+                    })
+                    .ToListAsync();
+
+                return Ok(new { success = true, data = notifications });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Error loading notifications.", error = ex.Message });
+            }
         }
-    }
 
-    [HttpPut("{id}/read")]
-    public async Task<IActionResult> MarkAsRead(int id)
-    {
-        try
+        [HttpPut("mark-read/{notificationId}")]
+        public async Task<IActionResult> MarkAsRead(int notificationId)
         {
-            var notification = await _context.Notifications.FindAsync(id);
-            if (notification == null)
-                return NotFound(new { error = "Notification not found" });
+            try
+            {
+                var notification = await _db.Notifications.FindAsync(notificationId);
+                if (notification == null)
+                    return NotFound(new { success = false, message = "Notification not found." });
 
-            notification.IsRead = true;
-            await _context.SaveChangesAsync();
+                notification.IsRead = true;
+                await _db.SaveChangesAsync();
 
-            return Ok(new { success = true });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error marking notification as read");
-            return StatusCode(500, new { error = "Failed to mark notification as read" });
+                return Ok(new { success = true, message = "Notification marked as read." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Error updating notification.", error = ex.Message });
+            }
         }
     }
 }

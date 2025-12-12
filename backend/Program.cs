@@ -3,6 +3,7 @@ using BloodLine.Services;
 using Microsoft.EntityFrameworkCore;
 using Amazon.SecretsManager;
 using Amazon.CloudWatch;
+using Amazon.SimpleNotificationService;
 using Amazon.Runtime;
 using Amazon;
 // using Amazon.S3;
@@ -19,11 +20,13 @@ var regionEndpoint = RegionEndpoint.GetBySystemName(awsRegion);
 // Add AWS Services
 builder.Services.AddSingleton<IAmazonSecretsManager>(new AmazonSecretsManagerClient(regionEndpoint));
 builder.Services.AddSingleton<IAmazonCloudWatch>(new AmazonCloudWatchClient(regionEndpoint));
+builder.Services.AddSingleton<IAmazonSimpleNotificationService>(new AmazonSimpleNotificationServiceClient(regionEndpoint));
 // builder.Services.AddAWSService<IAmazonS3>();
 builder.Services.AddScoped<DatabaseService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 builder.Services.AddScoped<DatabaseMigrationService>();
+builder.Services.AddScoped<NotificationService>();
 
 // Add CORS
 builder.Services.AddCors(options =>
