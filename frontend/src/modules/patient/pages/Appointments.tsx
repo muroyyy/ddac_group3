@@ -97,7 +97,7 @@ export default function Appointments() {
 
                   <div className="mt-4 text-sm space-y-2">
                     <p><strong>Doctor:</strong> {appt.doctorName}</p>
-                    <p><strong>Location:</strong> {appt.location}</p>
+                    <p><strong>Hospital:</strong> {appt.hospitalName || 'Not specified'}</p>
                     <p><strong>Date:</strong> {appt.appointmentDate}</p>
                   </div>
 
@@ -141,7 +141,7 @@ export default function Appointments() {
 
                   <div className="mt-4 text-sm space-y-2">
                     <p><strong>Doctor:</strong> {appt.doctorName}</p>
-                    <p><strong>Location:</strong> {appt.location}</p>
+                    <p><strong>Hospital:</strong> {appt.hospitalName || 'Not specified'}</p>
                     <p><strong>Date:</strong> {appt.appointmentDate}</p>
                     {appt.doctorNotes && (
                       <p><strong>Doctor Notes:</strong> {appt.doctorNotes}</p>
@@ -163,7 +163,7 @@ export default function Appointments() {
             </h2>
 
             <p><strong>Doctor:</strong> {selectedAppt.doctorName}</p>
-            <p><strong>Location:</strong> {selectedAppt.location}</p>
+            <p><strong>Hospital:</strong> {selectedAppt.hospitalName || 'Not specified'}</p>
             <p><strong>Date:</strong> {selectedAppt.appointmentDate}</p>
             <p><strong>Status:</strong> {selectedAppt.status}</p>
 

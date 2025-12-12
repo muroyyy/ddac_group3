@@ -156,69 +156,41 @@ namespace BloodLine.Controllers
                 if (userId <= 0)
                     return BadRequest(new { success = false, message = "Invalid user ID." });
 
-                // Check if user exists
-                bool userExists;
-                try
-                {
-                    userExists = await _db.Users.AnyAsync(u => u.Id == userId);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Database error checking user existence: {ex.Message}");
-                    return Ok(new { success = true, data = new List<object>() });
-                }
-
-                if (!userExists)
-                {
-                    return Ok(new { success = true, data = new List<object>() });
-                }
-
-                int? patientId;
-                try
-                {
-                    patientId = await GetPatientIdFromUser(userId);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error getting patient ID: {ex.Message}");
-                    return Ok(new { success = true, data = new List<object>() });
-                }
-
+                // Get patient_id from user_id via patient_profile
+                var patientId = await GetPatientIdFromUser(userId);
                 if (patientId == null)
                 {
                     return Ok(new { success = true, data = new List<object>() });
                 }
 
-                List<object> appts;
-                try
-                {
-                    appts = await _db.PatientAppointments
-                        .Where(a => a.PatientId == patientId.Value)
-                        .OrderByDescending(a => a.AppointmentDate)
-                        .Select(a => new
-                        {
-                            appointmentId = a.AppointmentId,
-                            doctorName = a.DoctorName ?? "Unknown",
-                            appointmentDate = a.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
-                            status = a.Status ?? "Unknown",
-                            doctorNotes = a.DoctorNotes
-                        })
-                        .Cast<object>()
-                        .ToListAsync();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error querying appointments: {ex.Message}");
-                    return Ok(new { success = true, data = new List<object>() });
-                }
+                // Query appointments with proper joins following the required pattern
+                var appointments = await _db.PatientAppointments
+                    .Where(pa => pa.PatientId == patientId.Value)
+                    .Join(_db.Hospitals, pa => pa.HospitalId, h => h.HospitalId, (pa, h) => new { pa, h })
+                    .GroupJoin(_db.Doctors, x => x.pa.DoctorId, d => d.DoctorId, (x, doctors) => new { x.pa, x.h, doctors })
+                    .SelectMany(x => x.doctors.DefaultIfEmpty(), (x, d) => new
+                    {
+                        appointmentId = x.pa.AppointmentId,
+                        hospitalName = x.h.HospitalName,
+                        doctorName = d != null ? d.DoctorName : x.pa.DoctorName ?? "Not Assigned",
+                        appointmentDate = x.pa.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
+                        status = x.pa.Status,
+                        doctorNotes = x.pa.DoctorNotes
+                    })
+                    .OrderByDescending(x => x.appointmentDate)
+                    .ToListAsync();
 
-                return Ok(new { success = true, data = appts });
+                return Ok(new { success = true, data = appointments });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Unexpected error in GetAppointments for userId {userId}: {ex.Message}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                return Ok(new { success = true, data = new List<object>() });
+                Console.WriteLine($"Error in GetAppointments for userId {userId}: {ex.Message}");
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Error loading appointments.",
+                    error = ex.Message
+                });
             }
         }
 

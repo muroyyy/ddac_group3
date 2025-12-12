@@ -56,6 +56,56 @@ public class TestController : ControllerBase
         }
     }
 
+    [HttpGet("diagnose-appointments/{userId}")]
+    public async Task<IActionResult> DiagnoseAppointments(int userId)
+    {
+        try
+        {
+            var result = new
+            {
+                userId = userId,
+                userExists = await _context.Users.AnyAsync(u => u.Id == userId),
+                patientProfileExists = await _context.PatientProfiles.AnyAsync(p => p.UserId == userId),
+                appointmentsTableExists = true, // Will fail if table doesn't exist
+                appointmentCount = await _context.PatientAppointments.CountAsync(),
+                userAppointmentCount = 0
+            };
+
+            // Get patient ID
+            var patientProfile = await _context.PatientProfiles
+                .FirstOrDefaultAsync(p => p.UserId == userId);
+            
+            if (patientProfile != null)
+            {
+                var userAppointmentCount = await _context.PatientAppointments
+                    .CountAsync(a => a.PatientId == patientProfile.PatientId);
+                
+                return Ok(new { 
+                    success = true, 
+                    data = new {
+                        result.userId,
+                        result.userExists,
+                        result.patientProfileExists,
+                        patientId = patientProfile.PatientId,
+                        result.appointmentsTableExists,
+                        result.appointmentCount,
+                        userAppointmentCount
+                    }
+                });
+            }
+
+            return Ok(new { success = true, data = result });
+        }
+        catch (Exception ex)
+        {
+            return Ok(new { 
+                success = false, 
+                error = ex.Message,
+                stackTrace = ex.StackTrace
+            });
+        }
+    }
+
     [HttpGet("list-users")]
     public async Task<IActionResult> ListUsers()
     {
