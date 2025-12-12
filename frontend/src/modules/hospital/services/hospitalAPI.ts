@@ -92,7 +92,7 @@ export const hospitalAPI = {
     return response.json();
   },
 
-  createAppointment: async (data: { requestId: number; doctorName: string; appointmentDate: Date }): Promise<{ success: boolean }> => {
+  createAppointment: async (data: { requestId: number; doctorName: string; appointmentDate: Date; initialNotes?: string }): Promise<{ success: boolean }> => {
     const response = await fetch(`${API_BASE_URL}/hospital/appointments/create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

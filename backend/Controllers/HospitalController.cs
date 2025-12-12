@@ -362,6 +362,7 @@ public class HospitalController : ControllerBase
                 DoctorName = dto.DoctorName,
                 AppointmentDate = dto.AppointmentDate,
                 Status = "Upcoming",
+                DoctorNotes = dto.InitialNotes,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -496,6 +497,7 @@ public class CreateAppointmentDto
     public int RequestId { get; set; }
     public string DoctorName { get; set; } = string.Empty;
     public DateTime AppointmentDate { get; set; }
+    public string? InitialNotes { get; set; }
 }
 
 public class CompleteAppointmentDto

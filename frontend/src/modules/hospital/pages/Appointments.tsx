@@ -44,7 +44,7 @@ export default function Appointments() {
       await hospitalAPI.completeAppointment(id, doctorNotes);
       setCompletingId(null);
       setDoctorNotes('');
-      alert('Appointment completed successfully!');
+      alert('Appointment completed successfully! Patient has been notified.');
       loadAppointments();
     } catch (error) {
       console.error('Failed to complete appointment:', error);
@@ -56,7 +56,7 @@ export default function Appointments() {
     if (!confirm('Are you sure you want to cancel this appointment?')) return;
     try {
       await hospitalAPI.cancelAppointment(id);
-      alert('Appointment cancelled successfully!');
+      alert('Appointment cancelled successfully! Patient has been notified.');
       loadAppointments();
     } catch (error) {
       console.error('Failed to cancel appointment:', error);
