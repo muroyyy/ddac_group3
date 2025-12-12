@@ -104,5 +104,7 @@ public class ApplicationDbContext : DbContext
         });
 
         modelBuilder.Entity<PatientAppointment>().ToTable("patient_appointments");
+        
+        modelBuilder.Entity<Notification>().ToTable("notifications");
     }
 }

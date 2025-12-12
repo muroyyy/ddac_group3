@@ -310,6 +310,8 @@ namespace BloodLine.Controllers
         {
             try
             {
+                Console.WriteLine($"Creating notification for userId: {userId}, requestId: {requestId}");
+                
                 var message = $"Your blood request for {bloodType} has been submitted successfully on {submittedAt:MMM dd, yyyy} at {submittedAt:HH:mm}. Request ID: #{requestId}";
 
                 var notification = new Notification
@@ -323,12 +325,13 @@ namespace BloodLine.Controllers
                 };
 
                 _db.Notifications.Add(notification);
-                await _db.SaveChangesAsync();
+                var result = await _db.SaveChangesAsync();
+                Console.WriteLine($"Notification saved successfully. Rows affected: {result}");
             }
             catch (Exception ex)
             {
-                // Log error but don't fail the main operation
                 Console.WriteLine($"Failed to send submission notification: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
             }
         }
     }
