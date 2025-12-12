@@ -49,8 +49,3 @@ public class PatientAppointmentController : ControllerBase
     }
 }
 
-public class UpdateAppointmentStatusRequest
-{
-    public string Status { get; set; } = string.Empty;
-    public string? DoctorNotes { get; set; }
-}
