@@ -11,13 +11,13 @@ namespace BloodLine.Controllers;
 public class PatientAppointmentController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
-    private readonly ISNSService _snsService;
+    private readonly NotificationService _notificationService;
     private readonly ILogger<PatientAppointmentController> _logger;
 
-    public PatientAppointmentController(ApplicationDbContext context, ISNSService snsService, ILogger<PatientAppointmentController> logger)
+    public PatientAppointmentController(ApplicationDbContext context, NotificationService notificationService, ILogger<PatientAppointmentController> logger)
     {
         _context = context;
-        _snsService = snsService;
+        _notificationService = notificationService;
         _logger = logger;
     }
 
@@ -36,39 +36,8 @@ public class PatientAppointmentController : ControllerBase
 
             await _context.SaveChangesAsync();
 
-            // Get patient details for notification
-            var patient = await _context.Users
-                .Join(_context.Set<PatientProfile>(), u => u.Id, pp => pp.UserId, (u, pp) => new { u, pp })
-                .Where(x => x.pp.PatientId == appointment.PatientId)
-                .Select(x => new { x.u.Phone, x.u.Email, x.u.FullName, x.u.Id })
-                .FirstOrDefaultAsync();
-
-            if (patient != null)
-            {
-                // Create notification message
-                var message = request.Status.ToLower() switch
-                {
-                    "completed" => $"Your appointment with Dr. {appointment.DoctorName} has been completed. Thank you for visiting us.",
-                    "cancelled" => $"Your appointment scheduled for {appointment.AppointmentDate:MMM dd, yyyy} has been cancelled. {request.DoctorNotes}",
-                    _ => $"Your appointment status has been updated to {request.Status}."
-                };
-
-                // Send SNS notification
-                await _snsService.SendAppointmentNotificationAsync(patient.Phone, patient.Email, message);
-
-                // Create in-app notification
-                var notification = new Notification
-                {
-                    UserId = patient.Id,
-                    Message = message,
-                    Type = request.Status.ToLower() == "cancelled" ? "Alert" : "Reminder",
-                    AppointmentId = appointment.AppointmentId,
-                    IsRead = false
-                };
-
-                _context.Notifications.Add(notification);
-                await _context.SaveChangesAsync();
-            }
+            // Send notification using NotificationService
+            await _notificationService.SendAppointmentNotification(appointment.AppointmentId, request.Status);
 
             return Ok(new { success = true, message = "Appointment status updated and notification sent" });
         }

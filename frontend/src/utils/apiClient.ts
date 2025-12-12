@@ -312,6 +312,26 @@ export const patientAPI = {
     );
     return parseJsonResponse(response);
   },
+
+  getNotifications: async (userId: number): Promise<any> => {
+    const response = await authenticatedFetch(
+      `${API_BASE_URL}/notification/${userId}`,
+      {
+        method: 'GET',
+      }
+    );
+    return parseJsonResponse(response);
+  },
+
+  markNotificationRead: async (notificationId: number): Promise<any> => {
+    const response = await authenticatedFetch(
+      `${API_BASE_URL}/notification/mark-read/${notificationId}`,
+      {
+        method: 'PUT',
+      }
+    );
+    return parseJsonResponse(response);
+  },
 };
 
 

@@ -1,5 +1,6 @@
 using BloodLine.Data;
 using BloodLine.Models;
+using BloodLine.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,11 +11,13 @@ namespace BloodLine.Controllers;
 public class HospitalController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
+    private readonly NotificationService _notificationService;
     private readonly ILogger<HospitalController> _logger;
 
-    public HospitalController(ApplicationDbContext context, ILogger<HospitalController> logger)
+    public HospitalController(ApplicationDbContext context, NotificationService notificationService, ILogger<HospitalController> logger)
     {
         _context = context;
+        _notificationService = notificationService;
         _logger = logger;
     }
 
@@ -273,6 +276,36 @@ public class HospitalController : ControllerBase
             return StatusCode(500, new { error = "Failed to fetch hospital profile" });
         }
     }
+
+    /// <summary>
+    /// Update appointment status with notification.
+    /// </summary>
+    [HttpPut("appointments/{appointmentId}/status")]
+    public async Task<IActionResult> UpdateAppointmentStatus(int appointmentId, [FromBody] UpdateAppointmentStatusRequest request)
+    {
+        try
+        {
+            var appointment = await _context.PatientAppointments.FindAsync(appointmentId);
+            if (appointment == null)
+                return NotFound(new { error = "Appointment not found" });
+
+            appointment.Status = request.Status;
+            if (!string.IsNullOrEmpty(request.DoctorNotes))
+                appointment.DoctorNotes = request.DoctorNotes;
+
+            await _context.SaveChangesAsync();
+
+            // Send notification
+            await _notificationService.SendAppointmentNotification(appointmentId, request.Status);
+
+            return Ok(new { success = true, message = "Appointment status updated and notification sent" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error updating appointment status: {ex.Message}");
+            return StatusCode(500, new { error = "Failed to update appointment status" });
+        }
+    }
 }
 
 public class AddInventoryRequest
@@ -291,6 +324,12 @@ public class UpdateApprovalRequest
 {
     public string? Status { get; set; }
     public int? ReviewedBy { get; set; }
+}
+
+public class UpdateAppointmentStatusRequest
+{
+    public string Status { get; set; } = string.Empty;
+    public string? DoctorNotes { get; set; }
 }
 
 

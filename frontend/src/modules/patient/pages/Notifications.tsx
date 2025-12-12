@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Bell, CheckCircle, XCircle, Info } from "lucide-react";
+import { Bell, CheckCircle, XCircle, Info, Calendar } from "lucide-react";
 import { useAuth } from '../../../context/AuthContext';
+import { patientAPI } from '../../../utils/apiClient';
 
 interface Notification {
   id: number;
+  title: string;
   message: string;
   type: string;
   isRead: boolean;
@@ -18,16 +20,16 @@ export default function Notifications() {
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      if (user?.id) {
-        try {
-          const response = await fetch(`https://bloodline.dev/api/notifications?userId=${user.id}`);
-          const data = await response.json();
-          setNotifications(data);
-        } catch (error) {
-          console.error('Failed to fetch notifications:', error);
-        } finally {
-          setLoading(false);
+      if (!user?.id) return;
+      try {
+        const result = await patientAPI.getNotifications(user.id);
+        if (result.success) {
+          setNotifications(result.data);
         }
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -36,18 +38,24 @@ export default function Notifications() {
 
   const markAsRead = async (notificationId: number) => {
     try {
-      await fetch(`https://bloodline.dev/api/notifications/${notificationId}/read`, {
-        method: 'PUT'
-      });
-      setNotifications(prev => 
-        prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n)
-      );
+      const result = await patientAPI.markNotificationRead(notificationId);
+      if (result.success) {
+        setNotifications(prev => 
+          prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n)
+        );
+      }
     } catch (error) {
       console.error('Failed to mark notification as read:', error);
     }
   };
 
   const typeStyles: any = {
+    appointment_update: {
+      icon: Calendar,
+      border: "border-blue-500",
+      bg: "bg-blue-50",
+      text: "text-blue-700",
+    },
     Alert: {
       icon: XCircle,
       border: "border-red-500",
@@ -112,19 +120,22 @@ export default function Notifications() {
 
                   {/* Text */}
                   <div>
-                    <p className={`font-medium ${!n.isRead ? 'text-gray-900' : 'text-gray-600'}`}>
+                    <h3 className={`font-semibold ${!n.isRead ? 'text-gray-900' : 'text-gray-600'}`}>
+                      {n.title}
+                    </h3>
+                    <p className={`text-sm mt-1 ${!n.isRead ? 'text-gray-700' : 'text-gray-500'}`}>
                       {n.message}
                     </p>
-                    <p className="text-sm mt-1">
-                      <span className={`font-semibold ${Style.text}`}>
-                        Type: {n.type}
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className={`text-xs px-2 py-1 rounded ${Style.bg} ${Style.text} font-medium`}>
+                        {n.type.replace('_', ' ').toUpperCase()}
                       </span>
                       {!n.isRead && (
-                        <span className="ml-2 text-xs bg-blue-500 text-white px-2 py-1 rounded">
+                        <span className="text-xs bg-red-500 text-white px-2 py-1 rounded">
                           New
                         </span>
                       )}
-                    </p>
+                    </div>
                   </div>
                 </div>
 
