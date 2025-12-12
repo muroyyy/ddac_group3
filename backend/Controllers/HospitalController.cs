@@ -210,10 +210,10 @@ public class HospitalController : ControllerBase
     }
 
     /// <summary>
-    /// Update approval request status.
+    /// Approve blood request.
     /// </summary>
-    [HttpPut("approval-requests/{id}")]
-    public async Task<IActionResult> UpdateApprovalRequest(int id, [FromBody] UpdateApprovalRequest request)
+    [HttpPost("requests/{id}/approve")]
+    public async Task<IActionResult> ApproveRequest(int id)
     {
         try
         {
@@ -221,24 +221,46 @@ public class HospitalController : ControllerBase
             if (bloodRequest == null)
                 return NotFound(new { error = "Request not found" });
 
-            var oldStatus = bloodRequest.Status;
-            bloodRequest.Status = request.Status ?? bloodRequest.Status;
-
+            bloodRequest.Status = "Approved";
             _context.Set<BloodRequest>().Update(bloodRequest);
             await _context.SaveChangesAsync();
 
-            // Send notification for status change
-            if (oldStatus != bloodRequest.Status && !string.IsNullOrEmpty(bloodRequest.Status))
-            {
-                await SendBloodRequestNotification(bloodRequest.PatientId, bloodRequest.Status, id);
-            }
+            await SendBloodRequestNotification(bloodRequest.PatientId, "Approved", id);
 
-            return Ok(new { success = true });
+            return Ok(new { success = true, message = "Request approved. Please create appointment." });
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error updating approval request: {ex.Message}");
-            return StatusCode(500, new { error = "Failed to update approval request" });
+            _logger.LogError($"Error approving request: {ex.Message}");
+            return StatusCode(500, new { error = "Failed to approve request" });
+        }
+    }
+
+    /// <summary>
+    /// Reject blood request.
+    /// </summary>
+    [HttpPost("requests/{id}/reject")]
+    public async Task<IActionResult> RejectRequest(int id, [FromBody] RejectRequestDto dto)
+    {
+        try
+        {
+            var bloodRequest = await _context.Set<BloodRequest>().FindAsync(id);
+            if (bloodRequest == null)
+                return NotFound(new { error = "Request not found" });
+
+            bloodRequest.Status = "Rejected";
+            bloodRequest.RejectionNotes = dto.RejectionNotes;
+            _context.Set<BloodRequest>().Update(bloodRequest);
+            await _context.SaveChangesAsync();
+
+            await SendBloodRequestNotification(bloodRequest.PatientId, "Rejected", id);
+
+            return Ok(new { success = true, message = "Request rejected." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error rejecting request: {ex.Message}");
+            return StatusCode(500, new { error = "Failed to reject request" });
         }
     }
 
@@ -321,32 +343,133 @@ public class HospitalController : ControllerBase
     }
 
     /// <summary>
-    /// Update appointment status with notification.
+    /// Create appointment after approval.
     /// </summary>
-    [HttpPut("appointments/{appointmentId}/status")]
-    public async Task<IActionResult> UpdateAppointmentStatus(int appointmentId, [FromBody] UpdateAppointmentStatusRequest request)
+    [HttpPost("appointments/create")]
+    public async Task<IActionResult> CreateAppointment([FromBody] CreateAppointmentDto dto)
     {
         try
         {
-            var appointment = await _context.PatientAppointments.FindAsync(appointmentId);
-            if (appointment == null)
-                return NotFound(new { error = "Appointment not found" });
+            var bloodRequest = await _context.Set<BloodRequest>().FindAsync(dto.RequestId);
+            if (bloodRequest == null || bloodRequest.Status != "Approved")
+                return BadRequest(new { error = "Invalid or non-approved request" });
 
-            appointment.Status = request.Status;
-            if (!string.IsNullOrEmpty(request.DoctorNotes))
-                appointment.DoctorNotes = request.DoctorNotes;
+            var appointment = new PatientAppointment
+            {
+                RequestId = dto.RequestId,
+                PatientId = bloodRequest.PatientId,
+                HospitalId = bloodRequest.HospitalId,
+                DoctorName = dto.DoctorName,
+                AppointmentDate = dto.AppointmentDate,
+                Status = "Upcoming",
+                CreatedAt = DateTime.UtcNow
+            };
 
+            _context.PatientAppointments.Add(appointment);
             await _context.SaveChangesAsync();
 
-            // Send notification
-            await _notificationService.SendAppointmentNotification(appointmentId, request.Status);
+            await _notificationService.SendAppointmentNotification(appointment.AppointmentId, "Created");
 
-            return Ok(new { success = true, message = "Appointment status updated and notification sent" });
+            return Ok(new { success = true, appointmentId = appointment.AppointmentId });
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error updating appointment status: {ex.Message}");
-            return StatusCode(500, new { error = "Failed to update appointment status" });
+            _logger.LogError($"Error creating appointment: {ex.Message}");
+            return StatusCode(500, new { error = "Failed to create appointment" });
+        }
+    }
+
+    /// <summary>
+    /// Get hospital appointments.
+    /// </summary>
+    [HttpGet("appointments/{userId}")]
+    public async Task<IActionResult> GetAppointments(int userId)
+    {
+        try
+        {
+            // Get hospital ID from user
+            var hospital = await _context.Set<Hospital>()
+                .FirstOrDefaultAsync(h => h.UserId == userId);
+            
+            if (hospital == null)
+                return BadRequest(new { error = "Hospital profile not found" });
+
+            var appointments = await _context.PatientAppointments
+                .Where(a => a.HospitalId == hospital.HospitalId)
+                .Join(_context.Set<BloodRequest>(), a => a.RequestId, br => br.RequestId, (a, br) => new { a, br })
+                .Join(_context.Set<PatientProfile>(), x => x.br.PatientId, pp => pp.PatientId, (x, pp) => new { x.a, x.br, pp })
+                .Join(_context.Users, x => x.pp.UserId, u => u.Id, (x, u) => new
+                {
+                    appointmentId = x.a.AppointmentId,
+                    patientName = u.FullName,
+                    doctorName = x.a.DoctorName,
+                    appointmentDate = x.a.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
+                    status = x.a.Status,
+                    bloodType = x.br.BloodType,
+                    doctorNotes = x.a.DoctorNotes
+                })
+                .OrderByDescending(x => x.appointmentDate)
+                .ToListAsync();
+
+            return Ok(new { success = true, data = appointments });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error fetching appointments: {ex.Message}");
+            return StatusCode(500, new { error = "Failed to fetch appointments" });
+        }
+    }
+
+    /// <summary>
+    /// Complete appointment.
+    /// </summary>
+    [HttpPost("appointments/{id}/complete")]
+    public async Task<IActionResult> CompleteAppointment(int id, [FromBody] CompleteAppointmentDto dto)
+    {
+        try
+        {
+            var appointment = await _context.PatientAppointments.FindAsync(id);
+            if (appointment == null)
+                return NotFound(new { error = "Appointment not found" });
+
+            appointment.Status = "Completed";
+            appointment.DoctorNotes = dto.DoctorNotes;
+            await _context.SaveChangesAsync();
+
+            await _notificationService.SendAppointmentNotification(id, "Completed");
+
+            return Ok(new { success = true });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error completing appointment: {ex.Message}");
+            return StatusCode(500, new { error = "Failed to complete appointment" });
+        }
+    }
+
+    /// <summary>
+    /// Cancel appointment.
+    /// </summary>
+    [HttpPost("appointments/{id}/cancel")]
+    public async Task<IActionResult> CancelAppointment(int id)
+    {
+        try
+        {
+            var appointment = await _context.PatientAppointments.FindAsync(id);
+            if (appointment == null)
+                return NotFound(new { error = "Appointment not found" });
+
+            appointment.Status = "Cancelled";
+            await _context.SaveChangesAsync();
+
+            await _notificationService.SendAppointmentNotification(id, "Cancelled");
+
+            return Ok(new { success = true });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error cancelling appointment: {ex.Message}");
+            return StatusCode(500, new { error = "Failed to cancel appointment" });
         }
     }
 }
@@ -363,15 +486,20 @@ public class UpdateInventoryRequest
     public int? Units { get; set; }
 }
 
-public class UpdateApprovalRequest
+public class RejectRequestDto
 {
-    public string? Status { get; set; }
-    public int? ReviewedBy { get; set; }
+    public string? RejectionNotes { get; set; }
 }
 
-public class UpdateAppointmentStatusRequest
+public class CreateAppointmentDto
 {
-    public string Status { get; set; } = string.Empty;
+    public int RequestId { get; set; }
+    public string DoctorName { get; set; } = string.Empty;
+    public DateTime AppointmentDate { get; set; }
+}
+
+public class CompleteAppointmentDto
+{
     public string? DoctorNotes { get; set; }
 }
 

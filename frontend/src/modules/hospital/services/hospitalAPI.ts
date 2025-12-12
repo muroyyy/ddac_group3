@@ -75,11 +75,51 @@ export const hospitalAPI = {
     return response.json();
   },
 
-  updateApprovalRequest: async (id: number, status: string, reviewedBy: number): Promise<{ success: boolean }> => {
-    const response = await fetch(`${API_BASE_URL}/hospital/approval-requests/${id}`, {
-      method: 'PUT',
+  approveRequest: async (id: number): Promise<{ success: boolean }> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/requests/${id}/approve`, {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status, reviewedBy }),
+    });
+    return response.json();
+  },
+
+  rejectRequest: async (id: number, rejectionNotes?: string): Promise<{ success: boolean }> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/requests/${id}/reject`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rejectionNotes }),
+    });
+    return response.json();
+  },
+
+  createAppointment: async (data: { requestId: number; doctorName: string; appointmentDate: Date }): Promise<{ success: boolean }> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/appointments/create`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+
+  getAppointments: async (userId: number): Promise<any[]> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/appointments/${userId}`);
+    const result = await response.json();
+    return result.data || [];
+  },
+
+  completeAppointment: async (id: number, doctorNotes?: string): Promise<{ success: boolean }> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/appointments/${id}/complete`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ doctorNotes }),
+    });
+    return response.json();
+  },
+
+  cancelAppointment: async (id: number): Promise<{ success: boolean }> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/appointments/${id}/cancel`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
     });
     return response.json();
   },

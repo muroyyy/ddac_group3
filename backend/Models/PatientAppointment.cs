@@ -20,13 +20,10 @@ public class PatientAppointment
     public int HospitalId { get; set; }
 
     [Column("doctor_name")]
-    public string? DoctorName { get; set; }
+    public string DoctorName { get; set; } = string.Empty;
 
     [Column("appointment_date")]
     public DateTime AppointmentDate { get; set; }
-
-    [Column("location")]
-    public string? Location { get; set; }
 
     [Column("status")]
     public string Status { get; set; } = "Upcoming";

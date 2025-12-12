@@ -20,9 +20,10 @@ public class DatabaseMigrationService
         {
             await _db.Database.ExecuteSqlRawAsync(@"
                 ALTER TABLE blood_requests 
-                ADD COLUMN IF NOT EXISTS notes TEXT NULL
+                ADD COLUMN IF NOT EXISTS notes TEXT NULL,
+                ADD COLUMN IF NOT EXISTS rejection_notes TEXT NULL
             ");
-            _logger.LogInformation("✅ Database migration completed: notes column added to blood_requests");
+            _logger.LogInformation("✅ Database migration completed: blood_requests columns added");
         }
         catch (Exception ex)
         {
@@ -34,15 +35,15 @@ public class DatabaseMigrationService
             await _db.Database.ExecuteSqlRawAsync(@"
                 CREATE TABLE IF NOT EXISTS patient_appointments (
                     appointment_id INT AUTO_INCREMENT PRIMARY KEY,
-                    patient_id INT NOT NULL,
                     request_id INT NOT NULL,
+                    patient_id INT NOT NULL,
                     hospital_id INT NOT NULL,
+                    doctor_name VARCHAR(255) NOT NULL,
                     appointment_date DATETIME NOT NULL,
-                    doctor_name VARCHAR(255) NULL,
-                    location VARCHAR(255) NULL,
-                    status VARCHAR(50) NOT NULL DEFAULT 'Upcoming',
+                    status ENUM('Upcoming','Completed','Cancelled') NOT NULL DEFAULT 'Upcoming',
                     doctor_notes TEXT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (request_id) REFERENCES blood_requests(request_id)
                 )
             ");
             _logger.LogInformation("✅ Database migration completed: patient_appointments table created");

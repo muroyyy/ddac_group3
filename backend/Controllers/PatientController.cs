@@ -168,9 +168,9 @@ namespace BloodLine.Controllers
                     {
                         appointmentId = a.AppointmentId,
                         doctorName = a.DoctorName,
-                        location = a.Location,
                         appointmentDate = a.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
-                        status = a.Status
+                        status = a.Status,
+                        doctorNotes = a.DoctorNotes
                     })
                     .ToListAsync();
 

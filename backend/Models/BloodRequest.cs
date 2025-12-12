@@ -31,6 +31,9 @@ public class BloodRequest
     [Column("notes")]
     public string? Notes { get; set; }
 
+    [Column("rejection_notes")]
+    public string? RejectionNotes { get; set; }
+
     [Column("created_at")]
     public DateTime? CreatedAt { get; set; }
 }

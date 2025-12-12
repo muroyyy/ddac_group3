@@ -32,13 +32,28 @@ export default function Approvals() {
     load();
   }, []);
 
-  const review = async (id: number, status: string) => {
-    if (!confirm(`Set status to ${status}?`)) return;
+  const approveRequest = async (id: number, patientName: string, bloodType: string) => {
+    if (!confirm('Approve this request?')) return;
     try {
-      await hospitalAPI.updateApprovalRequest(id, status, reviewerId);
+      await hospitalAPI.approveRequest(id);
+      // Navigate to appointment creation with URL params
+      const url = `/hospital/create-appointment?requestId=${id}&patientName=${encodeURIComponent(patientName)}&bloodType=${encodeURIComponent(bloodType)}`;
+      window.location.href = url;
+    } catch (e) {
+      console.error(e);
+      alert('Failed to approve request');
+    }
+  };
+
+  const rejectRequest = async (id: number) => {
+    const notes = prompt('Rejection reason (optional):');
+    if (notes === null) return; // User cancelled
+    try {
+      await hospitalAPI.rejectRequest(id, notes || undefined);
       load();
     } catch (e) {
       console.error(e);
+      alert('Failed to reject request');
     }
   };
 
@@ -220,18 +235,25 @@ export default function Approvals() {
                   </td>
                   <td className="p-4">
                     <div className="flex gap-2">
-                      <button 
-                        className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium" 
-                        onClick={() => review(r.id, 'approved')}
-                      >
-                        Approve
-                      </button>
-                      <button 
-                        className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium" 
-                        onClick={() => review(r.id, 'rejected')}
-                      >
-                        Reject
-                      </button>
+                      {r.status.toLowerCase() === 'pending' && (
+                        <>
+                          <button 
+                            className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium" 
+                            onClick={() => approveRequest(r.id, r.userName, r.bloodType || '')}
+                          >
+                            Approve
+                          </button>
+                          <button 
+                            className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium" 
+                            onClick={() => rejectRequest(r.id)}
+                          >
+                            Reject
+                          </button>
+                        </>
+                      )}
+                      {r.status.toLowerCase() !== 'pending' && (
+                        <span className="text-gray-500 text-sm">No actions available</span>
+                      )}
                     </div>
                   </td>
                 </tr>
