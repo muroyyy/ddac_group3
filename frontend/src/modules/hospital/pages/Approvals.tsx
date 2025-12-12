@@ -5,7 +5,6 @@ import type { ApprovalRequest } from '../services/hospitalAPI';
 import { useAuth } from '../../../context/AuthContext';
 
 export default function Approvals() {
-  const { user } = useAuth();
 
   const [requests, setRequests] = useState<ApprovalRequest[]>([]);
   const [loading, setLoading] = useState(true);
