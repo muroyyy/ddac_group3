@@ -426,7 +426,6 @@ public class HospitalController : ControllerBase
                 RequestId = dto.RequestId,
                 PatientId = bloodRequest.PatientId,
                 HospitalId = bloodRequest.HospitalId,
-                DoctorName = dto.DoctorName,
                 AppointmentDate = dto.AppointmentDate,
                 Status = "Upcoming",
                 DoctorNotes = dto.InitialNotes,
@@ -464,11 +463,13 @@ public class HospitalController : ControllerBase
                 .Where(a => a.HospitalId == hospitalId.Value)
                 .Join(_context.Set<BloodRequest>(), a => a.RequestId, br => br.RequestId, (a, br) => new { a, br })
                 .Join(_context.Set<PatientProfile>(), x => x.br.PatientId, pp => pp.PatientId, (x, pp) => new { x.a, x.br, pp })
-                .Join(_context.Users, x => x.pp.UserId, u => u.Id, (x, u) => new
+                .Join(_context.Users, x => x.pp.UserId, u => u.Id, (x, u) => new { x.a, x.br, x.pp, u })
+                .GroupJoin(_context.Doctors, x => x.a.DoctorId, d => d.DoctorId, (x, doctors) => new { x.a, x.br, x.pp, x.u, doctors })
+                .SelectMany(x => x.doctors.DefaultIfEmpty(), (x, d) => new
                 {
                     appointmentId = x.a.AppointmentId,
-                    patientName = u.FullName,
-                    doctorName = x.a.DoctorName,
+                    patientName = x.u.FullName,
+                    doctorName = d != null ? d.DoctorName : "Not Assigned",
                     appointmentDate = x.a.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
                     status = x.a.Status,
                     bloodType = x.br.BloodType,
