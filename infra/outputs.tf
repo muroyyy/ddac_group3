@@ -81,3 +81,13 @@ output "certificate_arn" {
   description = "ACM certificate ARN"
   value       = module.acm.certificate_arn
 }
+
+output "sns_topic_arn" {
+  description = "SNS topic ARN for notifications"
+  value       = module.sns.topic_arn
+}
+
+output "sns_topic_name" {
+  description = "SNS topic name"
+  value       = module.sns.topic_name
+}
