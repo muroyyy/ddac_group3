@@ -46,14 +46,17 @@ namespace BloodLine.Controllers
                 {
                     UserId = userId,
                     BloodType = request.BloodType,
-                    Location = request.Location
+                    Location = request.Location,
+                    IsAvailable = request.IsAvailable
                 };
                 _context.DonorProfiles.Add(profile);
             }
             else
             {
-                profile.BloodType = request.BloodType;
+                if (!string.IsNullOrEmpty(request.BloodType))
+                    profile.BloodType = request.BloodType;
                 profile.Location = request.Location;
+                profile.IsAvailable = request.IsAvailable;
             }
 
             await _context.SaveChangesAsync();
@@ -69,6 +72,8 @@ namespace BloodLine.Controllers
             var completedCount = 0;
             var lastDonationDate = (string?)null;
             var isAvailable = true;
+            var availabilityStatus = "Available for Immediate Donation";
+            var eligibleForImmediate = true;
             
             if (donorProfile != null)
             {
@@ -89,7 +94,19 @@ namespace BloodLine.Controllers
                     lastDonationDate = lastDonation.Value.ToString("yyyy-MM-dd");
                     // Check if 3 months have passed since last donation
                     var threeMonthsAgo = DateTime.Now.AddMonths(-3);
-                    isAvailable = lastDonation.Value <= threeMonthsAgo;
+                    eligibleForImmediate = lastDonation.Value <= threeMonthsAgo;
+                    
+                    if (!eligibleForImmediate)
+                    {
+                        availabilityStatus = "Available for Future Appointments";
+                    }
+                }
+                
+                // Override with profile availability setting
+                isAvailable = donorProfile.IsAvailable ?? true;
+                if (!isAvailable)
+                {
+                    availabilityStatus = "Unavailable";
                 }
             }
 
@@ -100,6 +117,8 @@ namespace BloodLine.Controllers
                 bloodType = donorProfile?.BloodType ?? "N/A",
                 lastDonation = lastDonationDate,
                 isAvailable = isAvailable,
+                availabilityStatus = availabilityStatus,
+                eligibleForImmediate = eligibleForImmediate,
                 urgentAlerts = 0
             });
         }
@@ -246,8 +265,9 @@ namespace BloodLine.Controllers
 
     public class DonorUpdateProfileRequest
     {
-        public string BloodType { get; set; } = "";
+        public string? BloodType { get; set; }
         public string Location { get; set; } = "";
+        public bool IsAvailable { get; set; } = true;
     }
 
     public class DonationRequestDto

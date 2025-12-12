@@ -41,7 +41,6 @@ export default function DonorProfile() {
     setLoading(true);
     try {
       const result = await donorAPI.updateProfile(user!.id, {
-        email: formData.email,
         location: formData.location,
         isAvailable: formData.isAvailable,
       });

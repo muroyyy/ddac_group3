@@ -112,19 +112,26 @@ export default function DonorDashboard() {
 
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-4">Availability Status</h2>
-          <div className="flex items-center justify-between">
-            <span className="text-gray-700">Currently Available:</span>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-gray-700">Status:</span>
             <span
               className={`px-4 py-2 rounded-full font-semibold ${
-                stats?.isAvailable
+                stats?.availabilityStatus === "Available for Immediate Donation"
                   ? "bg-green-100 text-green-800"
+                  : stats?.availabilityStatus === "Available for Future Appointments"
+                  ? "bg-yellow-100 text-yellow-800"
                   : "bg-red-100 text-red-800"
               }`}
             >
-              {stats?.isAvailable ? "Available" : "Unavailable"}
+              {stats?.availabilityStatus || "Unknown"}
             </span>
           </div>
-          <p className="text-sm text-gray-600 mt-4">
+          {stats?.availabilityStatus === "Available for Future Appointments" && (
+            <p className="text-sm text-orange-600 mb-3">
+              You have recently donated blood within three months and are not eligible for immediate appointments.
+            </p>
+          )}
+          <p className="text-sm text-gray-600">
             Update your availability status in your profile settings.
           </p>
         </div>
