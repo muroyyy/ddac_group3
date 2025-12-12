@@ -85,25 +85,25 @@ export default function DonorDashboard() {
           <div className="space-y-3">
             <button
               onClick={() => navigate("/donor/donate")}
-              className="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition"
+              className="w-full bg-red-800 text-white py-3 rounded-lg hover:bg-red-900 transition"
             >
               Request to Donate Blood
             </button>
             <button
               onClick={() => navigate("/donor/history")}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
+              className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition"
             >
               View Donation History
             </button>
             <button
               onClick={() => navigate("/donor/profile")}
-              className="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition"
+              className="w-full bg-gray-300 text-gray-800 py-3 rounded-lg hover:bg-gray-400 transition"
             >
               Update Profile
             </button>
             <button
               onClick={() => navigate("/donor/appointments")}
-              className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition"
+              className="w-full bg-green-800 text-white py-3 rounded-lg hover:bg-green-900 transition"
             >
               View Appointments
             </button>
