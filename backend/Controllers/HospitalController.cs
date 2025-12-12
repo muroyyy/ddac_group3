@@ -221,10 +221,17 @@ public class HospitalController : ControllerBase
             if (bloodRequest == null)
                 return NotFound(new { error = "Request not found" });
 
+            var oldStatus = bloodRequest.Status;
             bloodRequest.Status = request.Status ?? bloodRequest.Status;
 
             _context.Set<BloodRequest>().Update(bloodRequest);
             await _context.SaveChangesAsync();
+
+            // Send notification for status change
+            if (oldStatus != bloodRequest.Status && !string.IsNullOrEmpty(bloodRequest.Status))
+            {
+                await SendBloodRequestNotification(bloodRequest.PatientId, bloodRequest.Status, id);
+            }
 
             return Ok(new { success = true });
         }
@@ -232,6 +239,42 @@ public class HospitalController : ControllerBase
         {
             _logger.LogError($"Error updating approval request: {ex.Message}");
             return StatusCode(500, new { error = "Failed to update approval request" });
+        }
+    }
+
+    private async Task SendBloodRequestNotification(int patientId, string status, int requestId)
+    {
+        try
+        {
+            var patient = await _context.PatientProfiles
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.PatientId == patientId);
+
+            if (patient == null) return;
+
+            var message = status.ToLower() switch
+            {
+                "approved" => $"Good news! Your blood request #{requestId} has been approved.",
+                "rejected" => $"Your blood request #{requestId} has been rejected. Please contact the hospital for more information.",
+                _ => $"Your blood request #{requestId} status has been updated to {status}."
+            };
+
+            var notification = new Notification
+            {
+                UserId = patient.UserId,
+                Title = $"Blood Request {status}",
+                Message = message,
+                Type = "blood_request_update",
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Notifications.Add(notification);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error sending blood request notification: {ex.Message}");
         }
     }
 

@@ -56,6 +56,12 @@ export default function Notifications() {
       bg: "bg-blue-50",
       text: "text-blue-700",
     },
+    blood_request_update: {
+      icon: CheckCircle,
+      border: "border-green-500",
+      bg: "bg-green-50",
+      text: "text-green-700",
+    },
     Alert: {
       icon: XCircle,
       border: "border-red-500",
