@@ -234,6 +234,49 @@ public class HospitalController : ControllerBase
     }
 
     /// <summary>
+    /// Get all blood requests from the blood_requests table for hospital staff
+    /// </summary>
+    [HttpGet("all-blood-requests/{userId}")]
+    public async Task<IActionResult> GetAllBloodRequests(int userId)
+    {
+        try
+        {
+            // Get hospital ID for this user
+            var hospitalId = await GetHospitalIdFromUser(userId);
+            if (hospitalId == null)
+                return BadRequest(new { success = false, message = "Hospital staff not found" });
+
+            var requests = await _context.BloodRequests
+                .Where(br => br.HospitalId == hospitalId.Value)
+                .Join(_context.PatientProfiles, br => br.PatientId, pp => pp.PatientId, (br, pp) => new { br, pp })
+                .Join(_context.Users, x => x.pp.UserId, u => u.Id, (x, u) => new
+                {
+                    requestId = x.br.RequestId,
+                    patientId = x.br.PatientId,
+                    hospitalId = x.br.HospitalId,
+                    patientName = u.FullName,
+                    patientEmail = u.Email,
+                    patientPhone = u.Phone,
+                    bloodType = x.br.BloodType,
+                    unitsRequired = x.br.UnitsRequired,
+                    status = x.br.Status,
+                    urgencyLevel = x.br.UrgencyLevel,
+                    notes = x.br.Notes ?? "",
+                    createdAt = x.br.CreatedAt.HasValue ? x.br.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm:ss") : ""
+                })
+                .OrderByDescending(x => x.createdAt)
+                .ToListAsync();
+
+            return Ok(new { success = true, data = requests });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error fetching all blood requests: {ex.Message}");
+            return StatusCode(500, new { success = false, message = "Failed to fetch all blood requests" });
+        }
+    }
+
+    /// <summary>
     /// Approve blood request.
     /// </summary>
     [HttpPost("requests/{id}/approve")]

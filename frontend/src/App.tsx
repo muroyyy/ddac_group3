@@ -39,6 +39,7 @@ import CompletedDonations from './modules/donor/pages/CompletedDonations';
 import HospitalDashboard from './modules/hospital/pages/HospitalDashboard';
 import Inventory from './modules/hospital/pages/Inventory';
 import BloodRequests from './modules/hospital/pages/BloodRequests';
+import AllBloodRequests from './modules/hospital/pages/AllBloodRequests';
 import HospitalAppointments from './modules/hospital/pages/Appointments';
 import TestPage from './modules/hospital/pages/TestPage';
 import HospitalProfile from './modules/hospital/pages/Profile';
@@ -106,6 +107,7 @@ const AppRoutes: React.FC = () => {
               <Route path="dashboard" element={<HospitalDashboard user={user!} />} />
               <Route path="test" element={<TestPage />} />
               <Route path="blood-requests" element={<BloodRequests />} />
+              <Route path="all-blood-requests" element={<AllBloodRequests />} />
               <Route path="appointments" element={<HospitalAppointments />} />
               <Route path="inventory" element={<Inventory />} />
               <Route path="profile" element={<HospitalProfile />} />
