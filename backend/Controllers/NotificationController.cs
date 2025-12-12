@@ -21,6 +21,7 @@ namespace BloodLine.Controllers
             try
             {
                 var notifications = await _db.Notifications
+                    .AsNoTracking()
                     .Where(n => n.UserId == userId)
                     .OrderByDescending(n => n.CreatedAt)
                     .Select(n => new
@@ -39,6 +40,7 @@ namespace BloodLine.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Notification error for user {userId}: {ex.Message}");
                 return StatusCode(500, new { success = false, message = "Error loading notifications.", error = ex.Message });
             }
         }

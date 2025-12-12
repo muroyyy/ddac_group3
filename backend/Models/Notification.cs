@@ -30,6 +30,4 @@ public class Notification
 
     [Column("appointment_id")]
     public int? AppointmentId { get; set; }
-
-    public User User { get; set; } = null!;
 }
