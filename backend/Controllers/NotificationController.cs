@@ -97,41 +97,6 @@ namespace BloodLine.Controllers
             }
         }
 
-        [HttpPost("create-test/{userId}")]
-        public async Task<IActionResult> CreateTestNotification(int userId)
-        {
-            try
-            {
-                // First ensure table exists
-                await _db.Database.ExecuteSqlRawAsync(@"
-                    CREATE TABLE IF NOT EXISTS notifications (
-                        notification_id INT AUTO_INCREMENT PRIMARY KEY,
-                        user_id INT NOT NULL,
-                        title VARCHAR(255) NOT NULL,
-                        message TEXT NOT NULL,
-                        type VARCHAR(50) NOT NULL,
-                        is_read BOOLEAN DEFAULT FALSE,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        appointment_id INT NULL
-                    )
-                ");
 
-                // Insert test notification
-                await _db.Database.ExecuteSqlRawAsync(
-                    @"INSERT INTO notifications (user_id, title, message, type, is_read, created_at) 
-                      VALUES ({0}, {1}, {2}, {3}, 0, NOW())",
-                    userId, 
-                    "Test Notification", 
-                    "This is a test notification to verify the system is working.", 
-                    "test");
-                    
-                return Ok(new { success = true, message = "Test notification created." });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Test notification error: {ex.Message}");
-                return StatusCode(500, new { success = false, message = "Error creating test notification.", error = ex.Message });
-            }
-        }
     }
 }

@@ -13,11 +13,13 @@ namespace BloodLine.Controllers
     {
         private readonly ApplicationDbContext _db;
         private readonly IConfiguration _config;
+        private readonly Amazon.BedrockRuntime.IAmazonBedrockRuntime _bedrock;
 
-        public InsightsController(ApplicationDbContext db, IConfiguration config)
+        public InsightsController(ApplicationDbContext db, IConfiguration config, Amazon.BedrockRuntime.IAmazonBedrockRuntime bedrock)
         {
             _db = db;
             _config = config;
+            _bedrock = bedrock;
         }
 
         [HttpGet("{userId}")]
@@ -106,7 +108,7 @@ namespace BloodLine.Controllers
         {
             try
             {
-                var client = new AmazonBedrockRuntimeClient(Amazon.RegionEndpoint.USEast1);
+                Console.WriteLine("🤖 Attempting to generate AI insight using AWS Bedrock...");
                 
                 var prompt = $@"You are a healthcare assistant analyzing a patient's blood request history. 
 Generate a brief, empathetic insight (2-3 sentences) based on these statistics:
@@ -138,14 +140,20 @@ Provide actionable advice for the patient. Be concise, supportive, and focus on 
                     Body = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(requestBody)))
                 };
 
-                var response = await client.InvokeModelAsync(request);
+                Console.WriteLine("📡 Calling Bedrock API...");
+                var response = await _bedrock.InvokeModelAsync(request);
+                
+                Console.WriteLine("📝 Parsing Bedrock response...");
                 var responseBody = await JsonSerializer.DeserializeAsync<JsonElement>(response.Body);
                 var content = responseBody.GetProperty("content")[0].GetProperty("text").GetString();
                 
+                Console.WriteLine($"✅ Bedrock AI insight generated: {content?.Substring(0, Math.Min(50, content.Length ?? 0))}...");
                 return content ?? GetFallbackInsight(avgHours, avgDays);
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"❌ Bedrock AI failed: {ex.Message}");
+                Console.WriteLine($"🔄 Using fallback insight instead");
                 return GetFallbackInsight(avgHours, avgDays);
             }
         }

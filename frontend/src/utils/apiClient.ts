@@ -333,15 +333,7 @@ export const patientAPI = {
     return parseJsonResponse(response);
   },
 
-  createTestNotification: async (userId: number): Promise<any> => {
-    const response = await authenticatedFetch(
-      `${API_BASE_URL}/notification/create-test/${userId}`,
-      {
-        method: 'POST',
-      }
-    );
-    return parseJsonResponse(response);
-  },
+
 };
 
 
