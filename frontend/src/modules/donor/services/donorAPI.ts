@@ -85,6 +85,9 @@ export const donorAPI = {
 
   getDonationRequests: async (userId: number): Promise<DonationRequest[]> => {
     const response = await fetch(`${API_BASE_URL}/donor/donation-requests/${userId}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
     return response.json();
   },
 

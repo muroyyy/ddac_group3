@@ -27,8 +27,18 @@ export default function PendingRequests() {
       setError(null);
     } catch (error) {
       console.error('Error loading requests:', error);
-      setRequests([]);
-      setError('Failed to load donation requests');
+      const mockData = [
+        {
+          id: 1,
+          bloodType: 'O+',
+          unitsRequested: 1,
+          status: 'Pending',
+          createdAt: '2024-01-15T10:30:00Z',
+          hospitalName: 'Kuala Lumpur General Hospital'
+        }
+      ];
+      setRequests(mockData);
+      setError('Using sample data - API connection failed');
     } finally {
       setLoading(false);
     }
