@@ -31,6 +31,7 @@ export interface ApprovalRequest {
   bloodType?: string;
   status: string;
   createdAt: string;
+  doctorNote?: string;
 }
 
 export const hospitalAPI = {

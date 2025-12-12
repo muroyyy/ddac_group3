@@ -190,7 +190,8 @@ public class HospitalController : ControllerBase
                     requestType = "Blood Request",
                     bloodType = x.br.BloodType,
                     status = x.br.Status,
-                    createdAt = x.br.CreatedAt
+                    createdAt = x.br.CreatedAt,
+                    doctorNote = x.br.DoctorNote ?? ""
                 })
                 .ToListAsync();
 
