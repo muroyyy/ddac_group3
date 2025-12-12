@@ -238,7 +238,7 @@ public class HospitalController : ControllerBase
             var requests = await _context.BloodRequests
                 .Where(br => br.HospitalId == hospitalId.Value)
                 .Join(_context.PatientProfiles, br => br.PatientId, pp => pp.PatientId, (br, pp) => new { br, pp })
-                .Join(_context.Users, x => x.pp.UserId, u => u.Id, (x, u) => new
+                .Join(_context.Users, x => x.pp.UserId, u => u.UserId, (x, u) => new
                 {
                     requestId = x.br.RequestId,
                     patientName = u.FullName ?? "",
@@ -291,7 +291,7 @@ public class HospitalController : ControllerBase
             var requests = await _context.BloodRequests
                 .Where(br => br.HospitalId == hospitalId.Value)
                 .Join(_context.PatientProfiles, br => br.PatientId, pp => pp.PatientId, (br, pp) => new { br, pp })
-                .Join(_context.Users, x => x.pp.UserId, u => u.Id, (x, u) => new
+                .Join(_context.Users, x => x.pp.UserId, u => u.UserId, (x, u) => new
                 {
                     requestId = x.br.RequestId,
                     patientId = x.br.PatientId,
