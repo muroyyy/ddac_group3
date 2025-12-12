@@ -39,6 +39,8 @@ export interface DashboardStats {
   bloodType: string;
   lastDonation?: string;
   isAvailable: boolean;
+  availabilityStatus: string;
+  eligibleForImmediate: boolean;
 }
 
 export interface Hospital {
@@ -65,7 +67,7 @@ export const donorAPI = {
     return response.json();
   },
 
-  updateProfile: async (userId: number, data: { bloodType: string; location: string; isAvailable: boolean }) => {
+  updateProfile: async (userId: number, data: { bloodType?: string; location: string; isAvailable: boolean }) => {
     const response = await fetch(`${API_BASE_URL}/donor/profile/${userId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -85,6 +87,9 @@ export const donorAPI = {
 
   getDonationRequests: async (userId: number): Promise<DonationRequest[]> => {
     const response = await fetch(`${API_BASE_URL}/donor/donation-requests/${userId}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
     return response.json();
   },
 

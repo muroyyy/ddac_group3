@@ -46,14 +46,17 @@ namespace BloodLine.Controllers
                 {
                     UserId = userId,
                     BloodType = request.BloodType,
-                    Location = request.Location
+                    Location = request.Location,
+                    IsAvailable = request.IsAvailable
                 };
                 _context.DonorProfiles.Add(profile);
             }
             else
             {
-                profile.BloodType = request.BloodType;
+                if (!string.IsNullOrEmpty(request.BloodType))
+                    profile.BloodType = request.BloodType;
                 profile.Location = request.Location;
+                profile.IsAvailable = request.IsAvailable;
             }
 
             await _context.SaveChangesAsync();
@@ -67,6 +70,10 @@ namespace BloodLine.Controllers
             
             var pendingCount = 0;
             var completedCount = 0;
+            var lastDonationDate = (string?)null;
+            var isAvailable = true;
+            var availabilityStatus = "Available for Immediate Donation";
+            var eligibleForImmediate = true;
             
             if (donorProfile != null)
             {
@@ -77,6 +84,30 @@ namespace BloodLine.Controllers
                 completedCount = await _context.Database
                     .SqlQuery<int>($"SELECT COUNT(*) as Value FROM donor_appointments WHERE donor_id = {donorProfile.DonorId} AND status = 'Completed'")
                     .FirstOrDefaultAsync();
+                    
+                var lastDonation = await _context.Database
+                    .SqlQueryRaw<DateTime?>($"SELECT appointment_date as Value FROM donor_appointments WHERE donor_id = {donorProfile.DonorId} AND status = 'Completed' ORDER BY appointment_date DESC LIMIT 1")
+                    .FirstOrDefaultAsync();
+                    
+                if (lastDonation.HasValue)
+                {
+                    lastDonationDate = lastDonation.Value.ToString("yyyy-MM-dd");
+                    // Check if 3 months have passed since last donation
+                    var threeMonthsAgo = DateTime.Now.AddMonths(-3);
+                    eligibleForImmediate = lastDonation.Value <= threeMonthsAgo;
+                    
+                    if (!eligibleForImmediate)
+                    {
+                        availabilityStatus = "Available for Future Appointments";
+                    }
+                }
+                
+                // Override with profile availability setting
+                isAvailable = donorProfile.IsAvailable ?? true;
+                if (!isAvailable)
+                {
+                    availabilityStatus = "Unavailable";
+                }
             }
 
             return Ok(new
@@ -84,7 +115,10 @@ namespace BloodLine.Controllers
                 totalDonations = completedCount,
                 pendingRequests = pendingCount,
                 bloodType = donorProfile?.BloodType ?? "N/A",
-                lastDonation = (string?)null,
+                lastDonation = lastDonationDate,
+                isAvailable = isAvailable,
+                availabilityStatus = availabilityStatus,
+                eligibleForImmediate = eligibleForImmediate,
                 urgentAlerts = 0
             });
         }
@@ -100,7 +134,8 @@ namespace BloodLine.Controllers
                     name = h.HospitalName,
                     location = h.Address,
                     phone = h.ContactNumber ?? "N/A",
-                    email = h.User.Email
+                    email = h.User.Email,
+                    contactPerson = h.ContactPerson
                 })
                 .ToListAsync();
             
@@ -125,7 +160,7 @@ namespace BloodLine.Controllers
                       FROM donation_requests dr
                       JOIN donor_profile dp ON dr.donor_id = dp.donor_id
                       JOIN hospital h ON dr.hospital_id = h.hospital_id
-                      WHERE dr.donor_id = {0}
+                      WHERE dr.donor_id = {0} AND dr.status = 'Pending'
                       ORDER BY dr.requested_date DESC", donorProfile.DonorId)
                 .ToListAsync();
 
@@ -231,8 +266,9 @@ namespace BloodLine.Controllers
 
     public class DonorUpdateProfileRequest
     {
-        public string BloodType { get; set; } = "";
+        public string? BloodType { get; set; }
         public string Location { get; set; } = "";
+        public bool IsAvailable { get; set; } = true;
     }
 
     public class DonationRequestDto

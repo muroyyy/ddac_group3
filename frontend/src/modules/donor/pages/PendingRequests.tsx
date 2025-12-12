@@ -1,17 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
+import { donorAPI } from '../services/donorAPI';
+import type { DonationRequest } from '../services/donorAPI';
 
-interface DonationRequest {
-  id: number;
-  bloodType: string;
-  unitsRequested: number;
-  status: string;
-  notes?: string;
-  createdAt: string;
-  updatedAt?: string;
-  hospitalName?: string;
-}
+
 
 export default function PendingRequests() {
   const { user } = useAuth();
@@ -29,20 +22,11 @@ export default function PendingRequests() {
 
   const loadRequests = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_EC2_PUBLIC_IP ? `http://${import.meta.env.VITE_EC2_PUBLIC_IP}:5000/api` : 'http://localhost:5000/api'}/donor/donation-requests/${user!.id}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      // Ensure data is always an array
+      const data = await donorAPI.getDonationRequests(user!.id);
       setRequests(Array.isArray(data) ? data : []);
       setError(null);
     } catch (error) {
       console.error('Error loading requests:', error);
-      // Use mock data as fallback
       const mockData = [
         {
           id: 1,

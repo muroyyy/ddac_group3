@@ -24,6 +24,9 @@ public class DonorProfile
     [Column("total_donations")]
     public int TotalDonations { get; set; } = 0;
     
+    [Column("is_available")]
+    public bool? IsAvailable { get; set; } = true;
+    
     // Navigation property
     public User User { get; set; } = null!;
 }

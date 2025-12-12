@@ -68,7 +68,10 @@ export default function DonorDashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div 
+          onClick={() => stats?.lastDonation && navigate('/donor/history?highlight=latest')}
+          className={`bg-white p-6 rounded-lg shadow ${stats?.lastDonation ? 'cursor-pointer hover:shadow-md transition' : ''}`}
+        >
           <div className="text-sm text-gray-600">Last Donation</div>
           <div className="text-xl font-bold text-gray-700 mt-2">
             {stats?.lastDonation || "Never"}
@@ -82,25 +85,25 @@ export default function DonorDashboard() {
           <div className="space-y-3">
             <button
               onClick={() => navigate("/donor/donate")}
-              className="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition"
+              className="w-full bg-red-800 text-white py-3 rounded-lg hover:bg-red-900 transition"
             >
               Request to Donate Blood
             </button>
             <button
               onClick={() => navigate("/donor/history")}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
+              className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition"
             >
               View Donation History
             </button>
             <button
               onClick={() => navigate("/donor/profile")}
-              className="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition"
+              className="w-full bg-gray-300 text-gray-800 py-3 rounded-lg hover:bg-gray-400 transition"
             >
               Update Profile
             </button>
             <button
               onClick={() => navigate("/donor/appointments")}
-              className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition"
+              className="w-full bg-green-800 text-white py-3 rounded-lg hover:bg-green-900 transition"
             >
               View Appointments
             </button>
@@ -109,19 +112,26 @@ export default function DonorDashboard() {
 
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-4">Availability Status</h2>
-          <div className="flex items-center justify-between">
-            <span className="text-gray-700">Currently Available:</span>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-gray-700">Status:</span>
             <span
               className={`px-4 py-2 rounded-full font-semibold ${
-                stats?.isAvailable
+                stats?.availabilityStatus === "Available for Immediate Donation"
                   ? "bg-green-100 text-green-800"
+                  : stats?.availabilityStatus === "Available for Future Appointments"
+                  ? "bg-yellow-100 text-yellow-800"
                   : "bg-red-100 text-red-800"
               }`}
             >
-              {stats?.isAvailable ? "Available" : "Unavailable"}
+              {stats?.availabilityStatus || "Unknown"}
             </span>
           </div>
-          <p className="text-sm text-gray-600 mt-4">
+          {stats?.availabilityStatus === "Available for Future Appointments" && (
+            <p className="text-sm text-orange-600 mb-3">
+              You have recently donated blood within three months and are not eligible for immediate appointments.
+            </p>
+          )}
+          <p className="text-sm text-gray-600">
             Update your availability status in your profile settings.
           </p>
         </div>

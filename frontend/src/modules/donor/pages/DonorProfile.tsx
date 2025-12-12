@@ -41,7 +41,6 @@ export default function DonorProfile() {
     setLoading(true);
     try {
       const result = await donorAPI.updateProfile(user!.id, {
-        bloodType: formData.bloodType,
         location: formData.location,
         isAvailable: formData.isAvailable,
       });
@@ -76,13 +75,14 @@ export default function DonorProfile() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email
+              Email *
             </label>
             <input
               type="email"
               value={formData.email}
-              disabled
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              required
             />
           </div>
 
@@ -100,24 +100,15 @@ export default function DonorProfile() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Blood Type *
+              Blood Type
             </label>
-            <select
-              value={formData.bloodType}
-              onChange={(e) => setFormData({ ...formData, bloodType: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-              required
-            >
-              <option value="">Select Blood Type</option>
-              <option value="A+">A+</option>
-              <option value="A-">A-</option>
-              <option value="B+">B+</option>
-              <option value="B-">B-</option>
-              <option value="AB+">AB+</option>
-              <option value="AB-">AB-</option>
-              <option value="O+">O+</option>
-              <option value="O-">O-</option>
-            </select>
+            <input
+              type="text"
+              value={formData.bloodType || 'Not set'}
+              readOnly
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+            />
+            <p className="text-sm text-gray-500 mt-1">Blood type cannot be changed after registration</p>
           </div>
 
           <div>

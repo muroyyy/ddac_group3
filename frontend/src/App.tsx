@@ -38,7 +38,6 @@ import AppointmentsTable from './modules/donor/pages/AppointmentsTable';
 import CompletedDonations from './modules/donor/pages/CompletedDonations';
 import HospitalDashboard from './modules/hospital/pages/HospitalDashboard';
 import Inventory from './modules/hospital/pages/Inventory';
-import Approvals from './modules/hospital/pages/Approvals';
 import BloodRequests from './modules/hospital/pages/BloodRequests';
 import HospitalAppointments from './modules/hospital/pages/Appointments';
 import TestPage from './modules/hospital/pages/TestPage';

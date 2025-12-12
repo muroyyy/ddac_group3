@@ -109,3 +109,38 @@ resource "aws_s3_object" "hospital_folder" {
   key    = "hospital/"
   content = ""
 }
+
+# Schema backup bucket
+resource "aws_s3_bucket" "schema_backups" {
+  bucket = "bloodline-schema-backups-sha"
+
+  tags = {
+    Name = "${var.environment}-${var.project_name}-schema-backups"
+  }
+}
+
+resource "aws_s3_bucket_versioning" "schema_backups" {
+  bucket = aws_s3_bucket.schema_backups.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "schema_backups" {
+  bucket = aws_s3_bucket.schema_backups.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "schema_backups" {
+  bucket = aws_s3_bucket.schema_backups.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
