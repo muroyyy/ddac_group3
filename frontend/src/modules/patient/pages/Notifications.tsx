@@ -96,14 +96,31 @@ export default function Notifications() {
     <div className="space-y-6">
       
       {/* PAGE HEADER */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <Bell className="w-6 h-6 text-red-600" />
-          Notifications
-        </h1>
-        <p className="text-gray-600">
-          Stay updated with your request status.
-        </p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <Bell className="w-6 h-6 text-red-600" />
+            Notifications
+          </h1>
+          <p className="text-gray-600">
+            Stay updated with your request status.
+          </p>
+        </div>
+        <button
+          onClick={async () => {
+            if (user?.id) {
+              try {
+                await patientAPI.createTestNotification(user.id);
+                window.location.reload();
+              } catch (error) {
+                console.error('Failed to create test notification:', error);
+              }
+            }
+          }}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+        >
+          Create Test
+        </button>
       </div>
 
       {/* NOTIFICATION CARDS */}

@@ -4,6 +4,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BloodLine.Controllers
 {
+    public class NotificationDto
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public bool IsRead { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public int? AppointmentId { get; set; }
+    }
     [ApiController]
     [Route("api/[controller]")]
     public class NotificationController : ControllerBase
@@ -20,34 +30,31 @@ namespace BloodLine.Controllers
         {
             try
             {
-                // Check if table exists first
-                var tableExists = await _db.Database.ExecuteSqlRawAsync(
-                    "SELECT 1 FROM information_schema.tables WHERE table_name = 'notifications' LIMIT 1");
-                
-                var notifications = await _db.Notifications
-                    .AsNoTracking()
-                    .Where(n => n.UserId == userId)
-                    .OrderByDescending(n => n.CreatedAt)
-                    .Select(n => new
-                    {
-                        id = n.NotificationId,
-                        title = n.Title,
-                        message = n.Message,
-                        type = n.Type,
-                        isRead = n.IsRead,
-                        createdAt = n.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
-                        appointmentId = n.AppointmentId
-                    })
+                var notifications = await _db.Database.SqlQueryRaw<NotificationDto>(
+                    @"SELECT notification_id as Id, title as Title, message as Message, 
+                             type as Type, is_read as IsRead, created_at as CreatedAt,
+                             appointment_id as AppointmentId
+                      FROM notifications 
+                      WHERE user_id = {0} 
+                      ORDER BY created_at DESC", userId)
                     .ToListAsync();
 
-                return Ok(new { success = true, data = notifications });
+                var result = notifications.Select(n => new
+                {
+                    id = n.Id,
+                    title = n.Title,
+                    message = n.Message,
+                    type = n.Type,
+                    isRead = n.IsRead,
+                    createdAt = n.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
+                    appointmentId = n.AppointmentId
+                }).ToList();
+
+                return Ok(new { success = true, data = result });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Notification error for user {userId}: {ex.Message}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                
-                // Return empty array instead of error to prevent UI breaking
+                Console.WriteLine($"Notification error: {ex.Message}");
                 return Ok(new { success = true, data = new object[0] });
             }
         }
@@ -57,18 +64,33 @@ namespace BloodLine.Controllers
         {
             try
             {
-                var notification = await _db.Notifications.FindAsync(notificationId);
-                if (notification == null)
-                    return NotFound(new { success = false, message = "Notification not found." });
-
-                notification.IsRead = true;
-                await _db.SaveChangesAsync();
-
+                await _db.Database.ExecuteSqlRawAsync(
+                    "UPDATE notifications SET is_read = 1 WHERE notification_id = {0}", notificationId);
                 return Ok(new { success = true, message = "Notification marked as read." });
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { success = false, message = "Error updating notification.", error = ex.Message });
+            }
+        }
+
+        [HttpPost("create-test/{userId}")]
+        public async Task<IActionResult> CreateTestNotification(int userId)
+        {
+            try
+            {
+                await _db.Database.ExecuteSqlRawAsync(
+                    @"INSERT INTO notifications (user_id, title, message, type, is_read, created_at) 
+                      VALUES ({0}, {1}, {2}, {3}, 0, NOW())",
+                    userId, 
+                    "Test Notification", 
+                    "This is a test notification to verify the system is working.", 
+                    "test");
+                return Ok(new { success = true, message = "Test notification created." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Error creating test notification.", error = ex.Message });
             }
         }
     }

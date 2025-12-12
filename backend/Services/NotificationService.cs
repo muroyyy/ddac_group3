@@ -44,19 +44,14 @@ namespace BloodLine.Services
                     _ => $"Your appointment {appointmentId} status has been updated to {newStatus}."
                 };
 
-                // Save to database notifications table
-                var notification = new Models.Notification
-                {
-                    UserId = patient.UserId,
-                    Title = $"Appointment {newStatus}",
-                    Message = message,
-                    Type = "appointment_update",
-                    IsRead = false,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                _db.Notifications.Add(notification);
-                await _db.SaveChangesAsync();
+                // Save to database notifications table using raw SQL
+                await _db.Database.ExecuteSqlRawAsync(
+                    @"INSERT INTO notifications (user_id, title, message, type, is_read, created_at) 
+                      VALUES ({0}, {1}, {2}, {3}, 0, NOW())",
+                    patient.UserId,
+                    $"Appointment {newStatus}",
+                    message,
+                    "appointment_update");
 
                 // Send SNS notification (optional - for email/SMS)
                 var topicArn = _config["AWS:SNS:TopicArn"];
@@ -73,6 +68,24 @@ namespace BloodLine.Services
             catch (Exception ex)
             {
                 // Log error but don't fail the main operation
+                Console.WriteLine($"Notification error: {ex.Message}");
+            }
+        }
+
+        public async Task SendBloodRequestSubmissionNotification(int userId, string bloodType)
+        {
+            try
+            {
+                await _db.Database.ExecuteSqlRawAsync(
+                    @"INSERT INTO notifications (user_id, title, message, type, is_read, created_at) 
+                      VALUES ({0}, {1}, {2}, {3}, 0, NOW())",
+                    userId,
+                    "Blood Request Submitted",
+                    $"Your blood request for {bloodType} has been submitted and is being reviewed by hospitals.",
+                    "blood_request_submitted");
+            }
+            catch (Exception ex)
+            {
                 Console.WriteLine($"Notification error: {ex.Message}");
             }
         }

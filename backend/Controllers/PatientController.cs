@@ -310,28 +310,19 @@ namespace BloodLine.Controllers
         {
             try
             {
-                Console.WriteLine($"Creating notification for userId: {userId}, requestId: {requestId}");
-                
                 var message = $"Your blood request for {bloodType} has been submitted successfully on {submittedAt:MMM dd, yyyy} at {submittedAt:HH:mm}. Request ID: #{requestId}";
 
-                var notification = new Notification
-                {
-                    UserId = userId,
-                    Title = "Blood Request Submitted",
-                    Message = message,
-                    Type = "blood_request_submitted",
-                    IsRead = false,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                _db.Notifications.Add(notification);
-                var result = await _db.SaveChangesAsync();
-                Console.WriteLine($"Notification saved successfully. Rows affected: {result}");
+                await _db.Database.ExecuteSqlRawAsync(
+                    @"INSERT INTO notifications (user_id, title, message, type, is_read, created_at) 
+                      VALUES ({0}, {1}, {2}, {3}, 0, NOW())",
+                    userId,
+                    "Blood Request Submitted",
+                    message,
+                    "blood_request_submitted");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to send submission notification: {ex.Message}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
             }
         }
     }
