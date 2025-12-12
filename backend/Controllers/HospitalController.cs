@@ -227,59 +227,28 @@ public class HospitalController : ControllerBase
                 return BadRequest(new { success = false, message = "Hospital staff not found" });
             }
 
-            // Use raw SQL to get blood requests with patient info
-            var sql = $@"
-                SELECT br.request_id, br.patient_id, br.hospital_id, br.blood_type, 
-                       br.units_required, br.status, br.urgency_level, br.notes, 
-                       br.rejection_notes, br.created_at, 
-                       COALESCE(u.full_name, '') as patientName,
-                       COALESCE(u.email, '') as patientEmail,
-                       COALESCE(u.phone, '') as patientPhone,
-                       COALESCE(pp.emergency_contact, '') as emergencyContact,
-                       COALESCE(pp.allergies, '') as allergies,
-                       COALESCE(pp.medical_condition, '') as medicalCondition
-                FROM blood_requests br
-                LEFT JOIN patient_profile pp ON br.patient_id = pp.patient_id
-                LEFT JOIN users u ON pp.user_id = u.user_id
-                WHERE br.hospital_id = {hospitalId.Value}
-                ORDER BY br.created_at DESC";
+            // Simple approach - just get blood requests without complex joins for now
+            var bloodRequests = await _context.Set<BloodRequest>()
+                .Where(br => br.HospitalId == hospitalId.Value)
+                .ToListAsync();
 
-            var connection = _context.Database.GetDbConnection();
-            var wasOpen = connection.State == System.Data.ConnectionState.Open;
-            if (!wasOpen) await connection.OpenAsync();
-            
-            var results = new List<object>();
-            try
+            var results = bloodRequests.Select(br => new
             {
-                using var command = connection.CreateCommand();
-                command.CommandText = sql;
-                
-                using var reader = await command.ExecuteReaderAsync();
-                while (await reader.ReadAsync())
-                {
-                    results.Add(new
-                    {
-                        requestId = reader.GetInt32("request_id"),
-                        patientName = reader.GetString("patientName"),
-                        patientEmail = reader.GetString("patientEmail"),
-                        patientPhone = reader.GetString("patientPhone"),
-                        bloodType = reader.GetString("blood_type"),
-                        unitsRequired = reader.GetInt32("units_required"),
-                        status = reader.GetString("status"),
-                        urgencyLevel = reader.GetString("urgency_level"),
-                        notes = reader.IsDBNull("notes") ? "" : reader.GetString("notes"),
-                        rejectionNotes = reader.IsDBNull("rejection_notes") ? "" : reader.GetString("rejection_notes"),
-                        createdAt = reader.GetDateTime("created_at").ToString("yyyy-MM-dd HH:mm"),
-                        emergencyContact = reader.GetString("emergencyContact"),
-                        allergies = reader.GetString("allergies"),
-                        medicalCondition = reader.GetString("medicalCondition")
-                    });
-                }
-            }
-            finally
-            {
-                if (!wasOpen) await connection.CloseAsync();
-            }
+                requestId = br.RequestId,
+                patientName = "Patient " + br.PatientId, // Temporary placeholder
+                patientEmail = "",
+                patientPhone = "",
+                bloodType = br.BloodType ?? "",
+                unitsRequired = br.UnitsRequired,
+                status = br.Status ?? "",
+                urgencyLevel = br.UrgencyLevel ?? "",
+                notes = br.Notes ?? "",
+                rejectionNotes = br.RejectionNotes ?? "",
+                createdAt = br.CreatedAt?.ToString("yyyy-MM-dd HH:mm") ?? "",
+                emergencyContact = "",
+                allergies = "",
+                medicalCondition = ""
+            }).OrderByDescending(x => x.createdAt).ToList();
 
             _logger.LogInformation($"Found {results.Count} blood requests for hospital {hospitalId}");
             return Ok(new { success = true, data = results });
@@ -988,66 +957,7 @@ public class HospitalController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Get blood requests using raw SQL query
-    /// </summary>
-    [HttpGet("raw-blood-requests/{userId}")]
-    public async Task<IActionResult> GetRawBloodRequests(int userId)
-    {
-        try
-        {
-            var hospitalId = await GetHospitalIdFromUser(userId);
-            if (hospitalId == null)
-                return BadRequest(new { success = false, message = "Hospital staff not found" });
 
-            var sql = @"
-                SELECT br.request_id, br.patient_id, br.hospital_id, br.blood_type, 
-                       br.units_required, br.status, br.urgency_level, br.notes, 
-                       br.created_at, u.full_name as patient_name, u.email as patient_email, u.phone as patient_phone
-                FROM blood_requests br
-                LEFT JOIN patient_profile pp ON br.patient_id = pp.patient_id
-                LEFT JOIN users u ON pp.user_id = u.user_id
-                WHERE br.hospital_id = {0}
-                ORDER BY br.created_at DESC";
-
-            var connection = _context.Database.GetDbConnection();
-            await connection.OpenAsync();
-            
-            using var command = connection.CreateCommand();
-            command.CommandText = sql;
-            command.Parameters.Add(new MySqlConnector.MySqlParameter("@p0", hospitalId.Value));
-            command.CommandText = command.CommandText.Replace("{0}", "@p0");
-            
-            var results = new List<object>();
-            using var reader = await command.ExecuteReaderAsync();
-            
-            while (await reader.ReadAsync())
-            {
-                results.Add(new
-                {
-                    requestId = reader.GetInt32("request_id"),
-                    patientId = reader.GetInt32("patient_id"),
-                    hospitalId = reader.GetInt32("hospital_id"),
-                    bloodType = reader.GetString("blood_type"),
-                    unitsRequired = reader.GetInt32("units_required"),
-                    status = reader.GetString("status"),
-                    urgencyLevel = reader.GetString("urgency_level"),
-                    notes = reader.IsDBNull("notes") ? "" : reader.GetString("notes"),
-                    createdAt = reader.GetDateTime("created_at").ToString("yyyy-MM-dd HH:mm"),
-                    patientName = reader.IsDBNull("patient_name") ? "" : reader.GetString("patient_name"),
-                    patientEmail = reader.IsDBNull("patient_email") ? "" : reader.GetString("patient_email"),
-                    patientPhone = reader.IsDBNull("patient_phone") ? "" : reader.GetString("patient_phone")
-                });
-            }
-
-            return Ok(new { success = true, data = results, hospitalId = hospitalId });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError($"Error in raw blood requests: {ex.Message}");
-            return StatusCode(500, new { success = false, error = ex.Message });
-        }
-    }
 }
 
 public class AddInventoryRequest
