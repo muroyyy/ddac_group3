@@ -75,6 +75,18 @@ resource "aws_iam_role_policy" "ec2_secrets_policy" {
           "sqs:GetQueueUrl"
         ]
         Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          "arn:aws:s3:::bloodline-schema-backups-sha",
+          "arn:aws:s3:::bloodline-schema-backups-sha/*"
+        ]
       }
     ]
   })
