@@ -66,12 +66,14 @@ export default function BloodRequests() {
       // Call API with user ID to get hospital-scoped requests
       const res = await hospitalAPI.getBloodRequests(user.id);
       if (res.success) {
-        setRequests(res.data);
+        setRequests(res.data || []);
       } else {
-        console.error('Failed to load requests:', res.message);
+        console.error('Failed to load requests:', res.message || 'Unknown error');
+        setRequests([]);
       }
     } catch (error) {
       console.error('Failed to load requests:', error);
+      setRequests([]);
     } finally {
       setLoading(false);
     }
@@ -215,137 +217,138 @@ export default function BloodRequests() {
         </select>
       </div>
 
-      {/* Blood requests list */}
-      <div className="space-y-4">
+      {/* Blood requests table */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         {loading ? (
-          <div className="text-center py-8 text-gray-500">Loading blood requests...</div>
+          <div className="text-center py-12 text-gray-500">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto mb-4"></div>
+            Loading blood requests...
+          </div>
         ) : filteredRequests.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-12 text-gray-500">
+            <Droplets className="w-12 h-12 text-gray-300 mx-auto mb-4" />
             No blood requests found
           </div>
         ) : (
-          filteredRequests.map((request) => (
-            <div key={request.requestId} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer">
-              {/* Header with patient info and status */}
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                    <User className="w-6 h-6 text-red-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{request.patientName}</h3>
-                    <p className="text-gray-600 text-sm">{request.patientEmail}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Phone className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-600 text-sm">{request.patientPhone}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-col items-end gap-2">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    request.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
-                    request.status === 'Approved' ? 'bg-green-100 text-green-700' :
-                    'bg-red-100 text-red-700'
-                  }`}>
-                    {request.status}
-                  </span>
-                  <span className={`px-2 py-1 rounded-lg text-xs font-medium border ${getUrgencyStyle(request.urgencyLevel)}`}>
-                    {request.urgencyLevel} Priority
-                  </span>
-                </div>
-              </div>
-
-              {/* Request details grid */}
-              <div className="grid md:grid-cols-4 gap-4 mb-4">
-                <div className="flex items-center gap-2">
-                  <Droplets className="w-4 h-4 text-red-500" />
-                  <div>
-                    <p className="text-xs text-gray-500">Blood Type</p>
-                    <p className="font-semibold text-gray-900">{request.bloodType}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-blue-500" />
-                  <div>
-                    <p className="text-xs text-gray-500">Units Required</p>
-                    <p className="font-semibold text-gray-900">{request.unitsRequired}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-gray-500" />
-                  <div>
-                    <p className="text-xs text-gray-500">Requested</p>
-                    <p className="font-semibold text-gray-900">{new Date(request.createdAt).toLocaleDateString()}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Heart className="w-4 h-4 text-pink-500" />
-                  <div>
-                    <p className="text-xs text-gray-500">Emergency Contact</p>
-                    <p className="font-semibold text-gray-900 text-sm">{request.emergencyContact}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Medical information */}
-              {(request.medicalCondition || request.allergies || request.notes) && (
-                <div className="mb-4 p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-medium text-gray-900 mb-2">Medical Information</h4>
-                  {request.medicalCondition && (
-                    <p className="text-sm text-gray-700 mb-1">
-                      <strong>Condition:</strong> {request.medicalCondition}
-                    </p>
-                  )}
-                  {request.allergies && (
-                    <p className="text-sm text-gray-700 mb-1">
-                      <strong>Allergies:</strong> {request.allergies}
-                    </p>
-                  )}
-                  {request.notes && (
-                    <p className="text-sm text-gray-700">
-                      <strong>Notes:</strong> {request.notes}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {/* Rejection notes if rejected */}
-              {request.status === 'Rejected' && request.rejectionNotes && (
-                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-sm text-red-700">
-                    <strong>Rejection Reason:</strong> {request.rejectionNotes}
-                  </p>
-                </div>
-              )}
-
-              {/* Action buttons for pending requests */}
-              {request.status === 'Pending' && (
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => approveRequest(request.requestId, request.patientName, request.bloodType)}
-                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-red-50 border-b border-red-100">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-red-700 uppercase tracking-wider">
+                    Request ID
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-red-700 uppercase tracking-wider">
+                    Patient
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-red-700 uppercase tracking-wider">
+                    Blood Type
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-red-700 uppercase tracking-wider">
+                    Units
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-red-700 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-red-700 uppercase tracking-wider">
+                    Urgency
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-red-700 uppercase tracking-wider">
+                    Created
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-red-700 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredRequests.map((request, index) => (
+                  <tr 
+                    key={request.requestId} 
+                    className={index % 2 === 0 ? 'bg-white' : 'bg-red-50/30 hover:bg-red-50/50'}
                   >
-                    Approve Request
-                  </button>
-                  <button
-                    onClick={() => showRejectDialog(request.requestId)}
-                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
-                  >
-                    Reject Request
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSelectedRequest(request);
-                      setShowDetails(true);
-                    }}
-                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
-                  >
-                    View Details
-                  </button>
-                </div>
-              )}
-            </div>
-          ))
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <AlertCircle className="w-4 h-4 text-red-500 mr-2" />
+                        <span className="text-sm font-medium text-gray-900">#{request.requestId}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                          <User className="w-4 h-4 text-red-600" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{request.patientName}</div>
+                          <div className="text-sm text-gray-500">{request.patientEmail}</div>
+                          <div className="text-sm text-gray-500">{request.patientPhone}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <Droplets className="w-4 h-4 text-red-500 mr-2" />
+                        <span className="text-sm font-bold text-red-600">{request.bloodType}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm font-medium text-gray-900">{request.unitsRequired}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        request.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
+                        request.status === 'Approved' ? 'bg-green-100 text-green-700' :
+                        'bg-red-100 text-red-700'
+                      }`}>
+                        {request.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 py-1 rounded-lg text-xs font-medium border ${getUrgencyStyle(request.urgencyLevel)}`}>
+                        {request.urgencyLevel}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <Calendar className="w-4 h-4 text-gray-400 mr-2" />
+                        <span className="text-sm text-gray-900">
+                          {new Date(request.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        {request.status === 'Pending' && (
+                          <>
+                            <button
+                              onClick={() => approveRequest(request.requestId, request.patientName, request.bloodType)}
+                              className="text-green-600 hover:text-green-900 px-2 py-1 rounded bg-green-50 hover:bg-green-100"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => showRejectDialog(request.requestId)}
+                              className="text-red-600 hover:text-red-900 px-2 py-1 rounded bg-red-50 hover:bg-red-100"
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
+                        <button
+                          onClick={() => {
+                            setSelectedRequest(request);
+                            setShowDetails(true);
+                          }}
+                          className="text-blue-600 hover:text-blue-900 px-2 py-1 rounded bg-blue-50 hover:bg-blue-100"
+                        >
+                          Details
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 

@@ -76,7 +76,7 @@ export const hospitalAPI = {
   getAppointments: async (userId: number): Promise<any[]> => {
     const response = await fetch(`${API_BASE_URL}/hospital/appointments/${userId}`);
     const result = await response.json();
-    return result.data || [];
+    return result.success ? (result.data || []) : [];
   },
 
   completeAppointment: async (id: number, doctorNotes?: string): Promise<{ success: boolean }> => {

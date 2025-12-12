@@ -18,7 +18,6 @@ export default function HospitalLayout() {
 	const navItems = [
 		{ path: '/hospital/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
 		{ path: '/hospital/blood-requests', label: 'Blood Requests', Icon: Droplets },
-		{ path: '/hospital/all-blood-requests', label: 'All Blood Requests', Icon: Droplets },
 		{ path: '/hospital/appointments', label: 'Patient Appointments', Icon: Calendar },
 		{ path: '/hospital/inventory', label: 'Manage Inventory', Icon: Clipboard },
 		{ path: '/hospital/profile', label: 'Profile', Icon: User },

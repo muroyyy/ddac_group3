@@ -196,10 +196,17 @@ public class HospitalController : ControllerBase
     {
         try
         {
+            _logger.LogInformation($"Getting blood requests for user ID: {userId}");
+            
             // Get hospital ID for this user
             var hospitalId = await GetHospitalIdFromUser(userId);
+            _logger.LogInformation($"Hospital ID for user {userId}: {hospitalId}");
+            
             if (hospitalId == null)
+            {
+                _logger.LogWarning($"No hospital staff record found for user ID: {userId}");
                 return BadRequest(new { success = false, message = "Hospital staff not found" });
+            }
 
             var requests = await _context.BloodRequests
                 .Where(br => br.HospitalId == hospitalId.Value)
@@ -207,29 +214,30 @@ public class HospitalController : ControllerBase
                 .Join(_context.Users, x => x.pp.UserId, u => u.Id, (x, u) => new
                 {
                     requestId = x.br.RequestId,
-                    patientName = u.FullName,
-                    patientEmail = u.Email,
-                    bloodType = x.br.BloodType,
+                    patientName = u.FullName ?? "",
+                    patientEmail = u.Email ?? "",
+                    bloodType = x.br.BloodType ?? "",
                     unitsRequired = x.br.UnitsRequired,
-                    urgencyLevel = x.br.UrgencyLevel,
-                    status = x.br.Status,
-                    notes = x.br.Notes,
-                    rejectionNotes = x.br.RejectionNotes,
+                    urgencyLevel = x.br.UrgencyLevel ?? "",
+                    status = x.br.Status ?? "",
+                    notes = x.br.Notes ?? "",
+                    rejectionNotes = x.br.RejectionNotes ?? "",
                     createdAt = x.br.CreatedAt.HasValue ? x.br.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm") : "",
-                    patientPhone = u.Phone,
-                    emergencyContact = x.pp.EmergencyContact,
-                    allergies = x.pp.Allergies,
-                    medicalCondition = x.pp.MedicalCondition
+                    patientPhone = u.Phone ?? "",
+                    emergencyContact = x.pp.EmergencyContact ?? "",
+                    allergies = x.pp.Allergies ?? "",
+                    medicalCondition = x.pp.MedicalCondition ?? ""
                 })
                 .OrderByDescending(x => x.createdAt)
                 .ToListAsync();
 
+            _logger.LogInformation($"Found {requests.Count} blood requests for hospital {hospitalId}");
             return Ok(new { success = true, data = requests });
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error fetching blood requests: {ex.Message}");
-            return StatusCode(500, new { success = false, message = "Failed to fetch blood requests" });
+            _logger.LogError(ex, $"Error fetching blood requests for user {userId}: {ex.Message}");
+            return StatusCode(500, new { success = false, message = "Failed to fetch blood requests", error = ex.Message });
         }
     }
 
@@ -241,10 +249,17 @@ public class HospitalController : ControllerBase
     {
         try
         {
+            _logger.LogInformation($"Getting all blood requests for user ID: {userId}");
+            
             // Get hospital ID for this user
             var hospitalId = await GetHospitalIdFromUser(userId);
+            _logger.LogInformation($"Hospital ID for user {userId}: {hospitalId}");
+            
             if (hospitalId == null)
+            {
+                _logger.LogWarning($"No hospital staff record found for user ID: {userId}");
                 return BadRequest(new { success = false, message = "Hospital staff not found" });
+            }
 
             var requests = await _context.BloodRequests
                 .Where(br => br.HospitalId == hospitalId.Value)
@@ -254,25 +269,26 @@ public class HospitalController : ControllerBase
                     requestId = x.br.RequestId,
                     patientId = x.br.PatientId,
                     hospitalId = x.br.HospitalId,
-                    patientName = u.FullName,
-                    patientEmail = u.Email,
-                    patientPhone = u.Phone,
-                    bloodType = x.br.BloodType,
+                    patientName = u.FullName ?? "",
+                    patientEmail = u.Email ?? "",
+                    patientPhone = u.Phone ?? "",
+                    bloodType = x.br.BloodType ?? "",
                     unitsRequired = x.br.UnitsRequired,
-                    status = x.br.Status,
-                    urgencyLevel = x.br.UrgencyLevel,
+                    status = x.br.Status ?? "",
+                    urgencyLevel = x.br.UrgencyLevel ?? "",
                     notes = x.br.Notes ?? "",
                     createdAt = x.br.CreatedAt.HasValue ? x.br.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm:ss") : ""
                 })
                 .OrderByDescending(x => x.createdAt)
                 .ToListAsync();
 
+            _logger.LogInformation($"Found {requests.Count} blood requests for hospital {hospitalId}");
             return Ok(new { success = true, data = requests });
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error fetching all blood requests: {ex.Message}");
-            return StatusCode(500, new { success = false, message = "Failed to fetch all blood requests" });
+            _logger.LogError(ex, $"Error fetching all blood requests for user {userId}: {ex.Message}");
+            return StatusCode(500, new { success = false, message = "Failed to fetch all blood requests", error = ex.Message });
         }
     }
 
@@ -454,10 +470,17 @@ public class HospitalController : ControllerBase
     {
         try
         {
+            _logger.LogInformation($"Getting appointments for user ID: {userId}");
+            
             // Get hospital ID from hospital staff table
             var hospitalId = await GetHospitalIdFromUser(userId);
+            _logger.LogInformation($"Hospital ID for user {userId}: {hospitalId}");
+            
             if (hospitalId == null)
-                return BadRequest(new { error = "Hospital staff not found" });
+            {
+                _logger.LogWarning($"No hospital staff record found for user ID: {userId}");
+                return BadRequest(new { success = false, message = "Hospital staff not found" });
+            }
 
             var appointments = await _context.PatientAppointments
                 .Where(a => a.HospitalId == hospitalId.Value)
@@ -468,22 +491,23 @@ public class HospitalController : ControllerBase
                 .SelectMany(x => x.doctors.DefaultIfEmpty(), (x, d) => new
                 {
                     appointmentId = x.a.AppointmentId,
-                    patientName = x.u.FullName,
+                    patientName = x.u.FullName ?? "",
                     doctorName = d != null ? d.DoctorName : "Not Assigned",
                     appointmentDate = x.a.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
-                    status = x.a.Status,
-                    bloodType = x.br.BloodType,
-                    doctorNotes = x.a.DoctorNotes
+                    status = x.a.Status ?? "",
+                    bloodType = x.br.BloodType ?? "",
+                    doctorNotes = x.a.DoctorNotes ?? ""
                 })
                 .OrderByDescending(x => x.appointmentDate)
                 .ToListAsync();
 
-            return Ok(appointments);
+            _logger.LogInformation($"Found {appointments.Count} appointments for hospital {hospitalId}");
+            return Ok(new { success = true, data = appointments });
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error fetching appointments: {ex.Message}");
-            return StatusCode(500, new { error = "Failed to fetch appointments" });
+            _logger.LogError(ex, $"Error fetching appointments for user {userId}: {ex.Message}");
+            return StatusCode(500, new { success = false, message = "Failed to fetch appointments", error = ex.Message });
         }
     }
 
