@@ -141,9 +141,3 @@ public class CreateStaffRequest
     public int HospitalId { get; set; }
     public string Position { get; set; } = string.Empty;
 }
-
-public class LinkHospitalRequest
-{
-    public int HospitalId { get; set; }
-    public string? Position { get; set; }
-}
