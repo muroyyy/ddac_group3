@@ -20,11 +20,22 @@ export default function Notifications() {
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      if (!user?.id) return;
+      if (!user?.id) {
+        console.log('No user ID found');
+        setLoading(false);
+        return;
+      }
+      
+      console.log('Fetching notifications for user:', user.id);
       try {
         const result = await patientAPI.getNotifications(user.id);
+        console.log('Notification API result:', result);
+        
         if (result.success) {
+          console.log('Setting notifications:', result.data);
           setNotifications(result.data);
+        } else {
+          console.error('API returned success=false:', result);
         }
       } catch (error) {
         console.error('Failed to fetch notifications:', error);
@@ -110,11 +121,22 @@ export default function Notifications() {
           onClick={async () => {
             if (user?.id) {
               try {
-                await patientAPI.createTestNotification(user.id);
-                window.location.reload();
+                console.log('Creating test notification for user:', user.id);
+                const result = await patientAPI.createTestNotification(user.id);
+                console.log('Test notification result:', result);
+                
+                if (result.success) {
+                  alert('Test notification created! Refreshing page...');
+                  window.location.reload();
+                } else {
+                  alert('Failed to create test notification: ' + result.message);
+                }
               } catch (error) {
                 console.error('Failed to create test notification:', error);
+                alert('Error creating test notification: ' + error);
               }
+            } else {
+              alert('No user ID found');
             }
           }}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
@@ -123,11 +145,20 @@ export default function Notifications() {
         </button>
       </div>
 
+      {/* DEBUG INFO */}
+      <div className="bg-gray-100 p-4 rounded-lg text-sm">
+        <strong>Debug Info:</strong><br/>
+        User ID: {user?.id || 'Not found'}<br/>
+        Loading: {loading.toString()}<br/>
+        Notifications count: {notifications.length}<br/>
+        Notifications data: {JSON.stringify(notifications, null, 2)}
+      </div>
+
       {/* NOTIFICATION CARDS */}
       <div className="space-y-4">
         {notifications.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            No notifications yet
+            No notifications yet - Click "Create Test" to add one
           </div>
         ) : (
           notifications.map((n) => {
