@@ -24,9 +24,28 @@ public class HospitalController : ControllerBase
     // Helper method to get hospital ID from user ID
     private async Task<int?> GetHospitalIdFromUser(int userId)
     {
+        _logger.LogInformation($"Looking up hospital ID for user {userId}");
+        
+        // First check if user is hospital staff
         var staff = await _context.HospitalStaff
             .FirstOrDefaultAsync(s => s.UserId == userId);
-        return staff?.HospitalId;
+        if (staff != null)
+        {
+            _logger.LogInformation($"Found hospital staff record: Hospital ID {staff.HospitalId}");
+            return staff.HospitalId;
+        }
+
+        // Fallback: check if user is directly a hospital user
+        var hospital = await _context.Hospitals
+            .FirstOrDefaultAsync(h => h.UserId == userId);
+        if (hospital != null)
+        {
+            _logger.LogInformation($"Found direct hospital record: Hospital ID {hospital.HospitalId}");
+            return hospital.HospitalId;
+        }
+        
+        _logger.LogWarning($"No hospital association found for user {userId}");
+        return null;
     }
 
     // Helper method to validate hospital access
@@ -208,6 +227,14 @@ public class HospitalController : ControllerBase
                 return BadRequest(new { success = false, message = "Hospital staff not found" });
             }
 
+            // Check if hospital exists
+            var hospitalExists = await _context.Hospitals.AnyAsync(h => h.HospitalId == hospitalId.Value);
+            if (!hospitalExists)
+            {
+                _logger.LogWarning($"Hospital ID {hospitalId.Value} does not exist");
+                return BadRequest(new { success = false, message = "Hospital not found" });
+            }
+
             var requests = await _context.BloodRequests
                 .Where(br => br.HospitalId == hospitalId.Value)
                 .Join(_context.PatientProfiles, br => br.PatientId, pp => pp.PatientId, (br, pp) => new { br, pp })
@@ -232,7 +259,7 @@ public class HospitalController : ControllerBase
                 .ToListAsync();
 
             _logger.LogInformation($"Found {requests.Count} blood requests for hospital {hospitalId}");
-            return Ok(new { success = true, data = requests });
+            return Ok(new { success = true, data = requests ?? new List<object>() });
         }
         catch (Exception ex)
         {
@@ -908,6 +935,33 @@ public class HospitalController : ControllerBase
         {
             _logger.LogError($"Error updating staff profile: {ex.Message}");
             return StatusCode(500, new { success = false, message = "Failed to update profile" });
+        }
+    }
+
+    /// <summary>
+    /// Debug endpoint to check user hospital associations
+    /// </summary>
+    [HttpGet("debug/user/{userId}")]
+    public async Task<IActionResult> DebugUserAssociations(int userId)
+    {
+        try
+        {
+            var user = await _context.Users.FindAsync(userId);
+            var staff = await _context.HospitalStaff.FirstOrDefaultAsync(hs => hs.UserId == userId);
+            var hospital = await _context.Hospitals.FirstOrDefaultAsync(h => h.UserId == userId);
+            
+            return Ok(new {
+                userId = userId,
+                userExists = user != null,
+                userRole = user?.Role.ToString(),
+                staffRecord = staff != null ? new { staff.StaffId, staff.HospitalId, staff.Position } : null,
+                hospitalRecord = hospital != null ? new { hospital.HospitalId, hospital.HospitalName } : null
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error in debug endpoint: {ex.Message}");
+            return StatusCode(500, new { error = ex.Message });
         }
     }
 }
