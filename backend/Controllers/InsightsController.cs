@@ -160,7 +160,25 @@ Provide actionable advice for the patient. Be concise, supportive, and focus on 
 
         private string GetFallbackInsight(int avgHours, int avgDays)
         {
-            return $"Based on your request history, most of your requests are approved within about {avgHours} hours. You typically submit a new request every {avgDays} days. Try to plan future requests at least 2-3 days in advance to give hospitals enough time to prepare blood safely.";
+            var insights = new List<string>();
+            
+            if (avgHours <= 12)
+                insights.Add("Your requests show excellent approval timing, typically processed within half a day.");
+            else if (avgHours <= 24)
+                insights.Add("Hospital response times for your requests are within the standard 24-hour window.");
+            else
+                insights.Add("Consider submitting requests earlier as processing may take longer than expected.");
+                
+            if (avgDays <= 7)
+                insights.Add("Your request frequency suggests active medical management - ensure you're coordinating with your healthcare team.");
+            else if (avgDays <= 30)
+                insights.Add("Your request pattern shows good planning intervals, allowing hospitals adequate preparation time.");
+            else
+                insights.Add("Consider more regular health monitoring to anticipate future blood needs.");
+                
+            insights.Add("Tip: Submit requests during weekday business hours for faster processing and better hospital coordination.");
+            
+            return string.Join(" ", insights);
         }
     }
 }
