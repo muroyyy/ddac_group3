@@ -163,19 +163,21 @@ namespace BloodLine.Controllers
                     return Ok(new { success = true, data = new List<object>() });
                 }
 
-                // Simple query using existing table structure
+                // Query with proper JOINs following database relationships
                 var appointments = await _db.PatientAppointments
                     .Where(pa => pa.PatientId == patientId.Value)
-                    .OrderByDescending(pa => pa.AppointmentDate)
-                    .Select(pa => new
+                    .Join(_db.Hospitals, pa => pa.HospitalId, h => h.HospitalId, (pa, h) => new { pa, h })
+                    .GroupJoin(_db.Doctors, x => x.pa.DoctorId, d => d.DoctorId, (x, doctors) => new { x.pa, x.h, doctors })
+                    .SelectMany(x => x.doctors.DefaultIfEmpty(), (x, d) => new
                     {
-                        appointmentId = pa.AppointmentId,
-                        doctorName = pa.DoctorName,
-                        appointmentDate = pa.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
-                        status = pa.Status,
-                        doctorNotes = pa.DoctorNotes,
-                        hospitalName = "Hospital" // Simple fallback
+                        appointmentId = x.pa.AppointmentId,
+                        hospitalName = x.h.HospitalName,
+                        doctorName = d != null ? d.DoctorName : "Not Assigned",
+                        appointmentDate = x.pa.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
+                        status = x.pa.Status,
+                        doctorNotes = x.pa.DoctorNotes
                     })
+                    .OrderByDescending(x => x.appointmentDate)
                     .ToListAsync();
 
                 return Ok(new { success = true, data = appointments });

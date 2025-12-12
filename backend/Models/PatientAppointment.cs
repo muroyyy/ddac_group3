@@ -19,8 +19,8 @@ public class PatientAppointment
     [Column("hospital_id")]
     public int HospitalId { get; set; }
 
-    [Column("doctor_name")]
-    public string DoctorName { get; set; } = string.Empty;
+    [Column("doctor_id")]
+    public int? DoctorId { get; set; }
 
     [Column("appointment_date")]
     public DateTime AppointmentDate { get; set; }
