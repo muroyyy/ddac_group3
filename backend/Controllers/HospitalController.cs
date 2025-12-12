@@ -227,39 +227,62 @@ public class HospitalController : ControllerBase
                 return BadRequest(new { success = false, message = "Hospital staff not found" });
             }
 
-            // Check if hospital exists
-            var hospitalExists = await _context.Hospitals.AnyAsync(h => h.HospitalId == hospitalId.Value);
-            if (!hospitalExists)
+            // Use raw SQL to get blood requests with patient info
+            var sql = $@"
+                SELECT br.request_id, br.patient_id, br.hospital_id, br.blood_type, 
+                       br.units_required, br.status, br.urgency_level, br.notes, 
+                       br.rejection_notes, br.created_at, 
+                       COALESCE(u.full_name, '') as patientName,
+                       COALESCE(u.email, '') as patientEmail,
+                       COALESCE(u.phone, '') as patientPhone,
+                       COALESCE(pp.emergency_contact, '') as emergencyContact,
+                       COALESCE(pp.allergies, '') as allergies,
+                       COALESCE(pp.medical_condition, '') as medicalCondition
+                FROM blood_requests br
+                LEFT JOIN patient_profile pp ON br.patient_id = pp.patient_id
+                LEFT JOIN users u ON pp.user_id = u.user_id
+                WHERE br.hospital_id = {hospitalId.Value}
+                ORDER BY br.created_at DESC";
+
+            var connection = _context.Database.GetDbConnection();
+            var wasOpen = connection.State == System.Data.ConnectionState.Open;
+            if (!wasOpen) await connection.OpenAsync();
+            
+            var results = new List<object>();
+            try
             {
-                _logger.LogWarning($"Hospital ID {hospitalId.Value} does not exist");
-                return BadRequest(new { success = false, message = "Hospital not found" });
+                using var command = connection.CreateCommand();
+                command.CommandText = sql;
+                
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    results.Add(new
+                    {
+                        requestId = reader.GetInt32("request_id"),
+                        patientName = reader.GetString("patientName"),
+                        patientEmail = reader.GetString("patientEmail"),
+                        patientPhone = reader.GetString("patientPhone"),
+                        bloodType = reader.GetString("blood_type"),
+                        unitsRequired = reader.GetInt32("units_required"),
+                        status = reader.GetString("status"),
+                        urgencyLevel = reader.GetString("urgency_level"),
+                        notes = reader.IsDBNull("notes") ? "" : reader.GetString("notes"),
+                        rejectionNotes = reader.IsDBNull("rejection_notes") ? "" : reader.GetString("rejection_notes"),
+                        createdAt = reader.GetDateTime("created_at").ToString("yyyy-MM-dd HH:mm"),
+                        emergencyContact = reader.GetString("emergencyContact"),
+                        allergies = reader.GetString("allergies"),
+                        medicalCondition = reader.GetString("medicalCondition")
+                    });
+                }
+            }
+            finally
+            {
+                if (!wasOpen) await connection.CloseAsync();
             }
 
-            var requests = await _context.BloodRequests
-                .Where(br => br.HospitalId == hospitalId.Value)
-                .Join(_context.PatientProfiles, br => br.PatientId, pp => pp.PatientId, (br, pp) => new { br, pp })
-                .Join(_context.Users, x => x.pp.UserId, u => u.Id, (x, u) => new
-                {
-                    requestId = x.br.RequestId,
-                    patientName = u.FullName ?? "",
-                    patientEmail = u.Email ?? "",
-                    bloodType = x.br.BloodType ?? "",
-                    unitsRequired = x.br.UnitsRequired,
-                    urgencyLevel = x.br.UrgencyLevel ?? "",
-                    status = x.br.Status ?? "",
-                    notes = x.br.Notes ?? "",
-                    rejectionNotes = x.br.RejectionNotes ?? "",
-                    createdAt = x.br.CreatedAt.HasValue ? x.br.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm") : "",
-                    patientPhone = u.Phone ?? "",
-                    emergencyContact = x.pp.EmergencyContact ?? "",
-                    allergies = x.pp.Allergies ?? "",
-                    medicalCondition = x.pp.MedicalCondition ?? ""
-                })
-                .OrderByDescending(x => x.createdAt)
-                .ToListAsync();
-
-            _logger.LogInformation($"Found {requests.Count} blood requests for hospital {hospitalId}");
-            return Ok(new { success = true, data = requests ?? new List<object>() });
+            _logger.LogInformation($"Found {results.Count} blood requests for hospital {hospitalId}");
+            return Ok(new { success = true, data = results });
         }
         catch (Exception ex)
         {
@@ -962,6 +985,67 @@ public class HospitalController : ControllerBase
         {
             _logger.LogError($"Error in debug endpoint: {ex.Message}");
             return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Get blood requests using raw SQL query
+    /// </summary>
+    [HttpGet("raw-blood-requests/{userId}")]
+    public async Task<IActionResult> GetRawBloodRequests(int userId)
+    {
+        try
+        {
+            var hospitalId = await GetHospitalIdFromUser(userId);
+            if (hospitalId == null)
+                return BadRequest(new { success = false, message = "Hospital staff not found" });
+
+            var sql = @"
+                SELECT br.request_id, br.patient_id, br.hospital_id, br.blood_type, 
+                       br.units_required, br.status, br.urgency_level, br.notes, 
+                       br.created_at, u.full_name as patient_name, u.email as patient_email, u.phone as patient_phone
+                FROM blood_requests br
+                LEFT JOIN patient_profile pp ON br.patient_id = pp.patient_id
+                LEFT JOIN users u ON pp.user_id = u.user_id
+                WHERE br.hospital_id = {0}
+                ORDER BY br.created_at DESC";
+
+            var connection = _context.Database.GetDbConnection();
+            await connection.OpenAsync();
+            
+            using var command = connection.CreateCommand();
+            command.CommandText = sql;
+            command.Parameters.Add(new MySqlConnector.MySqlParameter("@p0", hospitalId.Value));
+            command.CommandText = command.CommandText.Replace("{0}", "@p0");
+            
+            var results = new List<object>();
+            using var reader = await command.ExecuteReaderAsync();
+            
+            while (await reader.ReadAsync())
+            {
+                results.Add(new
+                {
+                    requestId = reader.GetInt32("request_id"),
+                    patientId = reader.GetInt32("patient_id"),
+                    hospitalId = reader.GetInt32("hospital_id"),
+                    bloodType = reader.GetString("blood_type"),
+                    unitsRequired = reader.GetInt32("units_required"),
+                    status = reader.GetString("status"),
+                    urgencyLevel = reader.GetString("urgency_level"),
+                    notes = reader.IsDBNull("notes") ? "" : reader.GetString("notes"),
+                    createdAt = reader.GetDateTime("created_at").ToString("yyyy-MM-dd HH:mm"),
+                    patientName = reader.IsDBNull("patient_name") ? "" : reader.GetString("patient_name"),
+                    patientEmail = reader.IsDBNull("patient_email") ? "" : reader.GetString("patient_email"),
+                    patientPhone = reader.IsDBNull("patient_phone") ? "" : reader.GetString("patient_phone")
+                });
+            }
+
+            return Ok(new { success = true, data = results, hospitalId = hospitalId });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error in raw blood requests: {ex.Message}");
+            return StatusCode(500, new { success = false, error = ex.Message });
         }
     }
 }
