@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Search } from 'lucide-react';
 import { hospitalAPI } from '../services/hospitalAPI';
 import type { ApprovalRequest } from '../services/hospitalAPI';
 import { useAuth } from '../../../context/AuthContext';
@@ -9,6 +10,7 @@ export default function Approvals() {
 
   const [requests, setRequests] = useState<ApprovalRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const load = async () => {
     setLoading(true);
@@ -36,9 +38,30 @@ export default function Approvals() {
     }
   };
 
+  const filteredRequests = requests.filter(request => 
+    request.userName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4">Approval Requests</h2>
+      
+      {/* Search Bar */}
+      <div className="mb-4">
+        <div className="relative max-w-md">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-gray-400" />
+          </div>
+          <input
+            type="text"
+            placeholder="Search by name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-red-500 focus:border-red-500"
+          />
+        </div>
+      </div>
+      
       <div className="bg-white rounded shadow overflow-hidden">
         <table className="w-full text-left">
           <thead className="bg-gray-100">
@@ -54,10 +77,10 @@ export default function Approvals() {
           <tbody>
             {loading ? (
               <tr><td colSpan={6} className="p-4">Loading...</td></tr>
-            ) : requests.length === 0 ? (
-              <tr><td colSpan={6} className="p-4">No requests</td></tr>
+            ) : filteredRequests.length === 0 ? (
+              <tr><td colSpan={6} className="p-4">{searchTerm ? 'No matching requests found' : 'No requests'}</td></tr>
             ) : (
-              requests.map(r => (
+              filteredRequests.map(r => (
                 <tr key={r.id} className="border-t">
                   <td className="p-3">{r.userName}</td>
                   <td className="p-3">{r.userEmail}</td>
