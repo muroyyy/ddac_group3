@@ -21,7 +21,7 @@ var regionEndpoint = RegionEndpoint.GetBySystemName(awsRegion);
 builder.Services.AddSingleton<IAmazonSecretsManager>(new AmazonSecretsManagerClient(regionEndpoint));
 builder.Services.AddSingleton<IAmazonCloudWatch>(new AmazonCloudWatchClient(regionEndpoint));
 builder.Services.AddSingleton<IAmazonSimpleNotificationService>(new AmazonSimpleNotificationServiceClient(regionEndpoint));
-builder.Services.AddSingleton<Amazon.BedrockRuntime.IAmazonBedrockRuntime>(new Amazon.BedrockRuntime.AmazonBedrockRuntimeClient(regionEndpoint));
+
 // builder.Services.AddAWSService<IAmazonS3>();
 builder.Services.AddScoped<DatabaseService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();

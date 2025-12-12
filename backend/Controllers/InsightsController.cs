@@ -13,13 +13,11 @@ namespace BloodLine.Controllers
     {
         private readonly ApplicationDbContext _db;
         private readonly IConfiguration _config;
-        private readonly Amazon.BedrockRuntime.IAmazonBedrockRuntime _bedrock;
 
-        public InsightsController(ApplicationDbContext db, IConfiguration config, Amazon.BedrockRuntime.IAmazonBedrockRuntime bedrock)
+        public InsightsController(ApplicationDbContext db, IConfiguration config)
         {
             _db = db;
             _config = config;
-            _bedrock = bedrock;
         }
 
         [HttpGet("{userId}")]
@@ -141,7 +139,8 @@ Provide actionable advice for the patient. Be concise, supportive, and focus on 
                 };
 
                 Console.WriteLine("📡 Calling Bedrock API...");
-                var response = await _bedrock.InvokeModelAsync(request);
+                var client = new AmazonBedrockRuntimeClient(Amazon.RegionEndpoint.USEast1);
+                var response = await client.InvokeModelAsync(request);
                 
                 Console.WriteLine("📝 Parsing Bedrock response...");
                 var responseBody = await JsonSerializer.DeserializeAsync<JsonElement>(response.Body);
