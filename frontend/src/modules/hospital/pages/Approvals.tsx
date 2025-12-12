@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Search, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { hospitalAPI } from '../services/hospitalAPI';
 import type { ApprovalRequest } from '../services/hospitalAPI';
-import { useAuth } from '../../../context/AuthContext';
 
 export default function Approvals() {
 
