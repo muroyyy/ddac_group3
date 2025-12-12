@@ -1,6 +1,6 @@
 // Import React hooks and icons for blood requests management
 import { useEffect, useState } from 'react';
-import { Search, Droplets, Calendar, User, AlertCircle, Phone, Heart } from 'lucide-react';
+import { Search, Droplets, Calendar, User, AlertCircle } from 'lucide-react';
 import { hospitalAPI } from '../services/hospitalAPI';
 import { useAuth } from '../../../context/AuthContext';
 
