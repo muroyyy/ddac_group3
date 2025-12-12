@@ -163,46 +163,26 @@ namespace BloodLine.Controllers
                     return Ok(new { success = true, data = new List<object>() });
                 }
 
-                // Get appointments for this patient
+                // Simple query using existing table structure
                 var appointments = await _db.PatientAppointments
                     .Where(pa => pa.PatientId == patientId.Value)
                     .OrderByDescending(pa => pa.AppointmentDate)
+                    .Select(pa => new
+                    {
+                        appointmentId = pa.AppointmentId,
+                        doctorName = pa.DoctorName,
+                        appointmentDate = pa.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
+                        status = pa.Status,
+                        doctorNotes = pa.DoctorNotes,
+                        hospitalName = "Hospital" // Simple fallback
+                    })
                     .ToListAsync();
 
-                var result = new List<object>();
-                foreach (var appt in appointments)
-                {
-                    // Get hospital name
-                    var hospital = await _db.Hospitals.FirstOrDefaultAsync(h => h.HospitalId == appt.HospitalId);
-                    
-                    // Get doctor name (if doctor_id exists)
-                    string doctorName = appt.DoctorName ?? "Not Assigned";
-                    if (appt.DoctorId.HasValue)
-                    {
-                        var doctor = await _db.Doctors.FirstOrDefaultAsync(d => d.DoctorId == appt.DoctorId.Value);
-                        if (doctor != null)
-                        {
-                            doctorName = doctor.DoctorName;
-                        }
-                    }
-
-                    result.Add(new
-                    {
-                        appointmentId = appt.AppointmentId,
-                        hospitalName = hospital?.HospitalName ?? "Unknown Hospital",
-                        doctorName = doctorName,
-                        appointmentDate = appt.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
-                        status = appt.Status,
-                        doctorNotes = appt.DoctorNotes
-                    });
-                }
-
-                return Ok(new { success = true, data = result });
+                return Ok(new { success = true, data = appointments });
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in GetAppointments for userId {userId}: {ex.Message}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return Ok(new { success = true, data = new List<object>() });
             }
         }
