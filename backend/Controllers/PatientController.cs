@@ -156,15 +156,19 @@ namespace BloodLine.Controllers
                 if (userId <= 0)
                     return BadRequest(new { success = false, message = "Invalid user ID." });
 
+                // Check if user exists
+                var userExists = await _db.Users.AnyAsync(u => u.Id == userId);
+                if (!userExists)
+                {
+                    return NotFound(new { success = false, message = "User not found." });
+                }
+
                 var patientId = await GetPatientIdFromUser(userId);
 
                 if (patientId == null)
                 {
-                    return BadRequest(new
-                    {
-                        success = false,
-                        message = "Patient profile not found."
-                    });
+                    // Return empty appointments instead of error for users without patient profile
+                    return Ok(new { success = true, data = new List<object>() });
                 }
 
                 var appts = await _db.PatientAppointments
@@ -184,6 +188,7 @@ namespace BloodLine.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error in GetAppointments for userId {userId}: {ex.Message}");
                 return StatusCode(500, new
                 {
                     success = false,

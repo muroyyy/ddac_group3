@@ -89,6 +89,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         });
 
         if (response.success && response.user) {
+          console.log('Login response:', response.user);
           
           // Handle remember me functionality
           if (rememberMe) {
@@ -106,7 +107,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           const userData = {
             id: response.user.id,
             email: response.user.email,
-            name: response.user.fullName,
+            name: response.user.fullName || response.user.FullName,
             role: normalizedRole
           };
 

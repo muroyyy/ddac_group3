@@ -894,4 +894,10 @@ public class UpdateStaffProfileDto
     public string? Position { get; set; }
 }
 
+public class LinkHospitalRequest
+{
+    public int HospitalId { get; set; }
+    public string? Position { get; set; }
+}
+
 
