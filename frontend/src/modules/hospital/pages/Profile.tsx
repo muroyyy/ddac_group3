@@ -12,6 +12,12 @@ interface HospitalProfile {
   phone: string;
 }
 
+const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  if (import.meta.env.PROD) return 'https://bloodline.dev/api';
+  return 'http://localhost:5000/api';
+};
+
 export default function Profile() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<HospitalProfile>({
@@ -25,12 +31,13 @@ export default function Profile() {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const API_BASE_URL = getApiBaseUrl();
 
   useEffect(() => {
     const fetchProfile = async () => {
       if (user?.id) {
         try {
-          const response = await fetch(`https://bloodline.dev/api/hospital/profile?userId=${user.id}`);
+          const response = await fetch(`${API_BASE_URL}/hospital/profile?userId=${user.id}`);
           if (response.ok) {
             const hospitalData = await response.json();
             setProfile(prev => ({
@@ -54,7 +61,7 @@ export default function Profile() {
     setSaving(true);
     try {
       // Update user profile
-      const userResponse = await fetch(`https://bloodline.dev/api/auth/profile`, {
+      const userResponse = await fetch(`${API_BASE_URL}/auth/profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -65,7 +72,7 @@ export default function Profile() {
       });
 
       // Update hospital profile
-      const hospitalResponse = await fetch(`https://bloodline.dev/api/hospital/profile`, {
+      const hospitalResponse = await fetch(`${API_BASE_URL}/hospital/profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

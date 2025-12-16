@@ -22,10 +22,16 @@ const SystemAlerts: React.FC = () => {
     fetchAlerts();
   }, []);
 
+  const getApiBaseUrl = () => {
+    if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+    if (import.meta.env.PROD) return 'https://bloodline.dev/api';
+    return 'http://localhost:5000/api';
+  };
+
   const fetchAlerts = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_EC2_PUBLIC_IP ? `http://${import.meta.env.VITE_EC2_PUBLIC_IP}:5000/api` : 'http://localhost:5000/api'}/admin/alerts`);
+      const response = await fetch(`${getApiBaseUrl()}/admin/alerts`);
       const data = await response.json();
       if (data.success) {
         setAlerts(data.data);

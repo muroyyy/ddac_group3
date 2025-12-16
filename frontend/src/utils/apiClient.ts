@@ -2,7 +2,11 @@ import { sessionManager } from './sessionManager';
 
 // API Configuration with fallback
 const getApiBaseUrl = () => {
-  // In production, always use CloudFront domain (HTTPS)
+  // Use environment variable if set, otherwise use defaults
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  // Production default
   if (import.meta.env.PROD) {
     return 'https://bloodline.dev/api';
   }
