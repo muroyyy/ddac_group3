@@ -117,5 +117,3 @@ resource "aws_instance" "main" {
     ignore_changes = [ami]
   }
 }
-
-# Elastic IP removed - CloudFront uses EC2 public DNS directly
