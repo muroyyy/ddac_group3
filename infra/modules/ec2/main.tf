@@ -117,3 +117,12 @@ resource "aws_instance" "main" {
     ignore_changes = [ami]
   }
 }
+
+resource "aws_eip" "main" {
+  domain   = "vpc"
+  instance = aws_instance.main.id
+
+  tags = {
+    Name = "${var.environment}-${var.project_name}-eip"
+  }
+}

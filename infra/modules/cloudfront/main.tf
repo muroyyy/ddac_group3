@@ -13,15 +13,18 @@ resource "aws_cloudfront_distribution" "main" {
   }
 
   # EC2 origin for API calls
-  origin {
-    domain_name = var.ec2_public_dns
-    origin_id   = "EC2-${var.project_name}-${var.environment}"
+  dynamic "origin" {
+    for_each = var.ec2_public_dns != "" ? [1] : []
+    content {
+      domain_name = var.ec2_public_dns
+      origin_id   = "EC2-${var.project_name}-${var.environment}"
 
-    custom_origin_config {
-      http_port              = 5000
-      https_port             = 443
-      origin_protocol_policy = "http-only"
-      origin_ssl_protocols   = ["TLSv1.2"]
+      custom_origin_config {
+        http_port              = 5000
+        https_port             = 443
+        origin_protocol_policy = "http-only"
+        origin_ssl_protocols   = ["TLSv1.2"]
+      }
     }
   }
 
@@ -53,26 +56,29 @@ resource "aws_cloudfront_distribution" "main" {
   }
 
   # Cache behavior for API endpoints
-  ordered_cache_behavior {
-    path_pattern           = "/api/*"
-    allowed_methods        = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
-    cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = "EC2-${var.project_name}-${var.environment}"
-    compress               = true
-    viewer_protocol_policy = "redirect-to-https"
+  dynamic "ordered_cache_behavior" {
+    for_each = var.ec2_public_dns != "" ? [1] : []
+    content {
+      path_pattern           = "/api/*"
+      allowed_methods        = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+      cached_methods         = ["GET", "HEAD"]
+      target_origin_id       = "EC2-${var.project_name}-${var.environment}"
+      compress               = true
+      viewer_protocol_policy = "redirect-to-https"
 
-    forwarded_values {
-      query_string = true
-      headers      = ["*"]
-      
-      cookies {
-        forward = "all"
+      forwarded_values {
+        query_string = true
+        headers      = ["*"]
+        
+        cookies {
+          forward = "all"
+        }
       }
-    }
 
-    min_ttl     = 0
-    default_ttl = 0
-    max_ttl     = 0
+      min_ttl     = 0
+      default_ttl = 0
+      max_ttl     = 0
+    }
   }
 
   price_class = "PriceClass_100"
