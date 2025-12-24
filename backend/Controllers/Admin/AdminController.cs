@@ -1,3 +1,4 @@
+// AdminController.cs
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BloodLine.Data;
