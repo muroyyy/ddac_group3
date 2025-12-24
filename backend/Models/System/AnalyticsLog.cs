@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using BloodLine.Models.Users;
 
 namespace BloodLine.Models.System;
 
@@ -22,5 +23,5 @@ public class AnalyticsLog
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     
     [ForeignKey("PerformedBy")]
-    public User? User { get; set; }
+    public Users.User? User { get; set; }
 }

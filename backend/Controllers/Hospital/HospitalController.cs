@@ -7,11 +7,6 @@ using BloodLine.Models.Blood;
 using BloodLine.Models.Appointments;
 using BloodLine.Models.System;
 using BloodLine.Models.Users;
-using BloodLine.Models.Auth;
-using BloodLine.Models.Hospital;
-using BloodLine.Models.Blood;
-using BloodLine.Models.Appointments;
-using BloodLine.Models.System;
 using BloodLine.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -449,7 +444,7 @@ public class HospitalController : ControllerBase
     {
         try
         {
-            var profile = await _context.Set<Hospital>()
+            var profile = await _context.Set<HospitalEntity>()
                 .Where(h => h.UserId == userId)
                 .Join(_context.Users, h => h.UserId, u => u.Id, (h, u) => new
                 {

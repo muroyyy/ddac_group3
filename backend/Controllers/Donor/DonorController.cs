@@ -7,12 +7,6 @@ using BloodLine.Models.Hospital;
 using BloodLine.Models.Blood;
 using BloodLine.Models.Appointments;
 using BloodLine.Models.System;
-using BloodLine.Models.Users;
-using BloodLine.Models.Auth;
-using BloodLine.Models.Hospital;
-using BloodLine.Models.Blood;
-using BloodLine.Models.Appointments;
-using BloodLine.Models.System;
 using Microsoft.EntityFrameworkCore;
 
 namespace BloodLine.Controllers

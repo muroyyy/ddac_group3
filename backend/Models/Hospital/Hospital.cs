@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using BloodLine.Models.Users;
 
 namespace BloodLine.Models.Hospital;
 
 [Table("hospital")]
-public class Hospital
+public class HospitalEntity
 {
     [Key]
     [Column("hospital_id")]
@@ -25,5 +26,5 @@ public class Hospital
     [Column("contact_number")]
     public string? ContactNumber { get; set; }
 
-    public Users.User User { get; set; } = null!;
+    public User User { get; set; } = null!;
 }

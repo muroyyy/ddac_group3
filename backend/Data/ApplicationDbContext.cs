@@ -16,7 +16,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<DonorProfile> DonorProfiles { get; set; }
     public DbSet<PatientProfile> PatientProfiles { get; set; }
-    public DbSet<Hospital> Hospitals { get; set; }
+    public DbSet<HospitalEntity> Hospitals { get; set; }
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
     public DbSet<AnalyticsLog> AnalyticsLogs { get; set; }
     public DbSet<BloodRequest> BloodRequests { get; set; }
@@ -74,14 +74,14 @@ public class ApplicationDbContext : DbContext
                   .HasForeignKey<PatientProfile>(e => e.UserId);
         });
         
-        modelBuilder.Entity<Hospital>(entity =>
+        modelBuilder.Entity<HospitalEntity>(entity =>
         {
             entity.ToTable("hospital");
             entity.HasKey(e => e.HospitalId);
             entity.HasIndex(e => e.UserId).IsUnique();
             entity.HasOne(e => e.User)
                   .WithOne()
-                  .HasForeignKey<Hospital>(e => e.UserId);
+                  .HasForeignKey<HospitalEntity>(e => e.UserId);
         });
         
         modelBuilder.Entity<BloodRequest>().ToTable("blood_requests");

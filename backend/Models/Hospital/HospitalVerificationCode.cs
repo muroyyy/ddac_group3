@@ -24,5 +24,5 @@ public class HospitalVerificationCode
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation property
-    public Hospital.Hospital Hospital { get; set; } = null!;
+    public HospitalEntity Hospital { get; set; } = null!;
 }

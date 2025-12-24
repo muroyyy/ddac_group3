@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using BloodLine.Models.Users;
 
 namespace BloodLine.Models.Hospital;
 
@@ -24,5 +25,5 @@ public class HospitalStaff
 
     // Navigation properties
     public Users.User User { get; set; } = null!;
-    public Hospital.Hospital Hospital { get; set; } = null!;
+    public HospitalEntity Hospital { get; set; } = null!;
 }

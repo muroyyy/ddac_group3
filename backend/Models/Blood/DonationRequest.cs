@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using BloodLine.Models.Users;
+using BloodLine.Models.Hospital;
 
 namespace BloodLine.Models.Blood;
 
@@ -29,6 +31,6 @@ public class DonationRequest
     public int UnitsRequired { get; set; }
 
     // Navigation properties
-    public DonorProfile Donor { get; set; } = null!;
-    public Hospital Hospital { get; set; } = null!;
+    public Users.DonorProfile Donor { get; set; } = null!;
+    public Hospital.Hospital Hospital { get; set; } = null!;
 }

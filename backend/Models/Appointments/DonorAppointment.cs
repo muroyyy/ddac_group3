@@ -1,5 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using BloodLine.Models.Users;
+using BloodLine.Models.Blood;
+using BloodLine.Models.Hospital;
 
 namespace BloodLine.Models.Appointments;
 
@@ -35,7 +38,7 @@ public class DonorAppointment
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation properties
-    public DonorProfile Donor { get; set; } = null!;
-    public DonationRequest DonationRequest { get; set; } = null!;
-    public Hospital Hospital { get; set; } = null!;
+    public Users.DonorProfile Donor { get; set; } = null!;
+    public Blood.DonationRequest DonationRequest { get; set; } = null!;
+    public Hospital.Hospital Hospital { get; set; } = null!;
 }
