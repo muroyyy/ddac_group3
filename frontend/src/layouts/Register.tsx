@@ -27,6 +27,9 @@ interface FormData {
   role: 'donor' | 'patient' | 'hospital' | '';
   agreeToTerms: boolean;
   documents: File[];
+  hospitalId: number | null;
+  verificationCode: string;
+  position: string;
 }
 
 const RegisterPage: React.FC = () => {
@@ -41,15 +44,34 @@ const RegisterPage: React.FC = () => {
     confirmPassword: '',
     role: '',
     agreeToTerms: false,
-    documents: []
+    documents: [],
+    hospitalId: null,
+    verificationCode: '',
+    position: ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [hospitals, setHospitals] = useState<Array<{hospitalId: number; hospitalName: string}>>([]);
 
   const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
+
+  React.useEffect(() => {
+    const fetchHospitals = async () => {
+      try {
+        const { hospitalAPI } = await import('../utils/apiClient');
+        const response = await hospitalAPI.getAllHospitals();
+        if (response.success) {
+          setHospitals(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching hospitals:', error);
+      }
+    };
+    fetchHospitals();
+  }, []);
 
   const formatMalaysianPhone = (value: string): string => {
     // Remove all non-digits
@@ -152,6 +174,18 @@ const RegisterPage: React.FC = () => {
       }
     }
 
+    if (formData.role === 'hospital') {
+      if (!formData.hospitalId) {
+        newErrors.hospitalId = 'Please select a hospital';
+      }
+      if (!formData.verificationCode.trim()) {
+        newErrors.verificationCode = 'Verification code is required';
+      }
+      if (!formData.position.trim()) {
+        newErrors.position = 'Position is required';
+      }
+    }
+
     if (!formData.location.trim()) {
       newErrors.location = 'Location is required';
     }
@@ -207,6 +241,13 @@ const RegisterPage: React.FC = () => {
         submitData.append('password', formData.password);
         submitData.append('role', formData.role);
         
+        // Add hospital-specific fields
+        if (formData.role === 'hospital') {
+          submitData.append('hospitalId', formData.hospitalId?.toString() || '');
+          submitData.append('verificationCode', formData.verificationCode);
+          submitData.append('position', formData.position);
+        }
+        
         // Add documents if any
         formData.documents.forEach((file) => {
           submitData.append(`documents`, file);
@@ -215,7 +256,7 @@ const RegisterPage: React.FC = () => {
         const response = await authAPI.registerWithFiles(submitData);
 
         if (response.success) {
-          alert('Registration successful! You can now sign in.');
+          alert('Registration successful! Please wait for admin verification.');
           navigate('/login');
         } else {
           alert(response.message || 'Registration failed');
@@ -438,6 +479,130 @@ const RegisterPage: React.FC = () => {
 
             {currentStep === 2 && (
               <div className="space-y-6">
+                {formData.role === 'hospital' && (
+                  <>
+                    <div>
+                      <label htmlFor="hospitalId" className="block text-sm font-medium text-gray-700 mb-2">
+                        Select Hospital *
+                      </label>
+                      <select
+                        id="hospitalId"
+                        name="hospitalId"
+                        value={formData.hospitalId || ''}
+                        onChange={(e) => setFormData(prev => ({...prev, hospitalId: parseInt(e.target.value) || null}))}
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all cursor-pointer ${
+                          errors.hospitalId ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                        }`}
+                      >
+                        <option value="">Select a hospital</option>
+                        {hospitals.map(hospital => (
+                          <option key={hospital.hospitalId} value={hospital.hospitalId}>
+                            {hospital.hospitalName}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.hospitalId && (
+                        <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                          <AlertCircle className="w-4 h-4" />
+                          {errors.hospitalId}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label htmlFor="verificationCode" className="block text-sm font-medium text-gray-700 mb-2">
+                        Verification Code *
+                      </label>
+                      <input
+                        type="text"
+                        id="verificationCode"
+                        name="verificationCode"
+                        value={formData.verificationCode}
+                        onChange={handleChange}
+                        placeholder="Enter code provided by your hospital"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
+                          errors.verificationCode ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                        }`}
+                      />
+                      {errors.verificationCode && (
+                        <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                          <AlertCircle className="w-4 h-4" />
+                          {errors.verificationCode}
+                        </p>
+                      )}
+                      <p className="mt-2 text-xs text-gray-500">
+                        Contact your hospital HR to get the verification code
+                      </p>
+                    </div>
+
+                    <div>
+                      <label htmlFor="position" className="block text-sm font-medium text-gray-700 mb-2">
+                        Position *
+                      </label>
+                      <input
+                        type="text"
+                        id="position"
+                        name="position"
+                        value={formData.position}
+                        onChange={handleChange}
+                        placeholder="e.g., Nurse, Lab Technician, Administrator"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
+                          errors.position ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                        }`}
+                      />
+                      {errors.position && (
+                        <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                          <AlertCircle className="w-4 h-4" />
+                          {errors.position}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Upload Staff ID or Employment Letter *
+                      </label>
+                      <p className="text-xs text-gray-500 mb-3">
+                        Please upload your staff ID card or employment letter for verification
+                      </p>
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-red-400 transition-colors">
+                        <input
+                          type="file"
+                          id="documents"
+                          multiple
+                          accept=".jpg,.jpeg,.png,.pdf"
+                          onChange={handleFileChange}
+                          className="hidden"
+                        />
+                        <label htmlFor="documents" className="cursor-pointer">
+                          <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                          <p className="text-sm text-gray-600 mb-1">Click to upload documents</p>
+                          <p className="text-xs text-gray-400">JPG, PNG, PDF up to 10MB each</p>
+                        </label>
+                      </div>
+                      {formData.documents.length > 0 && (
+                        <div className="mt-3 space-y-2">
+                          {formData.documents.map((file, index) => (
+                            <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                              <div className="flex items-center gap-2">
+                                <FileText className="w-4 h-4 text-gray-500" />
+                                <span className="text-sm text-gray-700">{file.name}</span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => removeFile(index)}
+                                className="text-red-500 hover:text-red-700 text-sm"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+
                 {(formData.role === 'donor' || formData.role === 'patient') && (
                   <div>
                     <label htmlFor="bloodType" className="block text-sm font-medium text-gray-700 mb-2">
