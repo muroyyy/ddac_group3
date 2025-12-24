@@ -6,7 +6,6 @@ using BloodLine.Models.Hospital;
 using BloodLine.Models.Blood;
 using BloodLine.Models.Appointments;
 using BloodLine.Models.System;
-using BloodLine.Models.Users;
 using BloodLine.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

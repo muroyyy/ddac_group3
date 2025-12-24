@@ -32,5 +32,5 @@ public class DonationRequest
 
     // Navigation properties
     public Users.DonorProfile Donor { get; set; } = null!;
-    public Hospital.Hospital Hospital { get; set; } = null!;
+    public HospitalEntity Hospital { get; set; } = null!;
 }
