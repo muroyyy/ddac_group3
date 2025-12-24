@@ -142,7 +142,7 @@ public class AnalyticsController : ControllerBase
     {
         try
         {
-            var csv = new System.Text.StringBuilder();
+            var csv = new StringBuilder();
             csv.AppendLine("BloodLine Analytics Report");
             csv.AppendLine($"Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC");
             csv.AppendLine();
@@ -175,7 +175,7 @@ public class AnalyticsController : ControllerBase
             csv.AppendLine("Status,Count");
             csv.AppendLine($"Pending,0");
 
-            var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
+            var bytes = Encoding.UTF8.GetBytes(csv.ToString());
             return File(bytes, "text/csv", $"BloodLine_Analytics_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv");
         }
         catch (Exception ex)

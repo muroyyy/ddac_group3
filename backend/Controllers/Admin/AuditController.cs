@@ -141,7 +141,7 @@ public class AuditController : ControllerBase
             csv += string.Join("\n", logs.Select(l => 
                 $"{l.LogId},\"{l.ActionType}\",\"{l.UserName}\",\"{l.UserEmail}\",\"{l.UserRole}\",{l.Timestamp}"));
 
-            var bytes = System.Text.Encoding.UTF8.GetBytes(csv);
+            var bytes = Encoding.UTF8.GetBytes(csv);
             return File(bytes, "text/csv", $"audit_logs_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv");
         }
         catch (Exception ex)

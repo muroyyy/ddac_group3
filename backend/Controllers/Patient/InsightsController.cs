@@ -136,7 +136,7 @@ Provide actionable advice for the patient. Be concise, supportive, and focus on 
                     ModelId = "anthropic.claude-3-haiku-20240307-v1:0",
                     ContentType = "application/json",
                     Accept = "application/json",
-                    Body = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(requestBody)))
+                    Body = new MemoryStream(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(requestBody)))
                 };
 
                 Console.WriteLine("📡 Calling Bedrock API...");
