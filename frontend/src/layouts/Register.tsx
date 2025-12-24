@@ -55,8 +55,55 @@ const RegisterPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [hospitals, setHospitals] = useState<Array<{hospitalId: number; hospitalName: string}>>([]);
+  const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showOtherPosition, setShowOtherPosition] = useState(false);
+  const [showHospitalRequest, setShowHospitalRequest] = useState(false);
+  const [hospitalSearch, setHospitalSearch] = useState('');
+  const [showHospitalDropdown, setShowHospitalDropdown] = useState(false);
+  const [hospitalRequestForm, setHospitalRequestForm] = useState({
+    hospitalName: '',
+    hospitalAddress: '',
+    hospitalCity: '',
+    contactPerson: '',
+    contactEmail: '',
+    contactPhone: '',
+    reason: ''
+  });
 
   const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
+  const hospitalPositions = [
+    'Nurse',
+    'Lab Technician',
+    'Phlebotomist',
+    'Blood Bank Manager',
+    'Medical Technologist',
+    'Hospital Administrator',
+    'Doctor',
+    'Physician',
+    'Other'
+  ];
+
+  const filteredHospitals = hospitals.filter(hospital =>
+    hospital.hospitalName.toLowerCase().includes(hospitalSearch.toLowerCase())
+  );
+
+  const selectedHospital = hospitals.find(h => h.hospitalId === formData.hospitalId);
+
+  const handleHospitalRequestSubmit = () => {
+    // Mock submission - in real app, this would send to backend
+    alert(`Hospital request submitted for: ${hospitalRequestForm.hospitalName}\n\nWe will review your request and contact you at ${hospitalRequestForm.contactEmail} within 2-3 business days.`);
+    setShowHospitalRequest(false);
+    setHospitalRequestForm({
+      hospitalName: '',
+      hospitalAddress: '',
+      hospitalCity: '',
+      contactPerson: '',
+      contactEmail: '',
+      contactPhone: '',
+      reason: ''
+    });
+  };
 
   React.useEffect(() => {
     const fetchHospitals = async () => {
@@ -72,6 +119,23 @@ const RegisterPage: React.FC = () => {
     };
     fetchHospitals();
   }, []);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.hospital-dropdown-container')) {
+        setShowHospitalDropdown(false);
+      }
+    };
+
+    if (showHospitalDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showHospitalDropdown]);
 
   const formatMalaysianPhone = (value: string): string => {
     // Remove all non-digits
@@ -482,31 +546,70 @@ const RegisterPage: React.FC = () => {
                 {formData.role === 'hospital' && (
                   <>
                     <div>
-                      <label htmlFor="hospitalId" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Select Hospital *
                       </label>
-                      <select
-                        id="hospitalId"
-                        name="hospitalId"
-                        value={formData.hospitalId || ''}
-                        onChange={(e) => setFormData(prev => ({...prev, hospitalId: parseInt(e.target.value) || null}))}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all cursor-pointer ${
-                          errors.hospitalId ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                        }`}
-                      >
-                        <option value="">Select a hospital</option>
-                        {hospitals.map(hospital => (
-                          <option key={hospital.hospitalId} value={hospital.hospitalId}>
-                            {hospital.hospitalName}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="relative hospital-dropdown-container">
+                        <input
+                          type="text"
+                          value={selectedHospital ? selectedHospital.hospitalName : hospitalSearch}
+                          onChange={(e) => {
+                            setHospitalSearch(e.target.value);
+                            setShowHospitalDropdown(true);
+                            if (selectedHospital) {
+                              setFormData(prev => ({...prev, hospitalId: null}));
+                            }
+                          }}
+                          onFocus={() => setShowHospitalDropdown(true)}
+                          placeholder="Search for your hospital..."
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
+                            errors.hospitalId ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                          }`}
+                        />
+                        {showHospitalDropdown && (
+                          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                            {filteredHospitals.length > 0 ? (
+                              filteredHospitals.map(hospital => (
+                                <button
+                                  key={hospital.hospitalId}
+                                  type="button"
+                                  onClick={() => {
+                                    setFormData(prev => ({...prev, hospitalId: hospital.hospitalId}));
+                                    setHospitalSearch('');
+                                    setShowHospitalDropdown(false);
+                                  }}
+                                  className="w-full text-left px-4 py-3 hover:bg-red-50 transition-colors border-b border-gray-100 last:border-0"
+                                >
+                                  <div className="font-medium text-gray-900">{hospital.hospitalName}</div>
+                                </button>
+                              ))
+                            ) : (
+                              <div className="px-4 py-3 text-gray-500 text-sm">
+                                No hospitals found
+                              </div>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowHospitalRequest(true);
+                                setShowHospitalDropdown(false);
+                              }}
+                              className="w-full text-left px-4 py-3 bg-red-50 hover:bg-red-100 transition-colors border-t-2 border-red-200 text-red-700 font-medium"
+                            >
+                              + Request to add a new hospital
+                            </button>
+                          </div>
+                        )}
+                      </div>
                       {errors.hospitalId && (
                         <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
                           <AlertCircle className="w-4 h-4" />
                           {errors.hospitalId}
                         </p>
                       )}
+                      <p className="mt-2 text-xs text-gray-500">
+                        Can't find your hospital? Click "Request to add a new hospital" below the list
+                      </p>
                     </div>
 
                     <div>
@@ -539,17 +642,41 @@ const RegisterPage: React.FC = () => {
                       <label htmlFor="position" className="block text-sm font-medium text-gray-700 mb-2">
                         Position *
                       </label>
-                      <input
-                        type="text"
+                      <select
                         id="position"
                         name="position"
-                        value={formData.position}
-                        onChange={handleChange}
-                        placeholder="e.g., Nurse, Lab Technician, Administrator"
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
+                        value={showOtherPosition ? 'Other' : formData.position}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === 'Other') {
+                            setShowOtherPosition(true);
+                            setFormData(prev => ({...prev, position: ''}));
+                          } else {
+                            setShowOtherPosition(false);
+                            setFormData(prev => ({...prev, position: value}));
+                          }
+                        }}
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all cursor-pointer ${
                           errors.position ? 'border-red-500 bg-red-50' : 'border-gray-300'
                         }`}
-                      />
+                      >
+                        <option value="">Select your position</option>
+                        {hospitalPositions.map(pos => (
+                          <option key={pos} value={pos}>{pos}</option>
+                        ))}
+                      </select>
+                      {showOtherPosition && (
+                        <input
+                          type="text"
+                          name="position"
+                          value={formData.position}
+                          onChange={handleChange}
+                          placeholder="Enter your position"
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all mt-3 ${
+                            errors.position ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                          }`}
+                        />
+                      )}
                       {errors.position && (
                         <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
                           <AlertCircle className="w-4 h-4" />
@@ -796,13 +923,21 @@ const RegisterPage: React.FC = () => {
                     />
                     <span className="text-sm text-gray-700">
                       I agree to the{' '}
-                      <a href="#terms" className="text-red-600 hover:text-red-700 font-medium">
+                      <button
+                        type="button"
+                        onClick={() => setShowTerms(true)}
+                        className="text-red-600 hover:text-red-700 font-medium underline cursor-pointer"
+                      >
                         Terms and Conditions
-                      </a>{' '}
+                      </button>{' '}
                       and{' '}
-                      <a href="#privacy" className="text-red-600 hover:text-red-700 font-medium">
+                      <button
+                        type="button"
+                        onClick={() => setShowPrivacy(true)}
+                        className="text-red-600 hover:text-red-700 font-medium underline cursor-pointer"
+                      >
                         Privacy Policy
-                      </a>
+                      </button>
                     </span>
                   </label>
                   {errors.agreeToTerms && (
@@ -866,6 +1001,268 @@ const RegisterPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Terms and Conditions Modal */}
+      {showTerms && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-2xl font-bold text-gray-900">Terms and Conditions</h3>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              <div className="space-y-4 text-sm text-gray-700">
+                <p className="text-xs text-gray-500">Last updated: January 2025</p>
+                
+                <h4 className="font-semibold text-base text-gray-900 mt-4">1. Acceptance of Terms</h4>
+                <p>By accessing and using BloodLine, you accept and agree to be bound by the terms and provision of this agreement.</p>
+                
+                <h4 className="font-semibold text-base text-gray-900 mt-4">2. User Responsibilities</h4>
+                <p>Users must provide accurate and truthful information during registration. Donors must ensure they meet health requirements for blood donation. Patients must provide valid medical documentation when requesting blood.</p>
+                
+                <h4 className="font-semibold text-base text-gray-900 mt-4">3. Blood Donation</h4>
+                <p>All blood donations are voluntary and unpaid. Donors must be at least 18 years old and meet health eligibility criteria. BloodLine facilitates connections but does not directly handle blood collection or transfusion.</p>
+                
+                <h4 className="font-semibold text-base text-gray-900 mt-4">4. Privacy and Data Protection</h4>
+                <p>We collect and process personal data in accordance with applicable data protection laws. Medical information is handled with strict confidentiality. Users have the right to access, correct, or delete their personal data.</p>
+                
+                <h4 className="font-semibold text-base text-gray-900 mt-4">5. Hospital Staff Verification</h4>
+                <p>Hospital staff must provide valid employment verification. Verification codes are issued by authorized hospital administrators. Misrepresentation of hospital affiliation may result in account termination and legal action.</p>
+                
+                <h4 className="font-semibold text-base text-gray-900 mt-4">6. Limitation of Liability</h4>
+                <p>BloodLine is a platform connecting donors, patients, and hospitals. We are not responsible for medical outcomes, blood quality, or transfusion procedures. All medical procedures are the responsibility of licensed healthcare facilities.</p>
+                
+                <h4 className="font-semibold text-base text-gray-900 mt-4">7. Account Termination</h4>
+                <p>We reserve the right to suspend or terminate accounts that violate these terms. Users may delete their accounts at any time through account settings.</p>
+                
+                <h4 className="font-semibold text-base text-gray-900 mt-4">8. Changes to Terms</h4>
+                <p>We may modify these terms at any time. Users will be notified of significant changes. Continued use of the platform constitutes acceptance of modified terms.</p>
+                
+                <h4 className="font-semibold text-base text-gray-900 mt-4">9. Contact Information</h4>
+                <p>For questions about these terms, contact us at legal@bloodline.dev</p>
+              </div>
+            </div>
+            <div className="p-6 border-t border-gray-200 flex justify-end">
+              <button
+                onClick={() => setShowTerms(false)}
+                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Privacy Policy Modal */}
+      {showPrivacy && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-2xl font-bold text-gray-900">Privacy Policy</h3>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              <div className="space-y-4 text-sm text-gray-700">
+                <p className="text-xs text-gray-500">Last updated: January 2025</p>
+                
+                <h4 className="font-semibold text-base text-gray-900 mt-4">1. Information We Collect</h4>
+                <p><strong>Personal Information:</strong> Name, email, phone number, blood type, location, and medical documentation.</p>
+                <p><strong>Health Information:</strong> Blood type, donation history, medical eligibility status.</p>
+                <p><strong>Usage Data:</strong> Login times, feature usage, and platform interactions.</p>
+                
+                <h4 className="font-semibold text-base text-gray-900 mt-4">2. How We Use Your Information</h4>
+                <p>We use your information to:</p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Facilitate blood donation requests and matching</li>
+                  <li>Verify user identities and hospital affiliations</li>
+                  <li>Communicate important updates and notifications</li>
+                  <li>Improve platform functionality and user experience</li>
+                  <li>Comply with legal and regulatory requirements</li>
+                </ul>
+                
+                <h4 className="font-semibold text-base text-gray-900 mt-4">3. Information Sharing</h4>
+                <p>We share information only with:</p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Authorized hospital staff for blood request processing</li>
+                  <li>Donors when they respond to blood requests</li>
+                  <li>Law enforcement when legally required</li>
+                </ul>
+                <p className="mt-2">We never sell your personal information to third parties.</p>
+                
+                <h4 className="font-semibold text-base text-gray-900 mt-4">4. Data Security</h4>
+                <p>We implement industry-standard security measures including:</p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Encrypted data transmission (HTTPS/TLS)</li>
+                  <li>Secure password hashing (BCrypt)</li>
+                  <li>Regular security audits and updates</li>
+                  <li>Access controls and authentication</li>
+                  <li>AWS cloud infrastructure security</li>
+                </ul>
+                
+                <h4 className="font-semibold text-base text-gray-900 mt-4">5. Your Rights</h4>
+                <p>You have the right to:</p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Access your personal data</li>
+                  <li>Correct inaccurate information</li>
+                  <li>Request data deletion</li>
+                  <li>Opt-out of non-essential communications</li>
+                  <li>Export your data</li>
+                </ul>
+                
+                <h4 className="font-semibold text-base text-gray-900 mt-4">6. Data Retention</h4>
+                <p>We retain your data for as long as your account is active. After account deletion, we may retain certain information for legal compliance and audit purposes for up to 7 years.</p>
+                
+                <h4 className="font-semibold text-base text-gray-900 mt-4">7. Cookies and Tracking</h4>
+                <p>We use session cookies for authentication and functionality. We do not use third-party tracking cookies for advertising.</p>
+                
+                <h4 className="font-semibold text-base text-gray-900 mt-4">8. Children's Privacy</h4>
+                <p>BloodLine is not intended for users under 18 years of age. We do not knowingly collect information from minors.</p>
+                
+                <h4 className="font-semibold text-base text-gray-900 mt-4">9. Changes to Privacy Policy</h4>
+                <p>We may update this policy periodically. Users will be notified of significant changes via email or platform notification.</p>
+                
+                <h4 className="font-semibold text-base text-gray-900 mt-4">10. Contact Us</h4>
+                <p>For privacy concerns or data requests, contact us at:</p>
+                <p className="mt-2">Email: privacy@bloodline.dev<br/>Address: BloodLine Data Protection Office, Kuala Lumpur, Malaysia</p>
+              </div>
+            </div>
+            <div className="p-6 border-t border-gray-200 flex justify-end">
+              <button
+                onClick={() => setShowPrivacy(false)}
+                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hospital Request Modal */}
+      {showHospitalRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-2xl font-bold text-gray-900">Request New Hospital</h3>
+              <p className="text-sm text-gray-600 mt-1">Fill in the details below and we'll review your request</p>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Hospital Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={hospitalRequestForm.hospitalName}
+                    onChange={(e) => setHospitalRequestForm(prev => ({...prev, hospitalName: e.target.value}))}
+                    placeholder="Enter hospital name"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Hospital Address *
+                  </label>
+                  <input
+                    type="text"
+                    value={hospitalRequestForm.hospitalAddress}
+                    onChange={(e) => setHospitalRequestForm(prev => ({...prev, hospitalAddress: e.target.value}))}
+                    placeholder="Street address"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    City/State *
+                  </label>
+                  <input
+                    type="text"
+                    value={hospitalRequestForm.hospitalCity}
+                    onChange={(e) => setHospitalRequestForm(prev => ({...prev, hospitalCity: e.target.value}))}
+                    placeholder="e.g., Kuala Lumpur, Selangor"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Your Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={hospitalRequestForm.contactPerson}
+                    onChange={(e) => setHospitalRequestForm(prev => ({...prev, contactPerson: e.target.value}))}
+                    placeholder="Your full name"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Your Email *
+                  </label>
+                  <input
+                    type="email"
+                    value={hospitalRequestForm.contactEmail}
+                    onChange={(e) => setHospitalRequestForm(prev => ({...prev, contactEmail: e.target.value}))}
+                    placeholder="your.email@hospital.com"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Your Phone Number *
+                  </label>
+                  <input
+                    type="tel"
+                    value={hospitalRequestForm.contactPhone}
+                    onChange={(e) => setHospitalRequestForm(prev => ({...prev, contactPhone: e.target.value}))}
+                    placeholder="+60xx xxx xxxx"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Reason for Request
+                  </label>
+                  <textarea
+                    value={hospitalRequestForm.reason}
+                    onChange={(e) => setHospitalRequestForm(prev => ({...prev, reason: e.target.value}))}
+                    placeholder="Why should we add this hospital? (Optional)"
+                    rows={3}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none resize-none"
+                  />
+                </div>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-800">
+                    <strong>Note:</strong> We'll review your request within 2-3 business days and contact you at the provided email address.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+              <button
+                onClick={() => setShowHospitalRequest(false)}
+                className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleHospitalRequestSubmit}
+                disabled={!hospitalRequestForm.hospitalName || !hospitalRequestForm.hospitalAddress || !hospitalRequestForm.hospitalCity || !hospitalRequestForm.contactPerson || !hospitalRequestForm.contactEmail || !hospitalRequestForm.contactPhone}
+                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Submit Request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
