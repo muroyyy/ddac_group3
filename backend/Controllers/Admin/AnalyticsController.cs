@@ -7,6 +7,7 @@ using BloodLine.Models.Auth;
 using BloodLine.Models.Hospital;
 using BloodLine.Models.Blood;
 using BloodLine.Models.Appointments;
+using System.Text;
 
 namespace BloodLine.Controllers.Admin;
 

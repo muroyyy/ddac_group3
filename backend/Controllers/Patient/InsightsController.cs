@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Amazon.BedrockRuntime;
 using Amazon.BedrockRuntime.Model;
+using System.Text;
 using System.Text.Json;
 
 namespace BloodLine.Controllers
