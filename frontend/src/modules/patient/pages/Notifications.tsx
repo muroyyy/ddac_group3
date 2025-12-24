@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Bell, CheckCircle, XCircle, Info, Calendar } from "lucide-react";
 import { useAuth } from '../../../context/AuthContext';
-import { patientAPI } from '../../../utils/apiClient';
+import { patientAPI } from '../../../api';
 
 // Define the structure of a notification object - learned this pattern from React docs
 interface Notification {

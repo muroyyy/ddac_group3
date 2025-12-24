@@ -22,7 +22,7 @@ export default function Profile() {
       if (!user?.id) return;
 
       try {
-        const { patientAPI } = await import('../../../utils/apiClient');
+        const { patientAPI } = await import('../../../api');
         const result = await patientAPI.getProfile(user.id);
         if (result.success) {
           setProfile(result.data);

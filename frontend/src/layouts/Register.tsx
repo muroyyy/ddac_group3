@@ -61,7 +61,7 @@ const RegisterPage: React.FC = () => {
   React.useEffect(() => {
     const fetchHospitals = async () => {
       try {
-        const { hospitalAPI } = await import('../utils/apiClient');
+        const { hospitalAPI } = await import('../api');
         const response = await hospitalAPI.getAllHospitals();
         if (response.success) {
           setHospitals(response.data);
@@ -229,7 +229,7 @@ const RegisterPage: React.FC = () => {
       setIsLoading(true);
       
       try {
-        const { authAPI } = await import('../utils/apiClient');
+        const { authAPI } = await import('../api');
         
         // Create FormData for file upload
         const submitData = new FormData();

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Key, Building2, Calendar, Users, CheckCircle, XCircle, Copy } from 'lucide-react';
-import { hospitalCodeAPI, hospitalAPI } from '../../../utils/apiClient';
+import { hospitalCodeAPI, hospitalAPI } from '../../../api';
 
 interface VerificationCode {
   codeId: number;

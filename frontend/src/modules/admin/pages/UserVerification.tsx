@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Check, X, Eye, FileText, Clock, User, Mail, Phone } from 'lucide-react';
-import { verificationAPI } from '../../../utils/apiClient';
+import { verificationAPI } from '../../../api';
 
 interface PendingUser {
   id: number;

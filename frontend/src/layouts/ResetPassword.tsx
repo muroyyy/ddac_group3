@@ -81,7 +81,7 @@ const ResetPassword: React.FC = () => {
     setSuccess('');
 
     try {
-      const { authAPI } = await import('../utils/apiClient');
+      const { authAPI } = await import('../api');
       const response = await authAPI.resetPassword({
         email: formData.email,
         resetToken: formData.resetToken,

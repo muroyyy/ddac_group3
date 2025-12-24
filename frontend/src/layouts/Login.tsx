@@ -82,7 +82,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
       setIsLoading(true);
       
       try {
-        const { authAPI } = await import('../utils/apiClient');
+        const { authAPI } = await import('../api');
         const response = await authAPI.login({
           email: formData.email,
           password: formData.password

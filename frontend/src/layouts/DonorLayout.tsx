@@ -9,7 +9,7 @@ export default function DonorLayout() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleLogout = async () => {
-    const { sessionAPI } = await import('../utils/apiClient');
+    const { sessionAPI } = await import('../api');
     await sessionAPI.logout();
     logout();
     navigate('/login');
