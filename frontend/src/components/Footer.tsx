@@ -86,12 +86,18 @@ const Footer: React.FC = () => {
                 </button>
               </li>
               <li>
-                <button className="hover:text-gray-900 transition-colors cursor-pointer">
+                <button
+                  onClick={() => scrollToSection('faqs')}
+                  className="hover:text-gray-900 transition-colors cursor-pointer"
+                >
                   Eligibility Requirements
                 </button>
               </li>
               <li>
-                <button className="hover:text-gray-900 transition-colors cursor-pointer">
+                <button
+                  onClick={() => scrollToSection('faqs')}
+                  className="hover:text-gray-900 transition-colors cursor-pointer"
+                >
                   Blood Compatibility Chart
                 </button>
               </li>
