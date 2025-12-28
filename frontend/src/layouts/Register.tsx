@@ -334,58 +334,58 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex items-center justify-center p-4 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
-        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
-          <div className="flex items-center justify-center mb-8">
-            <img 
-              src={bloodlineLogo} 
-              alt="BloodLine Logo" 
-              className="w-auto h-16 max-w-full mx-auto"
+        <div className="bg-white rounded-3xl shadow-2xl p-6 md:p-8">
+          <div className="flex items-center justify-center mb-6">
+            <img
+              src={bloodlineLogo}
+              alt="BloodLine Logo"
+              className="w-auto h-12 max-w-full mx-auto"
             />
           </div>
 
-          <div className="text-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+          <div className="text-center mb-5">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
               Create Account
             </h2>
-            <p className="text-gray-600">
+            <p className="text-sm text-gray-600">
               Join BloodLine and start saving lives today
             </p>
           </div>
 
-          <div className="flex items-center justify-center mb-8">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center justify-center mb-5">
+            <div className="flex items-center gap-3">
               <div className={`flex items-center gap-2 ${currentStep >= 1 ? 'text-red-600' : 'text-gray-400'}`}>
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
                   currentStep >= 1 ? 'bg-red-600 text-white' : 'bg-gray-200'
                 }`}>
-                  {currentStep > 1 ? <Check className="w-5 h-5" /> : '1'}
+                  {currentStep > 1 ? <Check className="w-4 h-4" /> : '1'}
                 </div>
-                <span className="font-medium hidden sm:inline">Basic Info</span>
+                <span className="text-sm font-medium hidden sm:inline">Basic Info</span>
               </div>
-              <div className={`w-16 h-0.5 ${currentStep >= 2 ? 'bg-red-600' : 'bg-gray-300'}`}></div>
+              <div className={`w-12 h-0.5 ${currentStep >= 2 ? 'bg-red-600' : 'bg-gray-300'}`}></div>
               <div className={`flex items-center gap-2 ${currentStep >= 2 ? 'text-red-600' : 'text-gray-400'}`}>
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
                   currentStep >= 2 ? 'bg-red-600 text-white' : 'bg-gray-200'
                 }`}>
                   2
                 </div>
-                <span className="font-medium hidden sm:inline">Details & Security</span>
+                <span className="text-sm font-medium hidden sm:inline">Details & Security</span>
               </div>
             </div>
           </div>
 
           <div>
             {currentStep === 1 && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div>
-                  <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1.5">
                     Full Name *
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <User className="w-5 h-5 text-gray-400" />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <User className="w-4 h-4 text-gray-400" />
                     </div>
                     <input
                       type="text"
@@ -393,7 +393,7 @@ const RegisterPage: React.FC = () => {
                       name="fullName"
                       value={formData.fullName}
                       onChange={handleChange}
-                      className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
+                      className={`w-full pl-10 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
                         errors.fullName ? 'border-red-500 bg-red-50' : 'border-gray-300'
                       }`}
                     />
@@ -407,12 +407,12 @@ const RegisterPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
                     Email Address *
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Mail className="w-5 h-5 text-gray-400" />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Mail className="w-4 h-4 text-gray-400" />
                     </div>
                     <input
                       type="email"
@@ -420,7 +420,7 @@ const RegisterPage: React.FC = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
+                      className={`w-full pl-10 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
                         errors.email ? 'border-red-500 bg-red-50' : 'border-gray-300'
                       }`}
                     />
@@ -434,12 +434,12 @@ const RegisterPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1.5">
                     Phone Number *
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Phone className="w-5 h-5 text-gray-400" />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Phone className="w-4 h-4 text-gray-400" />
                     </div>
                     <input
                       type="tel"
@@ -448,7 +448,7 @@ const RegisterPage: React.FC = () => {
                       value={formData.phone}
                       onChange={handleChange}
                       placeholder="+601x xxx xxxx"
-                      className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
+                      className={`w-full pl-10 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
                         errors.phone ? 'border-red-500 bg-red-50' : 'border-gray-300'
                       }`}
                     />
@@ -462,13 +462,13 @@ const RegisterPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     I am registering as *
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <label className={`relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      formData.role === 'donor' 
-                        ? 'border-red-600 bg-red-50' 
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <label className={`relative flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                      formData.role === 'donor'
+                        ? 'border-red-600 bg-red-50'
                         : 'border-gray-300 hover:border-red-300'
                     }`}>
                       <input
@@ -479,15 +479,15 @@ const RegisterPage: React.FC = () => {
                         onChange={handleChange}
                         className="w-4 h-4 text-red-600"
                       />
-                      <div className="ml-3">
-                        <div className="font-semibold text-gray-900">🩸 Donor</div>
+                      <div className="ml-2.5">
+                        <div className="font-semibold text-sm text-gray-900">🩸 Donor</div>
                         <div className="text-xs text-gray-600">I want to donate blood</div>
                       </div>
                     </label>
 
-                    <label className={`relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      formData.role === 'patient' 
-                        ? 'border-red-600 bg-red-50' 
+                    <label className={`relative flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                      formData.role === 'patient'
+                        ? 'border-red-600 bg-red-50'
                         : 'border-gray-300 hover:border-red-300'
                     }`}>
                       <input
@@ -498,15 +498,15 @@ const RegisterPage: React.FC = () => {
                         onChange={handleChange}
                         className="w-4 h-4 text-red-600"
                       />
-                      <div className="ml-3">
-                        <div className="font-semibold text-gray-900">🧍 Patient</div>
+                      <div className="ml-2.5">
+                        <div className="font-semibold text-sm text-gray-900">🧍 Patient</div>
                         <div className="text-xs text-gray-600">I need blood</div>
                       </div>
                     </label>
 
-                    <label className={`relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      formData.role === 'hospital' 
-                        ? 'border-red-600 bg-red-50' 
+                    <label className={`relative flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                      formData.role === 'hospital'
+                        ? 'border-red-600 bg-red-50'
                         : 'border-gray-300 hover:border-red-300'
                     }`}>
                       <input
@@ -517,8 +517,8 @@ const RegisterPage: React.FC = () => {
                         onChange={handleChange}
                         className="w-4 h-4 text-red-600"
                       />
-                      <div className="ml-3">
-                        <div className="font-semibold text-gray-900">🏥 Hospital Staff</div>
+                      <div className="ml-2.5">
+                        <div className="font-semibold text-sm text-gray-900">🏥 Hospital Staff</div>
                         <div className="text-xs text-gray-600">Blood bank management</div>
                       </div>
                     </label>
@@ -534,7 +534,7 @@ const RegisterPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleNextStep}
-                  className="w-full py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 font-semibold transition-all cursor-pointer"
+                  className="w-full py-2.5 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 font-semibold transition-all cursor-pointer"
                 >
                   Next Step
                 </button>
@@ -542,7 +542,7 @@ const RegisterPage: React.FC = () => {
             )}
 
             {currentStep === 2 && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {formData.role === 'hospital' && (
                   <>
                     <div>
@@ -804,12 +804,12 @@ const RegisterPage: React.FC = () => {
                 )}
 
                 <div>
-                  <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1.5">
                     Location *
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <MapPin className="w-5 h-5 text-gray-400" />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <MapPin className="w-4 h-4 text-gray-400" />
                     </div>
                     <input
                       type="text"
@@ -817,7 +817,7 @@ const RegisterPage: React.FC = () => {
                       name="location"
                       value={formData.location}
                       onChange={handleChange}
-                      className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
+                      className={`w-full pl-10 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
                         errors.location ? 'border-red-500 bg-red-50' : 'border-gray-300'
                       }`}
                       placeholder="Kuala Lumpur, Malaysia"
@@ -832,12 +832,12 @@ const RegisterPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">
                     Password *
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Lock className="w-5 h-5 text-gray-400" />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock className="w-4 h-4 text-gray-400" />
                     </div>
                     <input
                       type={showPassword ? 'text' : 'password'}
@@ -845,7 +845,7 @@ const RegisterPage: React.FC = () => {
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
-                      className={`w-full pl-12 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
+                      className={`w-full pl-10 pr-10 py-2.5 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
                         errors.password ? 'border-red-500 bg-red-50' : 'border-gray-300'
                       }`}
                       placeholder="Enter a strong password"
@@ -853,12 +853,12 @@ const RegisterPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-4 flex items-center"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
                     >
                       {showPassword ? (
-                        <EyeOff className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+                        <EyeOff className="w-4 h-4 text-gray-400 hover:text-gray-600" />
                       ) : (
-                        <Eye className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+                        <Eye className="w-4 h-4 text-gray-400 hover:text-gray-600" />
                       )}
                     </button>
                   </div>
@@ -874,12 +874,12 @@ const RegisterPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1.5">
                     Confirm Password *
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Lock className="w-5 h-5 text-gray-400" />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock className="w-4 h-4 text-gray-400" />
                     </div>
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
@@ -887,7 +887,7 @@ const RegisterPage: React.FC = () => {
                       name="confirmPassword"
                       value={formData.confirmPassword}
                       onChange={handleChange}
-                      className={`w-full pl-12 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
+                      className={`w-full pl-10 pr-10 py-2.5 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all ${
                         errors.confirmPassword ? 'border-red-500 bg-red-50' : 'border-gray-300'
                       }`}
                       placeholder="Re-enter your password"
@@ -895,12 +895,12 @@ const RegisterPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute inset-y-0 right-0 pr-4 flex items-center"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
                     >
                       {showConfirmPassword ? (
-                        <EyeOff className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+                        <EyeOff className="w-4 h-4 text-gray-400 hover:text-gray-600" />
                       ) : (
-                        <Eye className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+                        <Eye className="w-4 h-4 text-gray-400 hover:text-gray-600" />
                       )}
                     </button>
                   </div>
@@ -948,11 +948,11 @@ const RegisterPage: React.FC = () => {
                   )}
                 </div>
 
-                <div className="flex gap-4">
+                <div className="flex gap-3">
                   <button
                     type="button"
                     onClick={handlePrevStep}
-                    className="flex-1 py-3 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all font-semibold cursor-pointer"
+                    className="flex-1 py-2.5 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all font-semibold cursor-pointer"
                   >
                     Back
                   </button>
@@ -960,11 +960,11 @@ const RegisterPage: React.FC = () => {
                     type="button"
                     onClick={handleSubmit}
                     disabled={isLoading}
-                    className="flex-1 py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+                    className="flex-1 py-2.5 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                   >
                     {isLoading ? (
                       <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         Creating...
                       </>
                     ) : (
@@ -976,7 +976,7 @@ const RegisterPage: React.FC = () => {
             )}
           </div>
 
-          <div className="mt-8 text-center">
+          <div className="mt-6 text-center">
             <p className="text-gray-600">
               Already have an account?{' '}
               <button
@@ -989,7 +989,7 @@ const RegisterPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="mt-6 text-center">
+          <div className="mt-4 text-center">
             <button
               type="button"
               onClick={() => navigate('/')}
