@@ -144,3 +144,14 @@ resource "aws_s3_bucket_public_access_block" "schema_backups" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+
+# Enable S3 Request Metrics for monitoring
+resource "aws_s3_bucket_metric" "frontend_metrics" {
+  bucket = aws_s3_bucket.frontend.id
+  name   = "EntireBucket"
+}
+
+resource "aws_s3_bucket_metric" "assets_metrics" {
+  bucket = aws_s3_bucket.assets.id
+  name   = "EntireBucket"
+}

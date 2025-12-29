@@ -102,3 +102,9 @@ output "sns_topic_name" {
   description = "SNS topic name"
   value       = module.sns.topic_name
 }
+
+# Monitoring policy ARN
+output "monitoring_dashboard_policy_arn" {
+  description = "ARN of the monitoring dashboard policy"
+  value       = aws_iam_policy.monitoring_dashboard_policy.arn
+}

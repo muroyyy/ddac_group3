@@ -133,3 +133,41 @@ module "sns" {
   environment  = var.environment
   project_name = var.project_name
 }
+
+# Policy for existing monitoring dashboard IAM user
+resource "aws_iam_policy" "monitoring_dashboard_policy" {
+  name        = "${var.environment}-${var.project_name}-monitoring-dashboard-policy"
+  description = "Policy for cross-account monitoring dashboard access"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "cloudwatch:GetMetricStatistics",
+          "cloudwatch:ListMetrics",
+          "cloudwatch:GetMetricData",
+          "ec2:DescribeInstances",
+          "ec2:DescribeInstanceStatus",
+          "rds:DescribeDBInstances",
+          "s3:GetBucketLocation",
+          "s3:ListBucket",
+          "cloudfront:GetDistribution",
+          "cloudfront:ListDistributions"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+
+  tags = {
+    Name = "${var.environment}-${var.project_name}-monitoring-policy"
+  }
+}
+
+# Attach policy to existing monitoring user
+resource "aws_iam_user_policy_attachment" "monitoring_dashboard_attachment" {
+  user       = "monitoring-dashboard-readonly"
+  policy_arn = aws_iam_policy.monitoring_dashboard_policy.arn
+}
