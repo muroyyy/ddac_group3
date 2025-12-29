@@ -265,7 +265,7 @@ const ResetPassword: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap- cursor-pointer"
             >
               {isLoading ? (
                 <>
@@ -282,7 +282,7 @@ const ResetPassword: React.FC = () => {
             <button 
               type="button"
               onClick={() => navigate('/forgot-password')}
-              className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              className="inline-flex items-center gap-2 text-sm text-gray-600 cursor-pointer hover:text-gray-900 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to forgot password
