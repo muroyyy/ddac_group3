@@ -88,6 +88,7 @@ resource "aws_iam_policy" "monitoring_readonly" {
         Action = [
           "cloudwatch:GetMetricStatistics",
           "cloudwatch:ListMetrics",
+          "cloudwatch:GetMetricData",
           "cloudwatch:DescribeAlarms",
           "ec2:DescribeInstances",
           "ec2:DescribeInstanceStatus",
@@ -96,7 +97,10 @@ resource "aws_iam_policy" "monitoring_readonly" {
           "lambda:GetFunction",
           "apigateway:GET",
           "s3:ListAllMyBuckets",
-          "s3:GetBucketLocation"
+          "s3:GetBucketLocation",
+          "s3:ListBucket",
+          "cloudfront:GetDistribution",
+          "cloudfront:ListDistributions"
         ]
         Resource = "*"
       }
