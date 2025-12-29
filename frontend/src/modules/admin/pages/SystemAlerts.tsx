@@ -93,7 +93,7 @@ const SystemAlerts: React.FC = () => {
           </div>
           <button
             onClick={fetchAlerts}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -143,7 +143,7 @@ const SystemAlerts: React.FC = () => {
           <div className="flex gap-2">
             <button
               onClick={() => setFilterType('all')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
                 filterType === 'all'
                   ? 'bg-red-600 text-white'
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
@@ -153,7 +153,7 @@ const SystemAlerts: React.FC = () => {
             </button>
             <button
               onClick={() => setFilterType('critical')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
                 filterType === 'critical'
                   ? 'bg-red-600 text-white'
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
@@ -163,7 +163,7 @@ const SystemAlerts: React.FC = () => {
             </button>
             <button
               onClick={() => setFilterType('warning')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
                 filterType === 'warning'
                   ? 'bg-red-600 text-white'
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
@@ -173,7 +173,7 @@ const SystemAlerts: React.FC = () => {
             </button>
             <button
               onClick={() => setFilterType('info')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
                 filterType === 'info'
                   ? 'bg-red-600 text-white'
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
