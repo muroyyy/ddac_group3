@@ -22,7 +22,7 @@ const AppRoutes: React.FC = () => {
     ...getAuthRoutes(login),
 
     // Public Routes
-    getPublicRoutes(),
+    ...getPublicRoutes(),
 
     // Protected Routes
     {

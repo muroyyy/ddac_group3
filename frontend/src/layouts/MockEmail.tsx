@@ -65,7 +65,7 @@ const MockEmail: React.FC = () => {
           <div className="p-8">
             {/* Logo at top */}
             <div className="text-center mb-6">
-              <div className="w-20 h-20 mx-auto mb-4">
+              <div className="w-32 h-20 mx-auto mb-4">
                 <img src={bloodlineLogo} alt="BloodLine Logo" className="w-full h-full object-contain" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">BloodLine</h2>
