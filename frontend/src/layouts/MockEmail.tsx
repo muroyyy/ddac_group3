@@ -59,39 +59,18 @@ const MockEmail: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-          {/* Email Header */}
-          <div className="bg-gradient-to-r from-red-600 to-red-700 p-6 text-white">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
-                <Mail className="w-7 h-7" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold">Mock Email Inbox</h1>
-                <p className="text-red-100 text-sm">Simulated email for assignment demo</p>
-              </div>
-            </div>
-            
-            <div className="bg-white bg-opacity-10 rounded-lg p-3">
-              <div className="flex items-center justify-between text-sm">
-                <span>To: {emailData.email}</span>
-                <span>From: noreply@bloodline.com</span>
-              </div>
-            </div>
-          </div>
-
           {/* Email Content */}
           <div className="p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-16 h-16 bg-red-600 rounded-xl flex items-center justify-center p-2">
+            {/* Logo at top */}
+            <div className="text-center mb-6">
+              <div className="w-20 h-20 mx-auto mb-4">
                 <img src={bloodlineLogo} alt="BloodLine Logo" className="w-full h-full object-contain" />
               </div>
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">BloodLine</h2>
-                <p className="text-gray-600">Password Reset Request</p>
-              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">BloodLine</h2>
+              <p className="text-gray-600">Password Reset Request</p>
             </div>
 
             <div className="space-y-6">
@@ -138,13 +117,9 @@ const MockEmail: React.FC = () => {
                   </div>
                 </div>
               </div>
-
-
             </div>
           </div>
         </div>
-
-
       </div>
     </div>
   );
