@@ -75,6 +75,7 @@ module "ec2" {
 
   environment                = var.environment
   project_name               = var.project_name
+  instance_type              = "t3.small"
   public_subnet_id           = module.vpc.public_subnet_ids[0]
   ec2_security_group_id      = module.security_groups.ec2_security_group_id
   secrets_manager_secret_arn = module.rds.secrets_manager_secret_arn
