@@ -100,7 +100,8 @@ resource "aws_iam_policy" "monitoring_readonly" {
           "s3:GetBucketLocation",
           "s3:ListBucket",
           "cloudfront:GetDistribution",
-          "cloudfront:ListDistributions"
+          "cloudfront:ListDistributions",
+          "route53:ListHostedZones"
         ]
         Resource = "*"
       }
