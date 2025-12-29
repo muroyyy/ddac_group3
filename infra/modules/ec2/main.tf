@@ -105,14 +105,14 @@ resource "aws_instance" "main" {
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
 
   user_data = base64encode(templatefile("${path.module}/user_data.sh", {
-    environment    = var.environment
-    project_name   = var.project_name
+    environment  = var.environment
+    project_name = var.project_name
   }))
 
   tags = {
     Name = "${var.environment}-${var.project_name}-ec2"
   }
-  
+
   lifecycle {
     ignore_changes = [ami]
   }
