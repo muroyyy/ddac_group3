@@ -101,7 +101,10 @@ resource "aws_iam_policy" "monitoring_readonly" {
           "s3:ListBucket",
           "cloudfront:GetDistribution",
           "cloudfront:ListDistributions",
-          "route53:ListHostedZones"
+          "route53:ListHostedZones",
+          "logs:DescribeLogGroups",
+          "logs:DescribeLogStreams",
+          "logs:GetLogEvents"
         ]
         Resource = "*"
       }

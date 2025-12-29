@@ -20,6 +20,12 @@ provider "aws" {
   region = var.aws_region
 }
 
+# Provider for us-east-1 (required for Route53 query logging)
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+}
+
 data "aws_availability_zones" "available" {
   state = "available"
 }
@@ -96,6 +102,10 @@ module "iam" {
 # Route53 Module
 module "route53" {
   source = "./modules/route53"
+  
+  providers = {
+    aws.us_east_1 = aws.us_east_1
+  }
 
   domain_name               = var.domain_name
   project_name              = var.project_name
