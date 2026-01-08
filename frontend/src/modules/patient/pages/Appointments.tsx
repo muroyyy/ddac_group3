@@ -24,14 +24,11 @@ export default function Appointments() {
           return;
         }
 
-        console.log('🔍 Loading appointments for user ID:', user.id);
         const result = await patientAPI.getAppointments(user.id);
-        console.log('📋 Appointments API response:', result);
 
         if (!result.success) {
           setError(result.message || "Failed to load appointments.");
         } else {
-          console.log('✅ Appointments data:', result.data);
           setAppointments(result.data || []);
         }
       } catch (err) {
@@ -77,23 +74,6 @@ export default function Appointments() {
 
       {!loading && !error && (
         <>
-          {/* DEBUG INFO - Remove in production */}
-          <div className="bg-gray-100 p-4 rounded-lg mb-6">
-            <h3 className="font-semibold mb-2">Debug Info:</h3>
-            <p><strong>User ID:</strong> {user?.id}</p>
-            <p><strong>Total Appointments:</strong> {appointments.length}</p>
-            <p><strong>Upcoming:</strong> {upcoming.length}</p>
-            <p><strong>Past:</strong> {past.length}</p>
-            {appointments.length > 0 && (
-              <details className="mt-2">
-                <summary className="cursor-pointer font-medium">Raw Data</summary>
-                <pre className="text-xs mt-2 bg-white p-2 rounded overflow-auto">
-                  {JSON.stringify(appointments, null, 2)}
-                </pre>
-              </details>
-            )}
-          </div>
-
           {/* UPCOMING APPOINTMENTS */}
           <section>
             <h2 className="text-2xl font-semibold mb-4">Upcoming Appointments</h2>
