@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { patientAPI } from '../../../api';
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { Edit } from "lucide-react";
 
 export default function RequestBlood() {
-  const { user } = useAuth(); // Get logged-in user from AuthContext
+  const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if not patient
   useEffect(() => {
     if (!user || user.role !== "patient") {
       alert("Only patients can access this page.");
@@ -16,13 +16,31 @@ export default function RequestBlood() {
     }
   }, [user, navigate]);
 
-  // ---------------- FORM STATE ----------------
   const [bloodType, setBloodType] = useState("");
   const [units, setUnits] = useState("");
   const [urgency, setUrgency] = useState("");
   const [hospital, setHospital] = useState("");
   const [notes, setNotes] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Load patient profile to get blood type
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!user?.id) return;
+      try {
+        const result = await patientAPI.getProfile(user.id);
+        if (result.success && result.data.bloodTypeNeeded) {
+          setBloodType(result.data.bloodTypeNeeded);
+        }
+      } catch (error) {
+        console.error("Failed to load profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProfile();
+  }, [user]);
 
   const mockHospitals = [
     { id: 1, name: "City General Hospital" },
@@ -30,7 +48,6 @@ export default function RequestBlood() {
     { id: 3, name: "Gleneagles KL" },
   ];
 
-  // ---------------- HANDLE SUBMIT ----------------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -40,7 +57,6 @@ export default function RequestBlood() {
       return;
     }
 
-    // Payload matching backend DTO
     const payload = {
       bloodType,
       unitsRequired: Number(units),
@@ -50,7 +66,6 @@ export default function RequestBlood() {
     };
 
     try {
-      // Send userId + form data to backend
       const response = await patientAPI.createBloodRequest(user.id, payload);
 
       if (response.success) {
@@ -64,7 +79,8 @@ export default function RequestBlood() {
     }
   };
 
-  // ---------------- UI ----------------
+  if (loading) return <div className="p-6">Loading...</div>;
+
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <h1 className="text-3xl font-bold">Request Blood</h1>
@@ -81,21 +97,30 @@ export default function RequestBlood() {
       >
         <h2 className="text-xl font-semibold">Blood Request Details</h2>
 
-        {/* BLOOD TYPE */}
+        {/* BLOOD TYPE - Read-only with edit option */}
         <div>
           <label className="block mb-1">Blood Type</label>
-          <select
-            value={bloodType}
-            onChange={(e) => setBloodType(e.target.value)}
-            required
-            className="border rounded-lg p-2 w-full"
-          >
-            <option value="">Select blood type</option>
-            <option>A+</option><option>A-</option>
-            <option>B+</option><option>B-</option>
-            <option>AB+</option><option>AB-</option>
-            <option>O+</option><option>O-</option>
-          </select>
+          <div className="flex items-center gap-3">
+            <input
+              type="text"
+              value={bloodType || "Not set in profile"}
+              readOnly
+              className="border rounded-lg p-2 flex-1 bg-gray-50 cursor-not-allowed"
+            />
+            <button
+              type="button"
+              onClick={() => navigate('/patient/profile')}
+              className="flex items-center gap-2 px-3 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50"
+            >
+              <Edit className="w-4 h-4" />
+              Edit in Profile
+            </button>
+          </div>
+          {!bloodType && (
+            <p className="text-red-600 text-sm mt-1">
+              Please set your blood type in your profile first.
+            </p>
+          )}
         </div>
 
         {/* UNITS */}
@@ -159,7 +184,8 @@ export default function RequestBlood() {
 
         <button
           type="submit"
-          className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700"
+          disabled={!bloodType}
+          className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           Submit Request
         </button>

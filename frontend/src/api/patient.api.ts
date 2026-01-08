@@ -86,4 +86,15 @@ export const patientAPI = {
     );
     return parseJsonResponse(response);
   },
+
+  sendEmail: async (subject: string, message: string): Promise<any> => {
+    const response = await authenticatedFetch(
+      `${API_BASE_URL}/patient/email/send`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ subject, message }),
+      }
+    );
+    return parseJsonResponse(response);
+  },
 };
