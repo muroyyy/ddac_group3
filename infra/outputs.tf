@@ -54,6 +54,17 @@ output "github_actions_secret_access_key" {
   sensitive   = true
 }
 
+output "monitoring_readonly_access_key_id" {
+  description = "Monitoring dashboard read-only IAM user access key ID"
+  value       = module.iam.monitoring_readonly_access_key_id
+}
+
+output "monitoring_readonly_secret_access_key" {
+  description = "Monitoring dashboard read-only IAM user secret access key"
+  value       = module.iam.monitoring_readonly_secret_access_key
+  sensitive   = true
+}
+
 
 
 # Domain and CDN outputs

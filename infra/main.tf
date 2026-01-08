@@ -20,6 +20,12 @@ provider "aws" {
   region = var.aws_region
 }
 
+# Provider for us-east-1 (required for Route53 query logging)
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+}
+
 data "aws_availability_zones" "available" {
   state = "available"
 }
@@ -27,7 +33,7 @@ data "aws_availability_zones" "available" {
 # VPC Module
 module "vpc" {
   source = "./modules/vpc"
-  
+
   environment        = var.environment
   project_name       = var.project_name
   availability_zones = slice(data.aws_availability_zones.available.names, 0, 2)
@@ -36,7 +42,7 @@ module "vpc" {
 # Security Groups Module
 module "security_groups" {
   source = "./modules/security_groups"
-  
+
   environment  = var.environment
   project_name = var.project_name
   vpc_id       = module.vpc.vpc_id
@@ -45,7 +51,7 @@ module "security_groups" {
 # RDS Module
 module "rds" {
   source = "./modules/rds"
-  
+
   environment           = var.environment
   project_name          = var.project_name
   private_subnet_ids    = module.vpc.private_subnet_ids
@@ -56,7 +62,7 @@ module "rds" {
 # S3 Module
 module "s3" {
   source = "./modules/s3"
-  
+
   environment  = var.environment
   project_name = var.project_name
 }
@@ -64,7 +70,7 @@ module "s3" {
 # ECR Module
 module "ecr" {
   source = "./modules/ecr"
-  
+
   environment  = var.environment
   project_name = var.project_name
 }
@@ -72,18 +78,19 @@ module "ecr" {
 # EC2 Module
 module "ec2" {
   source = "./modules/ec2"
-  
-  environment               = var.environment
-  project_name              = var.project_name
-  public_subnet_id          = module.vpc.public_subnet_ids[0]
-  ec2_security_group_id     = module.security_groups.ec2_security_group_id
+
+  environment                = var.environment
+  project_name               = var.project_name
+  instance_type              = "t3.small"
+  public_subnet_id           = module.vpc.public_subnet_ids[0]
+  ec2_security_group_id      = module.security_groups.ec2_security_group_id
   secrets_manager_secret_arn = module.rds.secrets_manager_secret_arn
 }
 
 # IAM Module
 module "iam" {
   source = "./modules/iam"
-  
+
   environment        = var.environment
   project_name       = var.project_name
   aws_region         = var.aws_region
@@ -96,27 +103,31 @@ module "iam" {
 module "route53" {
   source = "./modules/route53"
   
-  domain_name                = var.domain_name
-  project_name               = var.project_name
-  environment                = var.environment
-  cloudfront_domain_name     = module.cloudfront.domain_name
-  cloudfront_hosted_zone_id  = module.cloudfront.hosted_zone_id
+  providers = {
+    aws.us_east_1 = aws.us_east_1
+  }
+
+  domain_name               = var.domain_name
+  project_name              = var.project_name
+  environment               = var.environment
+  cloudfront_domain_name    = module.cloudfront.domain_name
+  cloudfront_hosted_zone_id = module.cloudfront.hosted_zone_id
 }
 
 # ACM Certificate Module
 module "acm" {
   source = "./modules/acm"
-  
-  domain_name     = var.domain_name
-  project_name    = var.project_name
-  environment     = var.environment
-  hosted_zone_id  = module.route53.hosted_zone_id
+
+  domain_name    = var.domain_name
+  project_name   = var.project_name
+  environment    = var.environment
+  hosted_zone_id = module.route53.hosted_zone_id
 }
 
 # CloudFront Module
 module "cloudfront" {
   source = "./modules/cloudfront"
-  
+
   domain_name         = var.domain_name
   project_name        = var.project_name
   environment         = var.environment
@@ -128,7 +139,7 @@ module "cloudfront" {
 # SNS Module
 module "sns" {
   source = "./modules/sns"
-  
+
   environment  = var.environment
   project_name = var.project_name
 }

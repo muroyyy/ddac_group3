@@ -64,9 +64,11 @@ bloodline-db-dump.sql
 .DS_Store
 Thumbs.db
 
+# Documentation
+docs/
+
 # Personal Notes
 run-local-notes.txt
-AUDIT_LOGGING_IMPLEMENTATION.md
 
 # Terraform
 **/.terraform/

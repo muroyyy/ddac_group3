@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
-import { patientAPI } from "../../../utils/apiClient";
+import { patientAPI } from '../../../api';
 import { useNavigate } from "react-router-dom";
 
 export default function EditProfile() {

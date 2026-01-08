@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug User Hospital Association</title>
+</head>
+<body>
+    <h1>Debug User Hospital Association</h1>
+    <p>Check user ID for wongyiren33@gmail.com and hospital associations</p>
+    
+    <script>
+        // Replace USER_ID with the actual user ID for wongyiren33@gmail.com
+        const userId = 4; // Update this with correct user ID
+        
+        fetch(`http://localhost:5000/api/hospital/debug/user/${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Debug response:', data);
+                document.body.innerHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.body.innerHTML += '<p>Error: ' + error.message + '</p>';
+            });
+    </script>
+</body>
+</html>

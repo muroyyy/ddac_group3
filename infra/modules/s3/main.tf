@@ -87,26 +87,26 @@ resource "aws_s3_bucket_public_access_block" "assets" {
 
 # Create folder structure using S3 objects
 resource "aws_s3_object" "admin_folder" {
-  bucket = aws_s3_bucket.assets.id
-  key    = "admin/"
+  bucket  = aws_s3_bucket.assets.id
+  key     = "admin/"
   content = ""
 }
 
 resource "aws_s3_object" "donor_folder" {
-  bucket = aws_s3_bucket.assets.id
-  key    = "donor/"
+  bucket  = aws_s3_bucket.assets.id
+  key     = "donor/"
   content = ""
 }
 
 resource "aws_s3_object" "patient_folder" {
-  bucket = aws_s3_bucket.assets.id
-  key    = "patient/"
+  bucket  = aws_s3_bucket.assets.id
+  key     = "patient/"
   content = ""
 }
 
 resource "aws_s3_object" "hospital_folder" {
-  bucket = aws_s3_bucket.assets.id
-  key    = "hospital/"
+  bucket  = aws_s3_bucket.assets.id
+  key     = "hospital/"
   content = ""
 }
 
@@ -143,4 +143,15 @@ resource "aws_s3_bucket_public_access_block" "schema_backups" {
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
+}
+
+# Enable S3 Request Metrics for monitoring
+resource "aws_s3_bucket_metric" "frontend_metrics" {
+  bucket = aws_s3_bucket.frontend.id
+  name   = "EntireBucket"
+}
+
+resource "aws_s3_bucket_metric" "assets_metrics" {
+  bucket = aws_s3_bucket.assets.id
+  name   = "EntireBucket"
 }

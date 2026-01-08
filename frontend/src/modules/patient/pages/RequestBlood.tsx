@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { patientAPI } from "../../../utils/apiClient";
+import { patientAPI } from '../../../api';
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 

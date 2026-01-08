@@ -29,6 +29,7 @@ import AuditLogs from '../modules/admin/pages/AuditLogs';
 import ProfileSettings from '../modules/admin/pages/ProfileSettings';
 import UserVerification from '../modules/admin/pages/UserVerification';
 import SystemAlerts from '../modules/admin/pages/SystemAlerts';
+import HospitalCodes from '../modules/admin/pages/HospitalCodes';
 
 interface AdminLayoutProps {
   user: {
@@ -48,6 +49,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
     { id: 'dashboard', icon: <Activity className="w-5 h-5" />, label: 'Dashboard' },
     { id: 'users', icon: <Users className="w-5 h-5" />, label: 'User Management' },
     { id: 'verification', icon: <CheckCircle className="w-5 h-5" />, label: 'User Verification' },
+    { id: 'hospital-codes', icon: <Shield className="w-5 h-5" />, label: 'Hospital Codes' },
     { id: 'alerts', icon: <Bell className="w-5 h-5" />, label: 'System Alerts' },
     { id: 'analytics', icon: <TrendingUp className="w-5 h-5" />, label: 'Analytics & Reports' },
     { id: 'security', icon: <Shield className="w-5 h-5" />, label: 'Security & Compliance' },
@@ -66,6 +68,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
         return <UserManagement />;
       case 'verification':
         return <UserVerification />;
+      case 'hospital-codes':
+        return <HospitalCodes />;
       case 'alerts':
         return <SystemAlerts />;
       case 'analytics':
@@ -207,7 +211,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
               <div className="w-px bg-gray-200"></div>
               <button
                 onClick={async () => {
-                  const { sessionAPI } = await import('../utils/apiClient');
+                  const { sessionAPI } = await import('../api');
                   await sessionAPI.logout();
                   onLogout();
                 }}

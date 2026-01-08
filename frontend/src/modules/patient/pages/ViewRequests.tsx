@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { patientAPI } from "../../../utils/apiClient";
+import { patientAPI } from '../../../api';
 import { useAuth } from "../../../context/AuthContext";
 
 export default function ViewRequests() {

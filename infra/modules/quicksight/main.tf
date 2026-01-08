@@ -89,7 +89,7 @@ resource "aws_quicksight_data_set" "analytics_dataset" {
 # QuickSight Dashboard
 resource "aws_quicksight_dashboard" "bloodbank_dashboard" {
   dashboard_id        = "bloodbank-analytics-dashboard"
-  name               = "BloodBank Analytics Dashboard"
+  name                = "BloodBank Analytics Dashboard"
   version_description = "Initial version"
 
   definition {

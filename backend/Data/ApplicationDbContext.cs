@@ -1,5 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using BloodLine.Models;
+using BloodLine.Models.Users;
+using BloodLine.Models.Auth;
+using BloodLine.Models.Hospital;
+using BloodLine.Models.Blood;
+using BloodLine.Models.Appointments;
+using BloodLine.Models.System;
 
 // Model version: 2.2 - Testing deployment
 namespace BloodLine.Data;
@@ -11,7 +16,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<DonorProfile> DonorProfiles { get; set; }
     public DbSet<PatientProfile> PatientProfiles { get; set; }
-    public DbSet<Hospital> Hospitals { get; set; }
+    public DbSet<HospitalEntity> Hospitals { get; set; }
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
     public DbSet<AnalyticsLog> AnalyticsLogs { get; set; }
     public DbSet<BloodRequest> BloodRequests { get; set; }
@@ -24,6 +29,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Doctor> Doctors { get; set; }
     public DbSet<DonationRequest> DonationRequests { get; set; }
     public DbSet<DonorAppointment> DonorAppointments { get; set; }
+    public DbSet<HospitalVerificationCode> HospitalVerificationCodes { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -68,14 +74,14 @@ public class ApplicationDbContext : DbContext
                   .HasForeignKey<PatientProfile>(e => e.UserId);
         });
         
-        modelBuilder.Entity<Hospital>(entity =>
+        modelBuilder.Entity<HospitalEntity>(entity =>
         {
             entity.ToTable("hospital");
             entity.HasKey(e => e.HospitalId);
             entity.HasIndex(e => e.UserId).IsUnique();
             entity.HasOne(e => e.User)
                   .WithOne()
-                  .HasForeignKey<Hospital>(e => e.UserId);
+                  .HasForeignKey<HospitalEntity>(e => e.UserId);
         });
         
         modelBuilder.Entity<BloodRequest>().ToTable("blood_requests");
@@ -115,5 +121,15 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Doctor>().ToTable("doctors");
         modelBuilder.Entity<DonationRequest>().ToTable("donation_requests");
         modelBuilder.Entity<DonorAppointment>().ToTable("donor_appointments");
+        
+        modelBuilder.Entity<HospitalVerificationCode>(entity =>
+        {
+            entity.ToTable("hospital_verification_codes");
+            entity.HasKey(e => e.CodeId);
+            entity.HasIndex(e => e.VerificationCode).IsUnique();
+            entity.HasOne(e => e.Hospital)
+                  .WithMany()
+                  .HasForeignKey(e => e.HospitalId);
+        });
     }
 }

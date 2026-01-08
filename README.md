@@ -1,68 +1,114 @@
-# Cloud-Based Blood Bank Management System
+# BloodLine - Blood Donation Management System
 
-A cloud-hosted web application connecting donors, patients, and hospitals for real-time blood availability management. Developed for the CT071-3-3 Designing and Developing Cloud Applications (DDAC) module at Asia Pacific University (APU).
-
-## Project Overview
-
-This system addresses blood shortages by creating a digital platform for efficient blood supply matching and tracking through cloud-based infrastructure.
-
-## User Roles
-
-- **Donor**: Register, update profile, donate blood, view donation history
-- **Patient**: Register, request blood by type and urgency, track request status
-- **Hospital**: Manage inventory, approve requests, generate reports
-- **Admin**: Manage user permissions, monitor system performance
-
-## Tech Stack
-
-- **Frontend**: ReactJS + Tailwind CSS
-- **Backend**: ASP.NET (C#)
-- **Database**: Amazon RDS (MySQL)
-- **Storage**: Amazon S3
-- **CDN**: Amazon CloudFront
-- **DNS**: Amazon Route53
-- **Security**: AWS IAM, SSL/TLS certificates
-- **CI/CD**: GitHub Actions
-- **Hosting**: Amazon EC2
+A cloud-native blood donation management platform built with React, .NET Core, and AWS services.
 
 ## Architecture
 
-- Frontend hosted on S3 with CloudFront distribution
-- Backend API running on EC2 in Docker containers
-- MySQL database on Amazon RDS
-- Custom domain with SSL certificate
-- Automated deployment via GitHub Actions
+- **Frontend**: React + TypeScript + Vite
+- **Backend**: .NET Core 8.0 Web API
+- **Database**: MySQL RDS
+- **Infrastructure**: AWS (CloudFront, EC2, S3, RDS, Route53, ACM)
+- **IaC**: Terraform
+- **CI/CD**: GitHub Actions
 
-## Repository Structure
+## Project Structure
 
 ```
 ddac_group3/
-├── frontend/          # ReactJS application
-├── backend/           # ASP.NET API
-├── infra/             # Terraform infrastructure
-├── .github/workflows/ # CI/CD pipelines
-└── README.md
+├── frontend/          # React frontend application
+├── backend/           # .NET Core API
+├── infra/             # Terraform infrastructure code
+└── .github/workflows/ # CI/CD pipelines
 ```
+
+## Features
+
+- **Multi-role Authentication**: Admin, Donor, Patient, Hospital
+- **Session Management**: 2-hour sessions with auto-expiry
+- **Blood Request System**: Patients can request blood, donors can respond
+- **Inventory Management**: Real-time blood inventory tracking
+- **User Verification**: Document-based verification for donors and patients
+- **Audit Logging**: Complete activity tracking
+- **Secure Password Reset**: Time-limited tokens (15 minutes)
+
+## Security
+
+- BCrypt password hashing (strength 12)
+- Session-based authentication
+- HTTPS-only in production via CloudFront
+- AWS Secrets Manager for credentials
+- IAM roles for EC2 access control
+
+## AWS Services Used
+
+- **CloudFront**: CDN and HTTPS termination
+- **EC2**: Backend API hosting
+- **RDS MySQL**: Database
+- **S3**: Frontend hosting and file storage
+- **Route53**: DNS management
+- **ACM**: SSL/TLS certificates
+- **Secrets Manager**: Credential storage
+- **ECR**: Docker image registry
+- **Systems Manager**: EC2 remote access
 
 ## Deployment
 
-- **Live URL**: https://bloodline.dev
-- **Backend API**: https://bloodline.dev/api
-- **Database**: Amazon RDS MySQL
-- **Infrastructure**: Managed via Terraform
+### Prerequisites
+- AWS Account
+- Terraform >= 1.0
+- Node.js >= 18
+- .NET Core SDK 8.0
+- Docker
 
-## Development Setup
+### Infrastructure Setup
+```bash
+cd infra
+terraform init
+terraform apply
+```
 
-1. Clone repository
-2. Install dependencies: `npm install` (frontend), `dotnet restore` (backend)
-3. Configure environment variables
-4. Run locally: `npm run dev` (frontend), `dotnet run` (backend)
+### Frontend Deployment
+Automated via GitHub Actions on push to `dev` branch.
 
-## Contributors
+### Backend Deployment
+Automated via GitHub Actions on push to `dev` branch.
 
-| Name | Role |
-|------|------|
-| Amirul Faiz | Admin |
-| Sahi Khan | Donor |
-| Sharveen Kaur Sidhu | Patient |
-| Wong Yi Ren | Hospital Staff |
+## Local Development
+
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### Backend
+```bash
+cd backend
+dotnet restore
+dotnet run
+```
+
+## Environment Variables
+
+### Frontend
+- `VITE_API_URL`: API base URL
+
+### Backend
+- `AWS_DEFAULT_REGION`: AWS region (default: ap-southeast-1)
+- `ASPNETCORE_ENVIRONMENT`: Environment (Production/Development)
+
+## Domain
+
+Production: https://bloodline.dev
+
+## Cost Optimization
+
+- Removed Elastic IP (saves $3.60/month)
+- CloudFront PriceClass_100 (US, Canada, Europe only)
+- RDS db.t3.micro instance
+- EC2 t2.micro instance
+
+## License
+
+Private project for educational purposes.

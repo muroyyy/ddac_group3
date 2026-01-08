@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
-import { patientAPI } from "../../../utils/apiClient";
+import { patientAPI } from '../../../api';
 import { Calendar, HeartPulse, ListChecks, CheckCircle } from "lucide-react";
 
 // -----------------------------------------------------------------------------

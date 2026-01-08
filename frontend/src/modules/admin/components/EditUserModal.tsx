@@ -93,7 +93,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ userId, isOpen, onClose, 
 
         {loading ? (
           <div className="p-6 text-center">
-            <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <div className="w-8 h-8 border-2 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-gray-600 dark:text-gray-400">Loading user data...</p>
           </div>
         ) : (
@@ -109,7 +109,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ userId, isOpen, onClose, 
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   required
                 />
               </div>
@@ -142,7 +142,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ userId, isOpen, onClose, 
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -157,7 +157,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ userId, isOpen, onClose, 
                   name="role"
                   value={formData.role}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent appearance-none"
                   required
                 >
                   <option value="Admin">Admin</option>
@@ -179,7 +179,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ userId, isOpen, onClose, 
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors disabled:opacity-50 cursor-pointer"
+                className="flex-1 px-4 py-2 bg-red-600 dark:bg-red-700 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>

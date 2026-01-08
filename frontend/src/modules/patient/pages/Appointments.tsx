@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { patientAPI } from "../../../utils/apiClient";
+import { patientAPI } from '../../../api';
 import { useAuth } from "../../../context/AuthContext";
 import type { Appointment } from "../../../types/Appointment";
 

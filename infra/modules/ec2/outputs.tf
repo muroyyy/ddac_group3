@@ -5,10 +5,10 @@ output "instance_id" {
 
 output "public_ip" {
   description = "EC2 public IP"
-  value       = aws_instance.main.public_ip
+  value       = aws_eip.main.public_ip
 }
 
 output "public_dns" {
   description = "EC2 public DNS name"
-  value       = aws_instance.main.public_dns
+  value       = aws_eip.main.public_dns
 }

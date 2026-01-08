@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Droplet, 
-  Mail, 
+import {
+  Mail,
   ArrowLeft,
   AlertCircle,
   CheckCircle
 } from 'lucide-react';
+import bloodlineLogo from '../assets/bloodline_logo.svg';
 
 const ForgotPassword: React.FC = () => {
   const navigate = useNavigate();
@@ -33,7 +33,7 @@ const ForgotPassword: React.FC = () => {
     setSuccess('');
 
     try {
-      const { authAPI } = await import('../utils/apiClient');
+      const { authAPI } = await import('../api');
       const response = await authAPI.forgotPassword({ email });
 
       if (response.success) {
@@ -55,11 +55,12 @@ const ForgotPassword: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-3xl shadow-2xl p-8">
-          <div className="flex items-center justify-center gap-2 mb-8">
-            <div className="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center">
-              <Droplet className="w-7 h-7 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-gray-900">BloodLine</span>
+          <div className="flex items-center justify-center mb-8">
+            <img
+              src={bloodlineLogo}
+              alt="BloodLine Logo"
+              className="w-auto h-16 max-w-full mx-auto"
+            />
           </div>
 
           <div className="mb-8 text-center">
@@ -108,7 +109,7 @@ const ForgotPassword: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
             >
               {isLoading ? (
                 <>
@@ -125,7 +126,7 @@ const ForgotPassword: React.FC = () => {
             <button 
               type="button"
               onClick={() => navigate('/login')}
-              className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to login

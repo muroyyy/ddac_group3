@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
-import { patientAPI } from "../../../utils/apiClient";
+import { patientAPI } from '../../../api';
 
 const getPercent = (part: number, total: number) =>
   total === 0 ? 0 : Math.round((part / total) * 100);

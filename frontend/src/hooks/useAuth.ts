@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { sessionManager } from '../utils/sessionManager';
-import { sessionAPI } from '../utils/apiClient';
+import { sessionAPI } from '../api';
 
 interface User {
   id: number;
