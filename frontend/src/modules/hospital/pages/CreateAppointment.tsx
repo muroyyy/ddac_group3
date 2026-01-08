@@ -45,14 +45,9 @@ export default function CreateAppointment() {
     try {
       const appointmentDateTime = new Date(`${formData.appointmentDate}T${formData.appointmentTime}`);
       
-      await hospitalAPI.createAppointment({
-        requestId,
-        doctorName: formData.doctorName,
-        appointmentDate: appointmentDateTime
-      });
-
-      alert('Appointment created successfully!');
-      navigate('/hospital/appointments');
+      // This component is no longer needed since approval creates appointment directly
+      alert('This page is deprecated. Appointments are now created during approval.');
+      navigate('/hospital/blood-requests');
     } catch (error) {
       console.error('Failed to create appointment:', error);
       alert('Failed to create appointment');
