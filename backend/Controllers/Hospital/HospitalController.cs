@@ -59,20 +59,23 @@ public class HospitalController : ControllerBase
     {
         try
         {
-            // Use raw SQL to avoid EF mapping issues
-            var hospitalId = await _context.Database.SqlQueryRaw<int?>(
-                "SELECT hospital_id FROM hospital_staff WHERE user_id = {0} LIMIT 1", userId)
-                .FirstOrDefaultAsync();
+            // Use simple query to get hospital_id from hospital_staff table
+            var result = await _context.Database
+                .SqlQuery<int>($"SELECT hospital_id FROM hospital_staff WHERE user_id = {userId} LIMIT 1")
+                .ToListAsync();
             
-            if (hospitalId.HasValue)
-                return hospitalId.Value;
+            if (result.Any())
+                return result.First();
                 
             // Fallback: check if user is directly a hospital user
-            var directHospitalId = await _context.Database.SqlQueryRaw<int?>(
-                "SELECT hospital_id FROM hospital WHERE user_id = {0} LIMIT 1", userId)
-                .FirstOrDefaultAsync();
+            var directResult = await _context.Database
+                .SqlQuery<int>($"SELECT hospital_id FROM hospital WHERE user_id = {userId} LIMIT 1")
+                .ToListAsync();
                 
-            return directHospitalId;
+            if (directResult.Any())
+                return directResult.First();
+                
+            return null;
         }
         catch (Exception ex)
         {
