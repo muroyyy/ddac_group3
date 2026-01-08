@@ -923,6 +923,35 @@ public class HospitalController : ControllerBase
             return StatusCode(500, new { error = ex.Message });
         }
     }
+    /// <summary>
+    /// Test endpoint to check hospital staff lookup
+    /// </summary>
+    [HttpGet("test/{userId}")]
+    public async Task<IActionResult> TestHospitalLookup(int userId)
+    {
+        try
+        {
+            var hospitalId = await GetHospitalIdFromUser(userId);
+            
+            var bloodRequestCount = await _context.BloodRequests
+                .Where(br => br.HospitalId == hospitalId)
+                .CountAsync();
+                
+            return Ok(new { 
+                userId = userId,
+                hospitalId = hospitalId,
+                bloodRequestCount = bloodRequestCount,
+                success = true 
+            });
+        }
+        catch (Exception ex)
+        {
+            return Ok(new { 
+                error = ex.Message,
+                success = false 
+            });
+        }
+    }
 
 
 }
