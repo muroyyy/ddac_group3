@@ -7,10 +7,10 @@ const API_BASE_URL = (
 );
 
 export interface DashboardStats {
+  pendingRequests: number;
+  upcomingAppointments: number;
   totalInventory: number;
-  pendingApprovals: number;
   lowStockCount: number;
-  systemHealth: string;
 }
 
 export interface BloodInventoryItem {
@@ -204,9 +204,10 @@ export const hospitalAPI = {
   },
 
   // Dashboard Stats
-  getDashboardStats: async (hospitalId: number): Promise<DashboardStats> => {
-    const response = await fetch(`${API_BASE_URL}/hospital/dashboard/stats?hospitalId=${hospitalId}`);
-    return response.json();
+  getDashboardStats: async (userId: number): Promise<DashboardStats> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/dashboard/stats?userId=${userId}`);
+    const result = await response.json();
+    return result.success ? result.data : { totalInventory: 0, pendingRequests: 0, upcomingAppointments: 0, lowStockCount: 0 };
   },
 
   // Approval Requests

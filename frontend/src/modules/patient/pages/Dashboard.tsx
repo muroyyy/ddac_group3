@@ -177,7 +177,7 @@ export default function PatientDashboard() {
                   <p className="text-sm text-gray-600">{news.desc}</p>
                   <p className="text-xs text-gray-400 mt-1">{news.date}</p>
 
-                  <span className="text-red-600 text-sm mt-2 inline-block hover:underline">
+                  <span className="text-red-600 text-sm mt-2 inline-block hover:underline cursor-pointer">
                     {expandedId === news.id ? "Hide Article ▲" : "Read Article ▼"}
                   </span>
                 </div>
@@ -196,7 +196,7 @@ export default function PatientDashboard() {
                       href={news.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-red-600 underline font-medium"
+                      className="text-red-600 underline font-medium cursor-pointer"
                     >
                       Open PDF – Click here
                     </a>

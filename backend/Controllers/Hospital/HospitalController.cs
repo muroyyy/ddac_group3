@@ -92,39 +92,48 @@ public class HospitalController : ControllerBase
     /// Get dashboard stats for a hospital (total inventory, pending approvals, low stock alerts, system health).
     /// </summary>
     [HttpGet("dashboard/stats")]
-    public async Task<IActionResult> GetDashboardStats([FromQuery] int hospitalId)
+    public async Task<IActionResult> GetDashboardStats([FromQuery] int userId)
     {
         try
         {
-            // Total blood units in inventory
-            var totalInventory = await _context.Set<BloodInventory>()
-                .Where(bi => bi.HospitalId == hospitalId)
-                .SumAsync(bi => bi.QuantityUnits);
+            var hospitalId = await GetHospitalIdFromUser(userId);
+            if (hospitalId == null)
+                return BadRequest(new { error = "Hospital staff not found" });
 
-            // Pending blood requests from active_blood_requests table
-            var pendingApprovals = await _context.Set<ActiveBloodRequest>()
-                .Where(abr => abr.Status == "Pending")
+            // Pending blood requests that need approval
+            var pendingRequests = await _context.BloodRequests
+                .Where(br => br.HospitalId == hospitalId.Value && br.Status == "Pending")
                 .CountAsync();
 
+            // Upcoming appointments
+            var upcomingAppointments = await _context.PatientAppointments
+                .Where(pa => pa.HospitalId == hospitalId.Value && pa.Status == "Upcoming")
+                .CountAsync();
+
+            // Total blood units in inventory
+            var totalInventory = await _context.BloodInventory
+                .Where(bi => bi.HospitalId == hospitalId.Value)
+                .SumAsync(bi => bi.QuantityUnits);
+
             // Low stock count (blood types with less than 10 units)
-            var lowStockCount = await _context.Set<BloodInventory>()
-                .Where(bi => bi.HospitalId == hospitalId && bi.QuantityUnits < 10)
+            var lowStockCount = await _context.BloodInventory
+                .Where(bi => bi.HospitalId == hospitalId.Value && bi.QuantityUnits < 10)
                 .CountAsync();
 
             var stats = new
             {
+                pendingRequests = pendingRequests,
+                upcomingAppointments = upcomingAppointments,
                 totalInventory = totalInventory,
-                pendingApprovals = pendingApprovals,
-                lowStockCount = lowStockCount,
-                systemHealth = "Healthy"
+                lowStockCount = lowStockCount
             };
 
-            return Ok(stats);
+            return Ok(new { success = true, data = stats });
         }
         catch (Exception ex)
         {
             _logger.LogError($"Error fetching dashboard stats: {ex.Message}");
-            return StatusCode(500, new { error = "Failed to fetch dashboard stats" });
+            return StatusCode(500, new { success = false, message = "Failed to fetch dashboard stats" });
         }
     }
 
