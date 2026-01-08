@@ -45,5 +45,20 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 0 72% 51%;
   }
+
+  /* Global button cursor styles */
+  button {
+    cursor: pointer !important;
+  }
+
+  button:disabled {
+    cursor: not-allowed !important;
+  }
+
+  /* Ensure all interactive elements use pointer cursor */
+  [role="button"],
+  .cursor-pointer {
+    cursor: pointer !important;
+  }
 }
 

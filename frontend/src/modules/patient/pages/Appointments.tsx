@@ -190,9 +190,9 @@ export default function Appointments() {
       {/* Confirm cancel appointment popup */}
       {showConfirmCancel && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm">
-            <h3 className="text-xl font-semibold mb-4">Cancel Appointment?</h3>
-            <p className="text-gray-700 mb-4">
+          <div className="bg-white rounded-xl p-6 w-full max-w-sm shadow-2xl">
+            <h3 className="text-xl font-semibold mb-4 text-gray-900">Cancel Appointment?</h3>
+            <p className="text-gray-700 mb-6">
               Are you sure you want to cancel this appointment?
             </p>
 
@@ -218,14 +218,14 @@ export default function Appointments() {
                     alert("Error cancelling appointment");
                   }
                 }}
-                className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
               >
                 Yes, Cancel
               </button>
 
               <button
                 onClick={() => setShowConfirmCancel(false)}
-                className="flex-1 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400"
+                className="flex-1 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 font-medium"
               >
                 No
               </button>
