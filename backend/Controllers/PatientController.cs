@@ -163,29 +163,33 @@ namespace BloodLine.Controllers
                     return Ok(new { success = true, data = new List<object>() });
                 }
 
-                // Query with proper JOINs following database relationships
+                Console.WriteLine($"Looking for appointments for patientId: {patientId.Value}");
+
+                // Simplified query with LEFT JOINs to handle NULL values
                 var appointments = await _db.PatientAppointments
                     .Where(pa => pa.PatientId == patientId.Value)
-                    .Join(_db.Hospitals, pa => pa.HospitalId, h => h.HospitalId, (pa, h) => new { pa, h })
-                    .GroupJoin(_db.Doctors, x => x.pa.DoctorId, d => d.DoctorId, (x, doctors) => new { x.pa, x.h, doctors })
-                    .SelectMany(x => x.doctors.DefaultIfEmpty(), (x, d) => new
+                    .Select(pa => new
                     {
-                        appointmentId = x.pa.AppointmentId,
-                        hospitalName = x.h.HospitalName,
-                        doctorName = d != null ? d.DoctorName : "Not Assigned",
-                        appointmentDate = x.pa.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
-                        status = x.pa.Status,
-                        doctorNotes = x.pa.DoctorNotes
+                        appointmentId = pa.AppointmentId,
+                        hospitalName = _db.Hospitals.Where(h => h.HospitalId == pa.HospitalId).Select(h => h.HospitalName).FirstOrDefault() ?? "Unknown Hospital",
+                        doctorName = pa.DoctorId.HasValue ? 
+                            _db.Doctors.Where(d => d.DoctorId == pa.DoctorId.Value).Select(d => d.DoctorName).FirstOrDefault() ?? "Not Assigned" : 
+                            "Not Assigned",
+                        appointmentDate = pa.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
+                        status = pa.Status,
+                        doctorNotes = pa.DoctorNotes
                     })
                     .OrderByDescending(x => x.appointmentDate)
                     .ToListAsync();
 
+                Console.WriteLine($"Found {appointments.Count} appointments");
                 return Ok(new { success = true, data = appointments });
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in GetAppointments for userId {userId}: {ex.Message}");
-                return Ok(new { success = true, data = new List<object>() });
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
 
