@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, User, Clock, ArrowLeft } from 'lucide-react';
-import { hospitalAPI } from '../services/hospitalAPI';
+import { Calendar, User, ArrowLeft } from 'lucide-react';
 
 export default function CreateAppointment() {
   const navigate = useNavigate();
@@ -41,19 +40,9 @@ export default function CreateAppointment() {
       return;
     }
 
-    setLoading(true);
-    try {
-      const appointmentDateTime = new Date(`${formData.appointmentDate}T${formData.appointmentTime}`);
-      
-      // This component is no longer needed since approval creates appointment directly
-      alert('This page is deprecated. Appointments are now created during approval.');
-      navigate('/hospital/blood-requests');
-    } catch (error) {
-      console.error('Failed to create appointment:', error);
-      alert('Failed to create appointment');
-    } finally {
-      setLoading(false);
-    }
+    // This component is no longer needed since approval creates appointment directly
+    alert('This page is deprecated. Appointments are now created during approval.');
+    navigate('/hospital/blood-requests');
   };
 
   if (!requestId) {
@@ -156,11 +145,9 @@ export default function CreateAppointment() {
           <div className="flex gap-4">
             <button
               type="submit"
-              disabled={loading}
-              className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 flex items-center justify-center gap-2"
             >
-              <Clock className="w-4 h-4" />
-              {loading ? 'Creating...' : 'Create Appointment'}
+              Go to Blood Requests
             </button>
             <button
               type="button"
