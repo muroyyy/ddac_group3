@@ -162,16 +162,12 @@ namespace BloodLine.Controllers
                 if (userId <= 0)
                     return BadRequest(new { success = false, message = "Invalid user ID." });
 
-                // Get patient_id from user_id via patient_profile
                 var patientId = await GetPatientIdFromUser(userId);
                 if (patientId == null)
                 {
                     return Ok(new { success = true, data = new List<object>() });
                 }
 
-                Console.WriteLine($"Looking for appointments for patientId: {patientId.Value}");
-
-                // Simplified query with LEFT JOINs to handle NULL values
                 var appointments = await _db.PatientAppointments
                     .Where(pa => pa.PatientId == patientId.Value)
                     .Select(pa => new
@@ -181,20 +177,28 @@ namespace BloodLine.Controllers
                         doctorName = pa.DoctorId.HasValue ? 
                             _db.Doctors.Where(d => d.DoctorId == pa.DoctorId.Value).Select(d => d.DoctorName).FirstOrDefault() ?? "Not Assigned" : 
                             "Not Assigned",
-                        appointmentDate = pa.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
+                        appointmentDate = pa.AppointmentDate,
                         status = pa.Status,
                         doctorNotes = pa.DoctorNotes
                     })
                     .OrderByDescending(x => x.appointmentDate)
                     .ToListAsync();
 
-                Console.WriteLine($"Found {appointments.Count} appointments");
-                return Ok(new { success = true, data = appointments });
+                var result = appointments.Select(a => new
+                {
+                    appointmentId = a.appointmentId,
+                    hospitalName = a.hospitalName,
+                    doctorName = a.doctorName,
+                    appointmentDate = a.appointmentDate.ToString("yyyy-MM-dd HH:mm"),
+                    status = a.status,
+                    doctorNotes = a.doctorNotes
+                }).ToList();
+
+                return Ok(new { success = true, data = result });
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in GetAppointments for userId {userId}: {ex.Message}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
