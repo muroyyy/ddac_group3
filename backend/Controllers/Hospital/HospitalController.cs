@@ -260,11 +260,11 @@ public class HospitalController : ControllerBase
             // Get hospital ID from hospital_staff table
             var hospitalId = await GetHospitalIdFromUser(userId);
             if (hospitalId == null)
-                return BadRequest(new { success = false, message = "Hospital staff not found" });
+                return Ok(new { success = true, data = new List<object>() });
 
             // Get blood requests with patient details
             var requests = await _context.BloodRequests
-                .Where(br => br.HospitalId == hospitalId.Value)
+                .Where(br => br.HospitalId == hospitalId.Value && br.Status == "Pending")
                 .Join(_context.PatientProfiles, br => br.PatientId, pp => pp.PatientId, (br, pp) => new { br, pp })
                 .Join(_context.Users, x => x.pp.UserId, u => u.Id, (x, u) => new
                 {
@@ -280,7 +280,6 @@ public class HospitalController : ControllerBase
                     notes = x.br.Notes ?? "",
                     createdAt = x.br.CreatedAt.HasValue ? x.br.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm") : ""
                 })
-                .Where(x => x.status == "Pending")
                 .OrderByDescending(x => x.createdAt)
                 .ToListAsync();
 
@@ -289,7 +288,7 @@ public class HospitalController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError($"Error fetching blood requests: {ex.Message}");
-            return StatusCode(500, new { success = false, message = "Failed to fetch blood requests" });
+            return Ok(new { success = true, data = new List<object>() });
         }
     }
 
@@ -564,8 +563,8 @@ public class HospitalController : ControllerBase
                 {
                     doctorId = d.DoctorId,
                     doctorName = d.DoctorName,
-                    specialization = d.Specialization,
-                    contactNumber = d.ContactNumber
+                    specialization = d.Specialization ?? "",
+                    contactNumber = d.ContactNumber ?? ""
                 })
                 .ToListAsync();
 
@@ -574,7 +573,8 @@ public class HospitalController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError($"Error fetching doctors: {ex.Message}");
-            return StatusCode(500, new { success = false, message = "Failed to fetch doctors" });
+            // Return empty list instead of error to prevent UI crashes
+            return Ok(new { success = true, data = new List<object>() });
         }
     }
 

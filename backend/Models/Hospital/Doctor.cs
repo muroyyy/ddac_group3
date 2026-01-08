@@ -21,7 +21,4 @@ public class Doctor
 
     [Column("contact_number")]
     public string ContactNumber { get; set; } = string.Empty;
-
-    // Navigation properties
-    public HospitalEntity Hospital { get; set; } = null!;
 }
