@@ -260,52 +260,36 @@ public class HospitalController : ControllerBase
     {
         try
         {
-            _logger.LogInformation($"Getting blood requests for user {userId}");
-            
-            // Get hospital ID from hospital_staff table
             var hospitalId = await GetHospitalIdFromUser(userId);
-            _logger.LogInformation($"Hospital ID: {hospitalId}");
-            
             if (hospitalId == null)
-            {
-                _logger.LogWarning($"No hospital found for user {userId}");
                 return Ok(new { success = true, data = new List<object>() });
-            }
 
-            // First, get blood requests without joins to see if they exist
-            var bloodRequests = await _context.BloodRequests
+            // Get blood requests with real patient details
+            var requests = await _context.BloodRequests
                 .Where(br => br.HospitalId == hospitalId.Value && br.Status == "Pending")
+                .Join(_context.PatientProfiles, br => br.PatientId, pp => pp.PatientId, (br, pp) => new { br, pp })
+                .Join(_context.Users, x => x.pp.UserId, u => u.Id, (x, u) => new
+                {
+                    requestId = x.br.RequestId,
+                    patientId = x.br.PatientId,
+                    patientName = u.FullName ?? "",
+                    patientEmail = u.Email ?? "",
+                    patientPhone = u.Phone ?? "",
+                    bloodType = x.br.BloodType ?? "",
+                    unitsRequired = x.br.UnitsRequired,
+                    status = x.br.Status ?? "",
+                    urgencyLevel = x.br.UrgencyLevel ?? "",
+                    notes = x.br.Notes ?? "",
+                    createdAt = x.br.CreatedAt?.ToString("yyyy-MM-dd HH:mm") ?? ""
+                })
+                .OrderByDescending(x => x.createdAt)
                 .ToListAsync();
-            
-            _logger.LogInformation($"Found {bloodRequests.Count} blood requests for hospital {hospitalId}");
-            
-            if (bloodRequests.Count == 0)
-            {
-                return Ok(new { success = true, data = new List<object>() });
-            }
 
-            // Simple response without complex joins for now
-            var results = bloodRequests.Select(br => new
-            {
-                requestId = br.RequestId,
-                patientId = br.PatientId,
-                patientName = $"Patient {br.PatientId}",
-                patientEmail = "",
-                patientPhone = "",
-                bloodType = br.BloodType ?? "",
-                unitsRequired = br.UnitsRequired,
-                status = br.Status ?? "",
-                urgencyLevel = br.UrgencyLevel ?? "",
-                notes = br.Notes ?? "",
-                createdAt = br.CreatedAt?.ToString("yyyy-MM-dd HH:mm") ?? ""
-            }).ToList();
-
-            return Ok(new { success = true, data = results });
+            return Ok(new { success = true, data = requests });
         }
         catch (Exception ex)
         {
             _logger.LogError($"Error fetching blood requests: {ex.Message}");
-            _logger.LogError($"Stack trace: {ex.StackTrace}");
             return Ok(new { success = true, data = new List<object>() });
         }
     }

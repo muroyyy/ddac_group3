@@ -448,19 +448,19 @@ export default function BloodRequests() {
       {/* Approval Modal */}
       {showApprovalModal && approvingRequest && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-4 text-gray-900">Approve Blood Request</h3>
-            <p className="text-gray-600 mb-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md transform transition-all">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Approve Blood Request</h3>
+            <p className="text-gray-600 mb-6">
               Patient: <strong>{approvingRequest.patientName}</strong> ({approvingRequest.bloodType})
             </p>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Select Doctor</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Select Doctor</label>
                 <select
                   value={selectedDoctorId}
                   onChange={(e) => setSelectedDoctorId(Number(e.target.value))}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 >
                   <option value={0}>Select a doctor...</option>
                   {doctors.map(doctor => (
@@ -472,32 +472,32 @@ export default function BloodRequests() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Appointment Date</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Appointment Date</label>
                 <input
                   type="date"
                   value={appointmentDate}
                   onChange={(e) => setAppointmentDate(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Appointment Time</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Appointment Time</label>
                 <input
                   type="time"
                   value={appointmentTime}
                   onChange={(e) => setAppointmentTime(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 />
               </div>
             </div>
 
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-3 mt-8">
               <button
                 onClick={approveRequest}
                 disabled={!selectedDoctorId || !appointmentDate || !appointmentTime}
-                className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+                className="flex-1 bg-green-600 text-white py-3 px-4 rounded-xl hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
               >
                 Approve & Create Appointment
               </button>
@@ -506,7 +506,7 @@ export default function BloodRequests() {
                   setShowApprovalModal(false);
                   setApprovingRequest(null);
                 }}
-                className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+                className="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-xl hover:bg-gray-200 transition-colors font-medium"
               >
                 Cancel
               </button>
