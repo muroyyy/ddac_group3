@@ -280,7 +280,7 @@ public class HospitalController : ControllerBase
                     status = x.br.Status ?? "",
                     urgencyLevel = x.br.UrgencyLevel ?? "",
                     notes = x.br.Notes ?? "",
-                    createdAt = x.br.CreatedAt?.ToString("yyyy-MM-dd HH:mm") ?? ""
+                    createdAt = x.br.CreatedAt.HasValue ? x.br.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm") : ""
                 })
                 .OrderByDescending(x => x.createdAt)
                 .ToListAsync();
