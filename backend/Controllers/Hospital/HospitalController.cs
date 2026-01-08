@@ -749,12 +749,14 @@ public class HospitalController : ControllerBase
     {
         try
         {
-            var appointment = await _context.DonorAppointments
-                .Include(da => da.Donor)
-                .FirstOrDefaultAsync(da => da.AppointmentId == id);
-            
+            var appointment = await _context.DonorAppointments.FindAsync(id);
             if (appointment == null)
                 return NotFound(new { success = false, message = "Donor appointment not found" });
+
+            // Get donor profile to get blood type
+            var donor = await _context.DonorProfiles.FindAsync(appointment.DonorId);
+            if (donor == null)
+                return NotFound(new { success = false, message = "Donor not found" });
 
             // Update appointment status
             appointment.Status = "Completed";
@@ -762,7 +764,7 @@ public class HospitalController : ControllerBase
 
             // Update blood inventory
             var inventory = await _context.BloodInventory
-                .FirstOrDefaultAsync(bi => bi.HospitalId == appointment.HospitalId && bi.BloodType == appointment.Donor.BloodType);
+                .FirstOrDefaultAsync(bi => bi.HospitalId == appointment.HospitalId && bi.BloodType == donor.BloodType);
             
             if (inventory != null)
             {
@@ -775,7 +777,7 @@ public class HospitalController : ControllerBase
                 inventory = new BloodInventory
                 {
                     HospitalId = appointment.HospitalId,
-                    BloodType = appointment.Donor.BloodType,
+                    BloodType = donor.BloodType,
                     QuantityUnits = dto.UnitsCollected,
                     Status = "Available",
                     LastUpdated = DateTime.UtcNow
