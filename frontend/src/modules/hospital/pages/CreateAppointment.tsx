@@ -31,7 +31,6 @@ export default function CreateAppointment() {
     appointmentDate: '',
     appointmentTime: ''
   });
-  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
