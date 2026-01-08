@@ -57,28 +57,28 @@ public class HospitalController : ControllerBase
     // Helper method to get hospital ID from user ID
     private async Task<int?> GetHospitalIdFromUser(int userId)
     {
-        _logger.LogInformation($"Looking up hospital ID for user {userId}");
-        
-        // First check if user is hospital staff
-        var staff = await _context.HospitalStaff
-            .FirstOrDefaultAsync(s => s.UserId == userId);
-        if (staff != null)
+        try
         {
-            _logger.LogInformation($"Found hospital staff record: Hospital ID {staff.HospitalId}");
-            return staff.HospitalId;
+            // Use raw SQL to avoid EF mapping issues
+            var hospitalId = await _context.Database.SqlQueryRaw<int?>(
+                "SELECT hospital_id FROM hospital_staff WHERE user_id = {0} LIMIT 1", userId)
+                .FirstOrDefaultAsync();
+            
+            if (hospitalId.HasValue)
+                return hospitalId.Value;
+                
+            // Fallback: check if user is directly a hospital user
+            var directHospitalId = await _context.Database.SqlQueryRaw<int?>(
+                "SELECT hospital_id FROM hospital WHERE user_id = {0} LIMIT 1", userId)
+                .FirstOrDefaultAsync();
+                
+            return directHospitalId;
         }
-
-        // Fallback: check if user is directly a hospital user
-        var hospital = await _context.Hospitals
-            .FirstOrDefaultAsync(h => h.UserId == userId);
-        if (hospital != null)
+        catch (Exception ex)
         {
-            _logger.LogInformation($"Found direct hospital record: Hospital ID {hospital.HospitalId}");
-            return hospital.HospitalId;
+            _logger.LogError($"Error getting hospital ID for user {userId}: {ex.Message}");
+            return null;
         }
-        
-        _logger.LogWarning($"No hospital association found for user {userId}");
-        return null;
     }
 
     // Helper method to validate hospital access
