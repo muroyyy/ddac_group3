@@ -257,71 +257,12 @@ public class HospitalController : ControllerBase
     {
         try
         {
-            _logger.LogInformation($"Getting blood requests for user ID: {userId}");
-            
-            // Get hospital ID for this user
+            // Get hospital ID from hospital_staff table
             var hospitalId = await GetHospitalIdFromUser(userId);
-            _logger.LogInformation($"Hospital ID for user {userId}: {hospitalId}");
-            
             if (hospitalId == null)
-            {
-                _logger.LogWarning($"No hospital staff record found for user ID: {userId}");
                 return BadRequest(new { success = false, message = "Hospital staff not found" });
-            }
 
-            // Simple approach - just get blood requests without complex joins for now
-            var bloodRequests = await _context.Set<BloodRequest>()
-                .Where(br => br.HospitalId == hospitalId.Value)
-                .ToListAsync();
-
-            var results = bloodRequests.Select(br => new
-            {
-                requestId = br.RequestId,
-                patientName = "Patient " + br.PatientId, // Temporary placeholder
-                patientEmail = "",
-                patientPhone = "",
-                bloodType = br.BloodType ?? "",
-                unitsRequired = br.UnitsRequired,
-                status = br.Status ?? "",
-                urgencyLevel = br.UrgencyLevel ?? "",
-                notes = br.Notes ?? "",
-                rejectionNotes = br.RejectionNotes ?? "",
-                createdAt = br.CreatedAt?.ToString("yyyy-MM-dd HH:mm") ?? "",
-                emergencyContact = "",
-                allergies = "",
-                medicalCondition = ""
-            }).OrderByDescending(x => x.createdAt).ToList();
-
-            _logger.LogInformation($"Found {results.Count} blood requests for hospital {hospitalId}");
-            return Ok(new { success = true, data = results });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Error fetching blood requests for user {userId}: {ex.Message}");
-            return StatusCode(500, new { success = false, message = "Failed to fetch blood requests", error = ex.Message });
-        }
-    }
-
-    /// <summary>
-    /// Get all blood requests from the blood_requests table for hospital staff
-    /// </summary>
-    [HttpGet("all-blood-requests/{userId}")]
-    public async Task<IActionResult> GetAllBloodRequests(int userId)
-    {
-        try
-        {
-            _logger.LogInformation($"Getting all blood requests for user ID: {userId}");
-            
-            // Get hospital ID for this user
-            var hospitalId = await GetHospitalIdFromUser(userId);
-            _logger.LogInformation($"Hospital ID for user {userId}: {hospitalId}");
-            
-            if (hospitalId == null)
-            {
-                _logger.LogWarning($"No hospital staff record found for user ID: {userId}");
-                return BadRequest(new { success = false, message = "Hospital staff not found" });
-            }
-
+            // Get blood requests with patient details
             var requests = await _context.BloodRequests
                 .Where(br => br.HospitalId == hospitalId.Value)
                 .Join(_context.PatientProfiles, br => br.PatientId, pp => pp.PatientId, (br, pp) => new { br, pp })
@@ -329,7 +270,6 @@ public class HospitalController : ControllerBase
                 {
                     requestId = x.br.RequestId,
                     patientId = x.br.PatientId,
-                    hospitalId = x.br.HospitalId,
                     patientName = u.FullName ?? "",
                     patientEmail = u.Email ?? "",
                     patientPhone = u.Phone ?? "",
@@ -338,40 +278,56 @@ public class HospitalController : ControllerBase
                     status = x.br.Status ?? "",
                     urgencyLevel = x.br.UrgencyLevel ?? "",
                     notes = x.br.Notes ?? "",
-                    createdAt = x.br.CreatedAt.HasValue ? x.br.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm:ss") : ""
+                    createdAt = x.br.CreatedAt.HasValue ? x.br.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm") : ""
                 })
+                .Where(x => x.status == "Pending")
                 .OrderByDescending(x => x.createdAt)
                 .ToListAsync();
 
-            _logger.LogInformation($"Found {requests.Count} blood requests for hospital {hospitalId}");
             return Ok(new { success = true, data = requests });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error fetching all blood requests for user {userId}: {ex.Message}");
-            return StatusCode(500, new { success = false, message = "Failed to fetch all blood requests", error = ex.Message });
+            _logger.LogError($"Error fetching blood requests: {ex.Message}");
+            return StatusCode(500, new { success = false, message = "Failed to fetch blood requests" });
         }
     }
 
+
+
     /// <summary>
-    /// Approve blood request.
+    /// Approve blood request and create appointment
     /// </summary>
     [HttpPost("requests/{id}/approve")]
-    public async Task<IActionResult> ApproveRequest(int id)
+    public async Task<IActionResult> ApproveRequest(int id, [FromBody] ApproveRequestDto dto)
     {
         try
         {
-            var bloodRequest = await _context.Set<BloodRequest>().FindAsync(id);
+            var bloodRequest = await _context.BloodRequests.FindAsync(id);
             if (bloodRequest == null)
                 return NotFound(new { error = "Request not found" });
 
+            // Update blood request status
             bloodRequest.Status = "Approved";
-            _context.Set<BloodRequest>().Update(bloodRequest);
+            
+            // Create appointment
+            var appointment = new PatientAppointment
+            {
+                RequestId = id,
+                PatientId = bloodRequest.PatientId,
+                HospitalId = bloodRequest.HospitalId,
+                DoctorId = dto.DoctorId,
+                AppointmentDate = dto.AppointmentDate,
+                Status = "Upcoming",
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.PatientAppointments.Add(appointment);
             await _context.SaveChangesAsync();
 
             await SendBloodRequestNotification(bloodRequest.PatientId, "Approved", id);
 
-            return Ok(new { success = true, message = "Request approved. Please create appointment." });
+            return Ok(new { success = true, message = "Request approved and appointment created" });
         }
         catch (Exception ex)
         {
@@ -486,42 +442,7 @@ public class HospitalController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Create appointment after approval.
-    /// </summary>
-    [HttpPost("appointments/create")]
-    public async Task<IActionResult> CreateAppointment([FromBody] CreateAppointmentDto dto)
-    {
-        try
-        {
-            var bloodRequest = await _context.Set<BloodRequest>().FindAsync(dto.RequestId);
-            if (bloodRequest == null || bloodRequest.Status != "Approved")
-                return BadRequest(new { error = "Invalid or non-approved request" });
 
-            var appointment = new PatientAppointment
-            {
-                RequestId = dto.RequestId,
-                PatientId = bloodRequest.PatientId,
-                HospitalId = bloodRequest.HospitalId,
-                AppointmentDate = dto.AppointmentDate,
-                Status = "Upcoming",
-                DoctorNotes = dto.InitialNotes,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.PatientAppointments.Add(appointment);
-            await _context.SaveChangesAsync();
-
-            await _notificationService.SendAppointmentNotification(appointment.AppointmentId, "Created");
-
-            return Ok(new { success = true, appointmentId = appointment.AppointmentId });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError($"Error creating appointment: {ex.Message}");
-            return StatusCode(500, new { error = "Failed to create appointment" });
-        }
-    }
 
     /// <summary>
     /// Get hospital appointments.
@@ -1019,12 +940,10 @@ public class RejectRequestDto
     public string? RejectionNotes { get; set; }
 }
 
-public class CreateAppointmentDto
+public class ApproveRequestDto
 {
-    public int RequestId { get; set; }
-    public string DoctorName { get; set; } = string.Empty;
+    public int DoctorId { get; set; }
     public DateTime AppointmentDate { get; set; }
-    public string? InitialNotes { get; set; }
 }
 
 public class CompleteAppointmentDto

@@ -7,6 +7,7 @@ import { useAuth } from '../../../context/AuthContext';
 // Define interface for blood request data structure
 interface BloodRequest {
   requestId: number;
+  patientId: number;
   patientName: string;
   patientEmail: string;
   patientPhone: string;
@@ -15,11 +16,14 @@ interface BloodRequest {
   urgencyLevel: string;
   status: string;
   notes: string;
-  rejectionNotes?: string;
   createdAt: string;
-  emergencyContact: string;
-  allergies: string;
-  medicalCondition: string;
+}
+
+interface Doctor {
+  doctorId: number;
+  doctorName: string;
+  specialization: string;
+  contactNumber: string;
 }
 
 // Main component for hospital staff to manage blood requests
@@ -28,52 +32,41 @@ export default function BloodRequests() {
   const { user } = useAuth();
   // State management for requests and UI
   const [requests, setRequests] = useState<BloodRequest[]>([]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
   const [selectedRequest, setSelectedRequest] = useState<BloodRequest | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectingId, setRejectingId] = useState<number | null>(null);
   
-  // Appointment creation form state
-  const [appointmentForm, setAppointmentForm] = useState<{
-    show: boolean;
-    requestId: number;
-    patientName: string;
-    bloodType: string;
-    doctorName: string;
-    appointmentDate: string;
-    appointmentTime: string;
-    doctorNotes: string;
-  }>({
-    show: false,
-    requestId: 0,
-    patientName: '',
-    bloodType: '',
-    doctorName: '',
-    appointmentDate: '',
-    appointmentTime: '',
-    doctorNotes: ''
-  });
+  // Approval modal state
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [approvingRequest, setApprovingRequest] = useState<BloodRequest | null>(null);
+  const [selectedDoctorId, setSelectedDoctorId] = useState<number>(0);
+  const [appointmentDate, setAppointmentDate] = useState('');
+  const [appointmentTime, setAppointmentTime] = useState('');
 
-  // Function to load blood requests for this hospital staff member
+  // Function to load blood requests and doctors
   const loadRequests = async () => {
     if (!user?.id) return;
     setLoading(true);
     try {
-      // Call API with user ID to get hospital-scoped requests
-      const res = await hospitalAPI.getBloodRequests(user.id);
-      if (res.success) {
-        setRequests(res.data || []);
-      } else {
-        console.error('Failed to load requests:', res.message || 'Unknown error');
-        setRequests([]);
+      const [requestsRes, doctorsRes] = await Promise.all([
+        hospitalAPI.getBloodRequests(user.id),
+        hospitalAPI.getDoctors(user.id)
+      ]);
+      
+      if (requestsRes.success) {
+        setRequests(requestsRes.data || []);
+      }
+      
+      if (doctorsRes.success) {
+        setDoctors(doctorsRes.data || []);
       }
     } catch (error) {
-      console.error('Failed to load requests:', error);
-      setRequests([]);
+      console.error('Failed to load data:', error);
     } finally {
       setLoading(false);
     }
@@ -83,25 +76,34 @@ export default function BloodRequests() {
     loadRequests();
   }, []);
 
-  // Function to approve a blood request and show appointment creation form
-  const approveRequest = async (id: number, patientName: string, bloodType: string) => {
-    if (!confirm('Approve this blood request? This will notify the patient.')) return;
+  // Function to show approval modal
+  const showApprovalDialog = (request: BloodRequest) => {
+    setApprovingRequest(request);
+    setSelectedDoctorId(0);
+    setAppointmentDate('');
+    setAppointmentTime('');
+    setShowApprovalModal(true);
+  };
+
+  // Function to approve request with appointment details
+  const approveRequest = async () => {
+    if (!approvingRequest || !selectedDoctorId || !appointmentDate || !appointmentTime) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
     try {
-      const result = await hospitalAPI.approveRequest(id);
+      const appointmentDateTime = new Date(`${appointmentDate}T${appointmentTime}`);
+      const result = await hospitalAPI.approveRequest(approvingRequest.requestId, {
+        doctorId: selectedDoctorId,
+        appointmentDate: appointmentDateTime
+      });
+      
       if (result.success) {
-        // Show appointment creation form after successful approval
-        setAppointmentForm({
-          show: true,
-          requestId: id,
-          patientName,
-          bloodType,
-          doctorName: '',
-          appointmentDate: '',
-          appointmentTime: '',
-          doctorNotes: ''
-        });
+        setShowApprovalModal(false);
+        setApprovingRequest(null);
         loadRequests();
-        alert('Request approved! Please create an appointment.');
+        alert('Request approved and appointment created successfully!');
       } else {
         alert('Failed to approve request');
       }
@@ -138,36 +140,12 @@ export default function BloodRequests() {
     }
   };
 
-  const createAppointment = async () => {
-    if (!appointmentForm.doctorName || !appointmentForm.appointmentDate || !appointmentForm.appointmentTime) {
-      alert('Please fill in all required fields');
-      return;
-    }
 
-    try {
-      const appointmentDateTime = new Date(`${appointmentForm.appointmentDate}T${appointmentForm.appointmentTime}`);
-      await hospitalAPI.createAppointment({
-        requestId: appointmentForm.requestId,
-        doctorName: appointmentForm.doctorName,
-        appointmentDate: appointmentDateTime,
-        initialNotes: appointmentForm.doctorNotes || undefined
-      });
-      
-      setAppointmentForm({ ...appointmentForm, show: false });
-      alert('Appointment created successfully!');
-      loadRequests();
-    } catch (error) {
-      console.error('Failed to create appointment:', error);
-      alert('Failed to create appointment');
-    }
-  };
 
-  // Filter requests based on search term and status
-  const filteredRequests = requests.filter(request => {
-    const matchesName = request.patientName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = !statusFilter || request.status.toLowerCase() === statusFilter.toLowerCase();
-    return matchesName && matchesStatus;
-  });
+  // Filter requests based on search term
+  const filteredRequests = requests.filter(request => 
+    request.patientName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Function to get urgency level styling
   const getUrgencyStyle = (urgency: string) => {
@@ -193,7 +171,7 @@ export default function BloodRequests() {
         </p>
       </div>
 
-      {/* Search and filter controls */}
+      {/* Search controls */}
       <div className="flex gap-4 mb-6">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -205,16 +183,6 @@ export default function BloodRequests() {
             className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500"
           />
         </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500"
-        >
-          <option value="">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="approved">Approved</option>
-          <option value="rejected">Rejected</option>
-        </select>
       </div>
 
       {/* Blood requests table */}
@@ -320,7 +288,7 @@ export default function BloodRequests() {
                         {request.status === 'Pending' && (
                           <>
                             <button
-                              onClick={() => approveRequest(request.requestId, request.patientName, request.bloodType)}
+                              onClick={() => showApprovalDialog(request)}
                               className="text-green-600 hover:text-green-900 px-2 py-1 rounded bg-green-50 hover:bg-green-100"
                             >
                               Approve
@@ -423,10 +391,6 @@ export default function BloodRequests() {
                     <p className="text-sm text-gray-500">Phone</p>
                     <p className="font-medium">{selectedRequest.patientPhone}</p>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Emergency Contact</p>
-                    <p className="font-medium">{selectedRequest.emergencyContact}</p>
-                  </div>
                 </div>
               </div>
 
@@ -457,16 +421,8 @@ export default function BloodRequests() {
 
               {/* Medical Information */}
               <div>
-                <h4 className="font-semibold text-gray-900 mb-3">Medical Information</h4>
+                <h4 className="font-semibold text-gray-900 mb-3">Request Notes</h4>
                 <div className="space-y-3">
-                  <div>
-                    <p className="text-sm text-gray-500">Medical Condition</p>
-                    <p className="font-medium">{selectedRequest.medicalCondition || 'Not specified'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Allergies</p>
-                    <p className="font-medium">{selectedRequest.allergies || 'None reported'}</p>
-                  </div>
                   {selectedRequest.notes && (
                     <div>
                       <p className="text-sm text-gray-500">Additional Notes</p>
@@ -489,53 +445,67 @@ export default function BloodRequests() {
         </div>
       )}
 
-      {/* Appointment Creation Modal */}
-      {appointmentForm.show && (
+      {/* Approval Modal */}
+      {showApprovalModal && approvingRequest && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-4 text-gray-900">Create Appointment</h3>
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">Approve Blood Request</h3>
             <p className="text-gray-600 mb-4">
-              Patient: <strong>{appointmentForm.patientName}</strong> ({appointmentForm.bloodType})
+              Patient: <strong>{approvingRequest.patientName}</strong> ({approvingRequest.bloodType})
             </p>
             
             <div className="space-y-4">
-              <input
-                type="text"
-                placeholder="Doctor Name *"
-                value={appointmentForm.doctorName}
-                onChange={(e) => setAppointmentForm({...appointmentForm, doctorName: e.target.value})}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-              />
-              <input
-                type="date"
-                value={appointmentForm.appointmentDate}
-                onChange={(e) => setAppointmentForm({...appointmentForm, appointmentDate: e.target.value})}
-                min={new Date().toISOString().split('T')[0]}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-              />
-              <input
-                type="time"
-                value={appointmentForm.appointmentTime}
-                onChange={(e) => setAppointmentForm({...appointmentForm, appointmentTime: e.target.value})}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-              />
-              <textarea
-                placeholder="Initial notes (optional)"
-                value={appointmentForm.doctorNotes}
-                onChange={(e) => setAppointmentForm({...appointmentForm, doctorNotes: e.target.value})}
-                className="w-full p-3 border border-gray-300 rounded-lg h-20 resize-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Select Doctor</label>
+                <select
+                  value={selectedDoctorId}
+                  onChange={(e) => setSelectedDoctorId(Number(e.target.value))}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                >
+                  <option value={0}>Select a doctor...</option>
+                  {doctors.map(doctor => (
+                    <option key={doctor.doctorId} value={doctor.doctorId}>
+                      {doctor.doctorName} - {doctor.specialization}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Appointment Date</label>
+                <input
+                  type="date"
+                  value={appointmentDate}
+                  onChange={(e) => setAppointmentDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Appointment Time</label>
+                <input
+                  type="time"
+                  value={appointmentTime}
+                  onChange={(e) => setAppointmentTime(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+              </div>
             </div>
 
             <div className="flex gap-3 mt-6">
               <button
-                onClick={createAppointment}
-                className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
+                onClick={approveRequest}
+                disabled={!selectedDoctorId || !appointmentDate || !appointmentTime}
+                className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
               >
-                Create Appointment
+                Approve & Create Appointment
               </button>
               <button
-                onClick={() => setAppointmentForm({...appointmentForm, show: false})}
+                onClick={() => {
+                  setShowApprovalModal(false);
+                  setApprovingRequest(null);
+                }}
                 className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition-colors"
               >
                 Cancel

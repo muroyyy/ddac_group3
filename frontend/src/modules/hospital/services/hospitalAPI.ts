@@ -46,10 +46,11 @@ export const hospitalAPI = {
     return response.json();
   },
 
-  approveRequest: async (id: number): Promise<{ success: boolean }> => {
+  approveRequest: async (id: number, data?: { doctorId: number; appointmentDate: Date }): Promise<{ success: boolean }> => {
     const response = await fetch(`${API_BASE_URL}/hospital/requests/${id}/approve`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      body: data ? JSON.stringify(data) : undefined,
     });
     return response.json();
   },
@@ -63,15 +64,7 @@ export const hospitalAPI = {
     return response.json();
   },
 
-  // Patient Appointments Management
-  createAppointment: async (data: { requestId: number; doctorName: string; appointmentDate: Date; initialNotes?: string }): Promise<{ success: boolean }> => {
-    const response = await fetch(`${API_BASE_URL}/hospital/appointments/create`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    return response.json();
-  },
+
 
   getAppointments: async (userId: number): Promise<any[]> => {
     const response = await fetch(`${API_BASE_URL}/hospital/appointments/${userId}`);
