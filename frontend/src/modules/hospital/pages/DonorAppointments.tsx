@@ -40,13 +40,13 @@ const DonorAppointments: React.FC = () => {
         
         // Fetch real data from donor_appointments table
         const response = await hospitalAPI.getDonorAppointments(userId);
-        console.log('📦 API Response:', response);
+        console.log('📦 API Response:', JSON.stringify(response, null, 2));
         
         if (response.success) {
           console.log('✅ Success - appointments data:', response.data);
           setAppointments(response.data || []);
         } else {
-          console.error('❌ API returned unsuccessful response:', response);
+          console.error('❌ API returned unsuccessful response:', JSON.stringify(response, null, 2));
           setAppointments([]);
         }
       } catch (error) {
