@@ -264,28 +264,72 @@ public class HospitalController : ControllerBase
             if (hospitalId == null)
                 return Ok(new { success = true, data = new List<object>() });
 
-            // Get blood requests with real patient details
-            var requests = await _context.BloodRequests
+            // First check if blood requests exist for this hospital
+            var bloodRequestsCount = await _context.BloodRequests
                 .Where(br => br.HospitalId == hospitalId.Value && br.Status == "Pending")
-                .Join(_context.PatientProfiles, br => br.PatientId, pp => pp.PatientId, (br, pp) => new { br, pp })
-                .Join(_context.Users, x => x.pp.UserId, u => u.Id, (x, u) => new
+                .CountAsync();
+            
+            _logger.LogInformation($"Found {bloodRequestsCount} pending blood requests for hospital {hospitalId}");
+
+            if (bloodRequestsCount == 0)
+            {
+                return Ok(new { success = true, data = new List<object>() });
+            }
+
+            // Try with JOINs first
+            try
+            {
+                var requests = await _context.BloodRequests
+                    .Where(br => br.HospitalId == hospitalId.Value && br.Status == "Pending")
+                    .Join(_context.PatientProfiles, br => br.PatientId, pp => pp.PatientId, (br, pp) => new { br, pp })
+                    .Join(_context.Users, x => x.pp.UserId, u => u.Id, (x, u) => new
+                    {
+                        requestId = x.br.RequestId,
+                        patientId = x.br.PatientId,
+                        patientName = u.FullName ?? "",
+                        patientEmail = u.Email ?? "",
+                        patientPhone = u.Phone ?? "",
+                        bloodType = x.br.BloodType ?? "",
+                        unitsRequired = x.br.UnitsRequired,
+                        status = x.br.Status ?? "",
+                        urgencyLevel = x.br.UrgencyLevel ?? "",
+                        notes = x.br.Notes ?? "",
+                        createdAt = x.br.CreatedAt.HasValue ? x.br.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm") : ""
+                    })
+                    .OrderByDescending(x => x.createdAt)
+                    .ToListAsync();
+
+                if (requests.Any())
                 {
-                    requestId = x.br.RequestId,
-                    patientId = x.br.PatientId,
-                    patientName = u.FullName ?? "",
-                    patientEmail = u.Email ?? "",
-                    patientPhone = u.Phone ?? "",
-                    bloodType = x.br.BloodType ?? "",
-                    unitsRequired = x.br.UnitsRequired,
-                    status = x.br.Status ?? "",
-                    urgencyLevel = x.br.UrgencyLevel ?? "",
-                    notes = x.br.Notes ?? "",
-                    createdAt = x.br.CreatedAt.HasValue ? x.br.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm") : ""
+                    return Ok(new { success = true, data = requests });
+                }
+            }
+            catch (Exception joinEx)
+            {
+                _logger.LogWarning($"JOIN query failed: {joinEx.Message}");
+            }
+
+            // Fallback: return basic blood request data without patient details
+            var basicRequests = await _context.BloodRequests
+                .Where(br => br.HospitalId == hospitalId.Value && br.Status == "Pending")
+                .Select(br => new
+                {
+                    requestId = br.RequestId,
+                    patientId = br.PatientId,
+                    patientName = $"Patient {br.PatientId}",
+                    patientEmail = "",
+                    patientPhone = "",
+                    bloodType = br.BloodType ?? "",
+                    unitsRequired = br.UnitsRequired,
+                    status = br.Status ?? "",
+                    urgencyLevel = br.UrgencyLevel ?? "",
+                    notes = br.Notes ?? "",
+                    createdAt = br.CreatedAt.HasValue ? br.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm") : ""
                 })
                 .OrderByDescending(x => x.createdAt)
                 .ToListAsync();
 
-            return Ok(new { success = true, data = requests });
+            return Ok(new { success = true, data = basicRequests });
         }
         catch (Exception ex)
         {
