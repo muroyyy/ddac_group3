@@ -1026,6 +1026,11 @@ public class CompleteDonorAppointmentDto
     public int UnitsCollected { get; set; }
 }
 
+public class CompleteAppointmentDto
+{
+    public string? DoctorNotes { get; set; }
+}
+
 public class UpdateStaffProfileDto
 {
     public string? FullName { get; set; }
