@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { hospitalAPI } from '../../../api/hospital.api';
 import { useAuth } from '../../../hooks/useAuth';
 
 interface DonorAppointment {
