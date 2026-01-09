@@ -597,31 +597,27 @@ public class HospitalController : ControllerBase
     {
         try
         {
-            // Return all donation requests for now to test
-            var allRequests = await _context.Database
-                .SqlQueryRaw<DonorRequestDto>(
-                    @"SELECT 
-                        dr.donation_id as DonationId,
-                        COALESCE(u.full_name, 'Unknown') as DonorName,
-                        COALESCE(u.email, 'Unknown') as DonorEmail,
-                        COALESCE(u.phone, 'Unknown') as DonorPhone,
-                        COALESCE(dp.blood_type, 'Unknown') as BloodType,
-                        dr.units_required as UnitsRequested,
-                        dr.status as Status,
-                        dr.requested_date as RequestedDate,
-                        '' as Notes
-                      FROM donation_requests dr
-                      LEFT JOIN donor_profile dp ON dr.donor_id = dp.donor_id
-                      LEFT JOIN users u ON dp.user_id = u.id
-                      WHERE dr.hospital_id = 1
-                      ORDER BY dr.requested_date DESC")
-                .ToListAsync();
+            // Simple test - return hardcoded data first
+            var testData = new[]
+            {
+                new {
+                    donationId = 1,
+                    donorName = "Test Donor",
+                    donorEmail = "test@example.com",
+                    donorPhone = "123-456-7890",
+                    bloodType = "O+",
+                    unitsRequested = 2,
+                    status = "Pending",
+                    requestedDate = "2024-01-01",
+                    notes = ""
+                }
+            };
 
-            return Ok(new { success = true, data = allRequests, userId = userId });
+            return Ok(new { success = true, data = testData });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { success = false, message = ex.Message, userId = userId });
+            return StatusCode(500, new { success = false, message = ex.Message, stackTrace = ex.StackTrace });
         }
     }
 
