@@ -639,45 +639,37 @@ public class HospitalController : ControllerBase
     {
         try
         {
-            _logger.LogInformation($"Approving donor request {id} with appointment date {dto.AppointmentDate}");
-            
             var donorRequest = await _context.DonationRequests.FindAsync(id);
             if (donorRequest == null)
                 return NotFound(new { success = false, message = "Donor request not found" });
 
-            _logger.LogInformation($"Found donor request: DonorId={donorRequest.DonorId}, HospitalId={donorRequest.HospitalId}");
-
             // Update donation request status
             donorRequest.Status = "Approved";
+            _context.DonationRequests.Update(donorRequest);
             
-            // Create appointment in donor_appointments table
+            // Create appointment in donor_appointments table with Scheduled status
             var appointment = new DonorAppointment
             {
                 DonorId = donorRequest.DonorId,
-                DonationId = donorRequest.DonationId,
+                DonationId = id,
                 HospitalId = donorRequest.HospitalId,
                 AppointmentDate = dto.AppointmentDate.Date,
                 AppointmentTime = dto.AppointmentDate.TimeOfDay,
                 Status = "Scheduled",
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
+                DoctorId = dto.DoctorId > 0 ? dto.DoctorId : null
             };
             
-            _logger.LogInformation($"Creating appointment: DonorId={appointment.DonorId}, HospitalId={appointment.HospitalId}, Date={appointment.AppointmentDate}, Time={appointment.AppointmentTime}");
-            
             _context.DonorAppointments.Add(appointment);
-            var saveResult = await _context.SaveChangesAsync();
-            
-            _logger.LogInformation($"SaveChanges result: {saveResult} records affected");
-            _logger.LogInformation($"Created appointment with ID: {appointment.AppointmentId}");
+            await _context.SaveChangesAsync();
 
-            return Ok(new { success = true, message = "Donor request approved and appointment created successfully.", appointmentId = appointment.AppointmentId });
+            return Ok(new { success = true, message = "Donor request approved and appointment scheduled.", appointmentId = appointment.AppointmentId });
         }
         catch (Exception ex)
         {
             _logger.LogError($"Error approving donor request: {ex.Message}");
-            _logger.LogError($"Stack trace: {ex.StackTrace}");
-            return StatusCode(500, new { success = false, message = "Failed to approve donor request" });
+            return StatusCode(500, new { success = false, message = $"Failed to approve donor request: {ex.Message}" });
         }
     }
 
@@ -693,10 +685,28 @@ public class HospitalController : ControllerBase
             if (donorRequest == null)
                 return NotFound(new { success = false, message = "Donor request not found" });
 
+            // Update donation request status
             donorRequest.Status = "Rejected";
+            _context.DonationRequests.Update(donorRequest);
+            
+            // Create appointment in donor_appointments table with Cancelled status
+            var appointment = new DonorAppointment
+            {
+                DonorId = donorRequest.DonorId,
+                DonationId = id,
+                HospitalId = donorRequest.HospitalId,
+                AppointmentDate = DateTime.Today.AddDays(1), // Default to tomorrow
+                AppointmentTime = TimeSpan.FromHours(9), // Default to 9 AM
+                Status = "Cancelled",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                DoctorNotes = dto.RejectionNotes
+            };
+            
+            _context.DonorAppointments.Add(appointment);
             await _context.SaveChangesAsync();
 
-            return Ok(new { success = true, message = "Donor request rejected." });
+            return Ok(new { success = true, message = "Donor request rejected and appointment cancelled.", appointmentId = appointment.AppointmentId });
         }
         catch (Exception ex)
         {
