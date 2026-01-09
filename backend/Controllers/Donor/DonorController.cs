@@ -135,9 +135,9 @@ namespace BloodLine.Controllers
             try
             {
                 var hospitals = await _context.Database
-                    .SqlQueryRaw<dynamic>(
-                        @"SELECT hospital_id as id, hospital_name as name, 
-                          address as location, contact_number as phone
+                    .SqlQueryRaw<HospitalDto>(
+                        @"SELECT hospital_id as Id, hospital_name as Name, 
+                          address as Location, contact_number as Phone
                           FROM hospital")
                     .ToListAsync();
                 
@@ -269,6 +269,14 @@ namespace BloodLine.Controllers
 
             return Ok(completedDonations);
         }
+    }
+
+    public class HospitalDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Location { get; set; } = "";
+        public string Phone { get; set; } = "";
     }
 
     public class DonorUpdateProfileRequest
