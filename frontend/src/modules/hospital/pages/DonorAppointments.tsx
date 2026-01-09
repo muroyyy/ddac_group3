@@ -13,9 +13,13 @@ interface DonorAppointment {
 }
 
 const DonorAppointments: React.FC = () => {
+  console.log('🚀 DonorAppointments component loaded');
   const [appointments, setAppointments] = useState<DonorAppointment[]>([]);
   const [loading, setLoading] = useState(true);
   const { user, isLoading: authLoading } = useAuth();
+  
+  console.log('👤 Current user:', user);
+  console.log('⏳ Auth loading:', authLoading);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,19 +34,25 @@ const DonorAppointments: React.FC = () => {
 
       try {
         setLoading(true);
+        console.log('🔍 Fetching donor appointments for user:', user.id);
+        console.log('🌐 API URL:', `https://bloodline.dev/api/hospital/donor-appointments/${user.id}`);
+        
         // Fetch real data from donor_appointments table
         const response = await hospitalAPI.getDonorAppointments(user.id);
+        console.log('📦 API Response:', response);
+        
         if (response.success) {
+          console.log('✅ Success - appointments data:', response.data);
           setAppointments(response.data || []);
         } else {
-          console.error('Failed to fetch donor appointments:', response);
+          console.error('❌ API returned unsuccessful response:', response);
           setAppointments([]);
         }
       } catch (error) {
-        console.error('Error fetching donor appointments:', error);
+        console.error('💥 Error fetching donor appointments:', error);
         // Check if error is due to HTML response (endpoint not deployed)
         if (error instanceof Error && error.message.includes('text/html')) {
-          console.error('❌ Backend endpoint not deployed - received HTML instead of JSON');
+          console.error('🚨 Backend endpoint not deployed - received HTML instead of JSON');
         }
         setAppointments([]);
       } finally {
