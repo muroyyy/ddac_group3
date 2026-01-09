@@ -606,10 +606,9 @@ public class HospitalController : ControllerBase
     {
         try
         {
-            // Only show requests with Pending status or null/empty status
+            // Get all donation requests regardless of hospital_id for debugging
             var requests = await _context.DonationRequests
-                .Where(dr => dr.HospitalId == 1 && 
-                       (string.IsNullOrEmpty(dr.Status) || dr.Status == "Pending"))
+                .Where(dr => string.IsNullOrEmpty(dr.Status) || dr.Status == "Pending")
                 .Select(dr => new
                 {
                     donationId = dr.DonationId,
@@ -620,7 +619,8 @@ public class HospitalController : ControllerBase
                     unitsRequested = dr.UnitsRequired,
                     status = dr.Status ?? "Pending",
                     requestedDate = dr.RequestedDate.ToString("yyyy-MM-dd"),
-                    notes = ""
+                    notes = "",
+                    hospitalId = dr.HospitalId // Add this for debugging
                 })
                 .ToListAsync();
 
