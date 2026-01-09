@@ -98,6 +98,7 @@ namespace BloodLine.Controllers
                 if (lastDonation.HasValue)
                 {
                     lastDonationDate = lastDonation.Value.ToString("yyyy-MM-dd");
+                    // Check if 3 months have passed since last donation
                     var threeMonthsAgo = DateTime.Now.AddMonths(-3);
                     eligibleForImmediate = lastDonation.Value <= threeMonthsAgo;
                     
@@ -107,6 +108,7 @@ namespace BloodLine.Controllers
                     }
                 }
                 
+                // Override with profile availability setting
                 isAvailable = donorProfile.IsAvailable ?? true;
                 if (!isAvailable)
                 {
@@ -133,9 +135,9 @@ namespace BloodLine.Controllers
             try
             {
                 var hospitals = await _context.Database
-                    .SqlQueryRaw<HospitalDto>(
-                        @"SELECT hospital_id as Id, hospital_name as Name, 
-                          address as Location, contact_number as Phone
+                    .SqlQueryRaw<dynamic>(
+                        @"SELECT hospital_id as id, hospital_name as name, 
+                          address as location, contact_number as phone
                           FROM hospital")
                     .ToListAsync();
                 
@@ -153,7 +155,7 @@ namespace BloodLine.Controllers
             var donorProfile = await _context.DonorProfiles.FirstOrDefaultAsync(d => d.UserId == userId);
             if (donorProfile == null) 
             {
-                return Ok(new List<DonationRequestDto>());
+                return Ok(new List<DonationRequestDto>()); // Return empty array instead of 404
             }
 
             var requests = await _context.Database
@@ -267,14 +269,6 @@ namespace BloodLine.Controllers
 
             return Ok(completedDonations);
         }
-    }
-
-    public class HospitalDto
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = "";
-        public string Location { get; set; } = "";
-        public string Phone { get; set; } = "";
     }
 
     public class DonorUpdateProfileRequest
