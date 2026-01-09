@@ -16,13 +16,6 @@ interface DonorRequest {
   requestedDate: string;
 }
 
-interface Doctor {
-  doctorId: number;
-  doctorName: string;
-  specialization: string;
-  contactNumber: string;
-}
-
 export default function DonorRequests() {
   const { user } = useAuth();
   const [requests, setRequests] = useState<DonorRequest[]>([]);
