@@ -639,9 +639,13 @@ public class HospitalController : ControllerBase
     {
         try
         {
+            _logger.LogInformation($"Approving donor request {id} with appointment date {dto.AppointmentDate}");
+            
             var donorRequest = await _context.DonationRequests.FindAsync(id);
             if (donorRequest == null)
                 return NotFound(new { success = false, message = "Donor request not found" });
+
+            _logger.LogInformation($"Found donor request: DonorId={donorRequest.DonorId}, HospitalId={donorRequest.HospitalId}");
 
             // Update donation request status
             donorRequest.Status = "Approved";
@@ -659,14 +663,20 @@ public class HospitalController : ControllerBase
                 UpdatedAt = DateTime.UtcNow
             };
             
+            _logger.LogInformation($"Creating appointment: DonorId={appointment.DonorId}, HospitalId={appointment.HospitalId}, Date={appointment.AppointmentDate}, Time={appointment.AppointmentTime}");
+            
             _context.DonorAppointments.Add(appointment);
-            await _context.SaveChangesAsync();
+            var saveResult = await _context.SaveChangesAsync();
+            
+            _logger.LogInformation($"SaveChanges result: {saveResult} records affected");
+            _logger.LogInformation($"Created appointment with ID: {appointment.AppointmentId}");
 
-            return Ok(new { success = true, message = "Donor request approved and appointment created successfully." });
+            return Ok(new { success = true, message = "Donor request approved and appointment created successfully.", appointmentId = appointment.AppointmentId });
         }
         catch (Exception ex)
         {
             _logger.LogError($"Error approving donor request: {ex.Message}");
+            _logger.LogError($"Stack trace: {ex.StackTrace}");
             return StatusCode(500, new { success = false, message = "Failed to approve donor request" });
         }
     }
@@ -961,45 +971,38 @@ public class HospitalController : ControllerBase
 
 
     /// <summary>
-    /// Debug endpoint to check appointments data
+    /// Debug endpoint to check donor appointments data
     /// </summary>
-    [HttpGet("debug-appointments/{userId}")]
-    public async Task<IActionResult> DebugAppointments(int userId)
+    [HttpGet("debug-donor-appointments/{userId}")]
+    public async Task<IActionResult> DebugDonorAppointments(int userId)
     {
         try
         {
             var hospitalId = await GetHospitalIdFromUser(userId);
             
-            // Try to query the table directly to see if it exists
-            var totalCount = 0;
-            var rawAppointments = new List<object>();
+            // Get raw count from donor_appointments table
+            var totalCount = await _context.DonorAppointments.CountAsync();
+            var hospitalCount = await _context.DonorAppointments.Where(da => da.HospitalId == hospitalId).CountAsync();
             
-            try
-            {
-                totalCount = await _context.PatientAppointments.CountAsync();
-                rawAppointments = (await _context.PatientAppointments
-                    .Take(5)
-                    .Select(a => new {
-                        a.AppointmentId,
-                        a.RequestId,
-                        a.PatientId,
-                        a.HospitalId,
-                        a.Status
-                    })
-                    .ToListAsync()).Cast<object>().ToList();
-            }
-            catch (Exception tableEx)
-            {
-                return Ok(new { 
-                    error = $"Table access error: {tableEx.Message}",
-                    success = false 
-                });
-            }
+            // Get raw appointments data
+            var rawAppointments = await _context.DonorAppointments
+                .Where(da => da.HospitalId == hospitalId)
+                .Select(da => new {
+                    da.AppointmentId,
+                    da.DonorId,
+                    da.HospitalId,
+                    da.AppointmentDate,
+                    da.AppointmentTime,
+                    da.Status,
+                    da.CreatedAt
+                })
+                .ToListAsync();
             
             return Ok(new { 
                 userId = userId,
                 hospitalId = hospitalId,
                 totalCount = totalCount,
+                hospitalCount = hospitalCount,
                 rawAppointments = rawAppointments,
                 success = true 
             });
