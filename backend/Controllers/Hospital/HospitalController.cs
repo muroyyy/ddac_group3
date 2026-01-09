@@ -704,8 +704,10 @@ public class HospitalController : ControllerBase
         try
         {
             var hospitalId = await GetHospitalIdFromUser(userId);
+            _logger.LogInformation($"User {userId} mapped to hospital {hospitalId}");
+            
             if (hospitalId == null)
-                return BadRequest(new { success = false, message = "Hospital staff not found" });
+                return Ok(new { success = false, message = "Hospital staff not found", userId = userId });
 
             var appointments = await _context.DonorAppointments
                 .Where(da => da.HospitalId == hospitalId.Value)
@@ -723,6 +725,7 @@ public class HospitalController : ControllerBase
                 .OrderByDescending(x => x.appointmentDate)
                 .ToListAsync();
 
+            _logger.LogInformation($"Found {appointments.Count} donor appointments for hospital {hospitalId}");
             return Ok(new { success = true, data = appointments });
         }
         catch (Exception ex)

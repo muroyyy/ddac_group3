@@ -201,17 +201,18 @@ namespace BloodLine.Controllers
             }
 
             var appointments = await _context.DonorAppointments
-                .Where(da => da.DonorId == donorProfile.DonorId && da.Status == "Scheduled")
-                .Select(da => new
+                .Where(da => da.DonorId == donorProfile.DonorId)
+                .Join(_context.Hospitals, da => da.HospitalId, h => h.HospitalId, (da, h) => new { da, h })
+                .Join(_context.DonorProfiles, x => x.da.DonorId, dp => dp.DonorId, (x, dp) => new
                 {
-                    id = da.AppointmentId,
-                    hospitalName = "Hospital " + da.HospitalId,
-                    date = da.AppointmentDate.ToString("yyyy-MM-dd"),
-                    time = da.AppointmentTime.ToString(@"hh\:mm"),
-                    status = da.Status,
-                    bloodType = "O+",
+                    id = x.da.AppointmentId,
+                    hospitalName = x.h.HospitalName,
+                    date = x.da.AppointmentDate.ToString("yyyy-MM-dd"),
+                    time = x.da.AppointmentTime.ToString(@"hh\:mm"),
+                    status = x.da.Status,
+                    bloodType = dp.BloodType ?? "Unknown",
                     units = 1,
-                    doctorNotes = da.DoctorNotes ?? ""
+                    doctorNotes = x.da.DoctorNotes ?? ""
                 })
                 .OrderBy(da => da.date)
                 .ToListAsync();
