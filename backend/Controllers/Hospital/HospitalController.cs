@@ -638,7 +638,6 @@ public class HospitalController : ControllerBase
     [HttpPost("donor-requests/{id}/approve")]
     public async Task<IActionResult> ApproveDonorRequest(int id, [FromBody] ApproveRequestDto dto)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
             _logger.LogInformation($"Attempting to approve donation request {id}");
@@ -673,17 +672,16 @@ public class HospitalController : ControllerBase
             _logger.LogInformation($"Creating appointment for donation {id}");
             _context.DonorAppointments.Add(appointment);
             
+            // Save both changes together
             var saveResult = await _context.SaveChangesAsync();
             _logger.LogInformation($"SaveChanges result: {saveResult} records affected");
             
-            await transaction.CommitAsync();
-            _logger.LogInformation($"Transaction committed successfully for donation {id}");
+            _logger.LogInformation($"Successfully approved donation {id} and created appointment {appointment.AppointmentId}");
 
             return Ok(new { success = true, message = "Donor request approved and appointment scheduled.", appointmentId = appointment.AppointmentId });
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
             _logger.LogError($"Error approving donor request {id}: {ex.Message}");
             _logger.LogError($"Stack trace: {ex.StackTrace}");
             return StatusCode(500, new { success = false, message = $"Failed to approve donor request: {ex.Message}" });

@@ -77,7 +77,7 @@ export default function DonorRequests() {
   };
 
   const approveRequest = async () => {
-    if (!approvingRequest || !selectedDoctorId || !appointmentDate || !appointmentTime) {
+    if (!approvingRequest || !appointmentDate || !appointmentTime) {
       alert('Please fill in all required fields');
       return;
     }
@@ -85,7 +85,7 @@ export default function DonorRequests() {
     try {
       const appointmentDateTime = new Date(`${appointmentDate}T${appointmentTime}`);
       const result = await hospitalAPI.approveDonorRequest(approvingRequest.donationId, {
-        doctorId: selectedDoctorId,
+        doctorId: 1, // Default doctor ID
         appointmentDate: appointmentDateTime
       });
       
@@ -431,22 +431,6 @@ export default function DonorRequests() {
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Select Doctor</label>
-                <select
-                  value={selectedDoctorId}
-                  onChange={(e) => setSelectedDoctorId(Number(e.target.value))}
-                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                >
-                  <option value={0}>Select a doctor...</option>
-                  {doctors.map(doctor => (
-                    <option key={doctor.doctorId} value={doctor.doctorId}>
-                      {doctor.doctorName} - {doctor.specialization}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Appointment Date</label>
                 <input
                   type="date"
@@ -471,7 +455,7 @@ export default function DonorRequests() {
             <div className="flex gap-3 mt-8">
               <button
                 onClick={approveRequest}
-                disabled={!selectedDoctorId || !appointmentDate || !appointmentTime}
+                disabled={!appointmentDate || !appointmentTime}
                 className="flex-1 bg-green-600 text-white py-3 px-4 rounded-xl hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
               >
                 Approve & Create Appointment
