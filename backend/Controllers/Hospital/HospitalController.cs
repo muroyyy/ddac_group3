@@ -1,4 +1,5 @@
 using BloodLine.Data;
+using BloodLine.Data.DTOs;
 using BloodLine.Models;
 using BloodLine.Models.Users;
 using BloodLine.Models.Auth;
