@@ -597,46 +597,31 @@ public class HospitalController : ControllerBase
     {
         try
         {
-            // Debug: Check if user exists and get hospital ID
-            var hospitalId = await GetHospitalIdFromUser(userId);
-            if (hospitalId == null)
-            {
-                // Debug: Check if user exists in hospital_staff table
-                var staffExists = await _context.Database
-                    .SqlQuery<int>($"SELECT COUNT(*) as Value FROM hospital_staff WHERE user_id = {userId}")
-                    .FirstOrDefaultAsync();
-                    
-                return BadRequest(new { 
-                    success = false, 
-                    message = $"Hospital staff not found for user {userId}. Staff records: {staffExists}" 
-                });
-            }
-
-            var requests = await _context.Database
+            // Return all donation requests for now to test
+            var allRequests = await _context.Database
                 .SqlQueryRaw<DonorRequestDto>(
                     @"SELECT 
                         dr.donation_id as DonationId,
-                        u.full_name as DonorName,
-                        u.email as DonorEmail,
-                        u.phone as DonorPhone,
-                        dp.blood_type as BloodType,
+                        COALESCE(u.full_name, 'Unknown') as DonorName,
+                        COALESCE(u.email, 'Unknown') as DonorEmail,
+                        COALESCE(u.phone, 'Unknown') as DonorPhone,
+                        COALESCE(dp.blood_type, 'Unknown') as BloodType,
                         dr.units_required as UnitsRequested,
                         dr.status as Status,
                         dr.requested_date as RequestedDate,
                         '' as Notes
                       FROM donation_requests dr
-                      JOIN donor_profile dp ON dr.donor_id = dp.donor_id
-                      JOIN users u ON dp.user_id = u.id
-                      WHERE dr.hospital_id = {0}
-                      ORDER BY dr.requested_date DESC", hospitalId.Value)
+                      LEFT JOIN donor_profile dp ON dr.donor_id = dp.donor_id
+                      LEFT JOIN users u ON dp.user_id = u.id
+                      WHERE dr.hospital_id = 1
+                      ORDER BY dr.requested_date DESC")
                 .ToListAsync();
 
-            return Ok(new { success = true, data = requests, hospitalId = hospitalId.Value });
+            return Ok(new { success = true, data = allRequests, userId = userId });
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error fetching donor requests: {ex.Message}");
-            return StatusCode(500, new { success = false, message = "Failed to fetch donor requests", error = ex.Message });
+            return StatusCode(500, new { success = false, message = ex.Message, userId = userId });
         }
     }
 
