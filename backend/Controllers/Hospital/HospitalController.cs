@@ -458,7 +458,25 @@ public class HospitalController : ControllerBase
             if (hospitalId == null)
                 return Ok(new { success = true, data = new List<object>() });
 
-            // First check if appointments exist
+            // Check all appointments first (ignore hospital filter for testing)
+            var allAppointments = await _context.PatientAppointments.CountAsync();
+            _logger.LogInformation($"Total appointments in database: {allAppointments}");
+            
+            if (allAppointments == 0)
+            {
+                // No appointments exist at all - return empty with debug info
+                return Ok(new { 
+                    success = true, 
+                    data = new List<object>(),
+                    debug = new { 
+                        message = "No appointments found in database",
+                        hospitalId = hospitalId,
+                        totalAppointments = allAppointments
+                    }
+                });
+            }
+
+            // First check if appointments exist for this hospital
             var appointmentCount = await _context.PatientAppointments
                 .Where(a => a.HospitalId == hospitalId.Value)
                 .CountAsync();
@@ -907,28 +925,37 @@ public class HospitalController : ControllerBase
         {
             var hospitalId = await GetHospitalIdFromUser(userId);
             
-            var totalCount = await _context.PatientAppointments
-                .Where(a => a.HospitalId == hospitalId)
-                .CountAsync();
-                
-            var rawAppointments = await _context.PatientAppointments
-                .Where(a => a.HospitalId == hospitalId)
-                .Take(5)
-                .ToListAsync();
+            // Try to query the table directly to see if it exists
+            var totalCount = 0;
+            var rawAppointments = new List<object>();
+            
+            try
+            {
+                totalCount = await _context.PatientAppointments.CountAsync();
+                rawAppointments = await _context.PatientAppointments
+                    .Take(5)
+                    .Select(a => new {
+                        a.AppointmentId,
+                        a.RequestId,
+                        a.PatientId,
+                        a.HospitalId,
+                        a.Status
+                    })
+                    .ToListAsync();
+            }
+            catch (Exception tableEx)
+            {
+                return Ok(new { 
+                    error = $"Table access error: {tableEx.Message}",
+                    success = false 
+                });
+            }
             
             return Ok(new { 
                 userId = userId,
                 hospitalId = hospitalId,
                 totalCount = totalCount,
-                rawAppointments = rawAppointments.Select(a => new {
-                    a.AppointmentId,
-                    a.RequestId,
-                    a.PatientId,
-                    a.DoctorId,
-                    a.Status,
-                    a.AppointmentDate,
-                    a.CreatedAt
-                }),
+                rawAppointments = rawAppointments,
                 success = true 
             });
         }
