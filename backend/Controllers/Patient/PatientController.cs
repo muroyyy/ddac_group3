@@ -26,32 +26,63 @@ namespace BloodLine.Controllers
             _notificationService = notificationService;
         }
 
-        // -------------------------------------------------------------------
-        // Convert UserId -> PatientId
-        // -------------------------------------------------------------------
+        /// <summary>
+        /// SECURITY HELPER METHOD - Converts user ID to patient ID
+        /// 
+        /// PURPOSE:
+        /// - Users have a user_id (for authentication/login)
+        /// - Patients have a patient_id (for medical records)
+        /// - This method links the two for secure data access
+        /// 
+        /// SECURITY BENEFIT:
+        /// - Ensures patients can only access their own medical data
+        /// - Prevents unauthorized access to other patients' appointments
+        /// </summary>
+        /// <param name="userId">The authenticated user's ID from login session</param>
+        /// <returns>Patient ID if found, null if user has no patient profile</returns>
         private async Task<int?> GetPatientIdFromUser(int userId)
         {
+            // QUERY patient_profile table to find patient record for this user
             var profile = await _db.PatientProfiles
                 .FirstOrDefaultAsync(p => p.UserId == userId);
 
+            // RETURN patient ID or null if no profile exists
             return profile?.PatientId;
         }
 
-        // -------------------------------------------------------------------
-        // POST: /api/patient/blood-request/{userId}
-        // -------------------------------------------------------------------
+        /// <summary>
+        /// CREATE BLOOD REQUEST ENDPOINT - Allows patients to submit new blood requests
+        /// 
+        /// BUSINESS LOGIC:
+        /// - Validates user is authenticated and has patient profile
+        /// - Creates blood_requests record with "Pending" status
+        /// - Sends confirmation notification to patient
+        /// - Hospital staff will later review and approve/reject
+        /// - If approved, appointment is automatically created
+        /// 
+        /// SECURITY:
+        /// - Converts user ID to patient ID for data isolation
+        /// - Validates all input data
+        /// - Prevents unauthorized access to other patients' data
+        /// </summary>
+        /// <param name="userId">The authenticated user's ID from frontend</param>
+        /// <param name="dto">Blood request data (blood type, units, urgency, hospital, notes)</param>
+        /// <returns>Success response with request ID or error message</returns>
         [HttpPost("blood-request/{userId}")]
         public async Task<IActionResult> CreateBloodRequest(int userId, [FromBody] CreateBloodRequestDto dto)
         {
             try
             {
+                // INPUT VALIDATION - Ensure valid user ID
                 if (userId <= 0)
                     return BadRequest(new { success = false, message = "Invalid user ID." });
 
+                // INPUT VALIDATION - Ensure request data provided
                 if (dto == null)
                     return BadRequest(new { success = false, message = "Request data is required." });
 
-                // 🔥 Convert userId → patientId
+                // SECURITY CONVERSION - Convert user ID to patient ID
+                // This ensures only patients can create requests and data isolation
                 var patientId = await GetPatientIdFromUser(userId);
 
                 if (patientId == null)
@@ -63,24 +94,27 @@ namespace BloodLine.Controllers
                     });
                 }
 
+                // CREATE BLOOD REQUEST OBJECT - Prepare data for database
                 var newRequest = new BloodRequest
                 {
-                    PatientId = patientId.Value,
-                    HospitalId = dto.HospitalId,
-                    BloodType = dto.BloodType ?? "Unknown",
-                    UnitsRequired = dto.UnitsRequired > 0 ? dto.UnitsRequired : 1,
-                    UrgencyLevel = dto.UrgencyLevel ?? "Medium",
-                    Notes = dto.Notes,
-                    Status = "Pending",
-                    CreatedAt = DateTime.UtcNow
+                    PatientId = patientId.Value,                                    // Link to patient
+                    HospitalId = dto.HospitalId,                                    // Target hospital
+                    BloodType = dto.BloodType ?? "Unknown",                        // Blood type with fallback
+                    UnitsRequired = dto.UnitsRequired > 0 ? dto.UnitsRequired : 1, // Minimum 1 unit
+                    UrgencyLevel = dto.UrgencyLevel ?? "Medium",                   // Urgency with fallback
+                    Notes = dto.Notes,                                              // Optional notes
+                    Status = "Pending",                                            // Initial status
+                    CreatedAt = DateTime.UtcNow                                     // Timestamp
                 };
 
+                // SAVE TO DATABASE - Add request and commit transaction
                 _db.BloodRequests.Add(newRequest);
                 await _db.SaveChangesAsync();
 
-                // Send confirmation notification to patient
+                // SEND NOTIFICATION - Confirm submission to patient
                 await SendBloodRequestSubmissionNotification(userId, newRequest.RequestId, newRequest.BloodType, newRequest.CreatedAt ?? DateTime.UtcNow);
 
+                // SUCCESS RESPONSE - Return request ID for tracking
                 return Ok(new
                 {
                     success = true,
@@ -90,6 +124,7 @@ namespace BloodLine.Controllers
             }
             catch (Exception ex)
             {
+                // ERROR HANDLING - Log error and return generic message
                 return StatusCode(500, new
                 {
                     success = false,
@@ -99,9 +134,10 @@ namespace BloodLine.Controllers
             }
         }
 
-        // -------------------------------------------------------------------
-        // GET: /api/patient/blood-requests/{userId}
-        // -------------------------------------------------------------------
+        /// <summary>
+        /// GET BLOOD REQUESTS ENDPOINT - Retrieves patient's blood requests
+        /// Used by frontend to display request history
+        /// </summary>
         [HttpGet("blood-requests/{userId}")]
         public async Task<IActionResult> GetBloodRequests(int userId)
         {
@@ -154,26 +190,46 @@ namespace BloodLine.Controllers
             }
         }
 
+        /// <summary>
+        /// GET APPOINTMENTS ENDPOINT - Retrieves all appointments for a specific patient
+        /// 
+        /// BUSINESS LOGIC:
+        /// - Converts user ID to patient ID for security
+        /// - Queries patient_appointments table with JOINs
+        /// - Returns appointments with hospital and doctor information
+        /// - Orders by date (newest first)
+        /// 
+        /// SECURITY: Only returns appointments for the authenticated patient
+        /// </summary>
+        /// <param name="userId">The authenticated user's ID from frontend</param>
+        /// <returns>JSON response with appointment data</returns>
         [HttpGet("appointments/{userId}")]
         public async Task<IActionResult> GetAppointments(int userId)
         {
             try
             {
+                // INPUT VALIDATION - Ensure valid user ID
                 if (userId <= 0)
                     return BadRequest(new { success = false, message = "Invalid user ID." });
 
+                // SECURITY CONVERSION - Convert user ID to patient ID
+                // This ensures patients can only see their own appointments
                 var patientId = await GetPatientIdFromUser(userId);
                 if (patientId == null)
                 {
+                    // User has no patient profile - return empty list
                     return Ok(new { success = true, data = new List<object>() });
                 }
 
+                // DATABASE QUERY - Get appointments with related data
                 var appointments = await _db.PatientAppointments
-                    .Where(pa => pa.PatientId == patientId.Value)
+                    .Where(pa => pa.PatientId == patientId.Value)  // SECURITY: Only this patient's appointments
                     .Select(pa => new
                     {
                         appointmentId = pa.AppointmentId,
+                        // JOIN with hospitals table to get hospital name
                         hospitalName = _db.Hospitals.Where(h => h.HospitalId == pa.HospitalId).Select(h => h.HospitalName).FirstOrDefault() ?? "Unknown Hospital",
+                        // JOIN with doctors table to get doctor name (handle null doctor_id)
                         doctorName = pa.DoctorId.HasValue ? 
                             _db.Doctors.Where(d => d.DoctorId == pa.DoctorId.Value).Select(d => d.DoctorName).FirstOrDefault() ?? "Not Assigned" : 
                             "Not Assigned",
@@ -181,53 +237,74 @@ namespace BloodLine.Controllers
                         status = pa.Status,
                         doctorNotes = pa.DoctorNotes
                     })
-                    .OrderByDescending(x => x.appointmentDate)
+                    .OrderByDescending(x => x.appointmentDate)  // SORT: Newest appointments first
                     .ToListAsync();
 
+                // FORMAT RESPONSE - Convert dates to string format for frontend
                 var result = appointments.Select(a => new
                 {
                     appointmentId = a.appointmentId,
                     hospitalName = a.hospitalName,
                     doctorName = a.doctorName,
-                    appointmentDate = a.appointmentDate.ToString("yyyy-MM-dd HH:mm"),
+                    appointmentDate = a.appointmentDate.ToString("yyyy-MM-dd HH:mm"),  // Format for frontend display
                     status = a.status,
                     doctorNotes = a.doctorNotes
                 }).ToList();
 
+                // SUCCESS RESPONSE - Return formatted appointment data
                 return Ok(new { success = true, data = result });
             }
             catch (Exception ex)
             {
+                // ERROR HANDLING - Log error and return generic message
                 Console.WriteLine($"Error in GetAppointments for userId {userId}: {ex.Message}");
                 return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
 
 
-        //Code to cancel upcoming appointment only
+        /// <summary>
+        /// CANCEL APPOINTMENT ENDPOINT - Allows patients to cancel upcoming appointments
+        /// 
+        /// BUSINESS LOGIC:
+        /// - Only "Upcoming" appointments can be cancelled
+        /// - Updates appointment status to "Cancelled"
+        /// - Updates timestamp to track when cancellation occurred
+        /// 
+        /// SECURITY: Validates appointment exists and is in correct status
+        /// </summary>
+        /// <param name="appointmentId">The ID of the appointment to cancel</param>
+        /// <returns>Success/failure response</returns>
         [HttpPut("cancel-appointment/{appointmentId}")]
         public async Task<IActionResult> CancelAppointment(int appointmentId)
         {
             try
             {
+                // FIND AND VALIDATE APPOINTMENT
+                // Only find appointments that are "Upcoming" - prevents cancelling completed/cancelled appointments
                 var appointment = await _db.PatientAppointments
                     .FirstOrDefaultAsync(a => a.AppointmentId == appointmentId && a.Status == "Upcoming");
 
+                // VALIDATION - Check if appointment exists and is cancellable
                 if (appointment == null)
                 {
                     return BadRequest(new { success = false, message = "Appointment not found or already cancelled." });
                 }
 
-                // Update status to 'Cancelled'
+                // UPDATE DATABASE - Change status to cancelled
                 appointment.Status = "Cancelled";
-                appointment.CreatedAt = DateTime.UtcNow; // Update timestamp to show last update
+                appointment.CreatedAt = DateTime.UtcNow; // Update timestamp to track when cancellation occurred
+                
+                // SAVE CHANGES - Persist the cancellation to database
                 _db.PatientAppointments.Update(appointment);
                 await _db.SaveChangesAsync();
 
+                // SUCCESS RESPONSE - Confirm cancellation to frontend
                 return Ok(new { success = true, message = "Appointment cancelled successfully." });
             }
             catch (Exception ex)
             {
+                // ERROR HANDLING - Return server error with details
                 return StatusCode(500, new
                 {
                     success = false,
