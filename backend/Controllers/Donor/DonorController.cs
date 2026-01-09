@@ -200,24 +200,32 @@ namespace BloodLine.Controllers
                 return Ok(new { success = true, data = new List<object>() });
             }
 
-            var appointments = await _context.DonorAppointments
-                .Where(da => da.DonorId == donorProfile.DonorId && da.Status == "Scheduled")
-                .Join(_context.Hospitals, da => da.HospitalId, h => h.HospitalId, (da, h) => new { da, h })
-                .Join(_context.DonorProfiles, x => x.da.DonorId, dp => dp.DonorId, (x, dp) => new
-                {
-                    id = x.da.AppointmentId,
-                    hospitalName = x.h.HospitalName,
-                    date = x.da.AppointmentDate.ToString("yyyy-MM-dd"),
-                    time = x.da.AppointmentTime.ToString(@"hh\:mm"),
-                    status = x.da.Status,
-                    bloodType = dp.BloodType ?? "Unknown",
-                    units = 1,
-                    doctorNotes = x.da.DoctorNotes ?? ""
-                })
-                .OrderBy(da => da.date)
+            var appointments = await _context.Database
+                .SqlQueryRaw<DonorAppointmentResponseDto>(
+                    @"SELECT da.appointment_id as Id, h.hospital_name as HospitalName,
+                      da.appointment_date as Date, da.appointment_time as Time,
+                      da.status as Status, dp.blood_type as BloodType, 1 as Units,
+                      da.doctor_notes as DoctorNotes
+                      FROM donor_appointments da
+                      JOIN hospital h ON da.hospital_id = h.hospital_id
+                      JOIN donor_profile dp ON da.donor_id = dp.donor_id
+                      WHERE da.donor_id = {0} AND da.status = 'Scheduled'
+                      ORDER BY da.appointment_date ASC", donorProfile.DonorId)
                 .ToListAsync();
 
-            return Ok(new { success = true, data = appointments });
+            var formattedAppointments = appointments.Select(a => new
+            {
+                id = a.Id,
+                hospitalName = a.HospitalName,
+                date = a.Date.ToString("yyyy-MM-dd"),
+                time = a.Time.ToString(@"hh\:mm"),
+                status = a.Status,
+                bloodType = a.BloodType ?? "Unknown",
+                units = a.Units,
+                doctorNotes = a.DoctorNotes ?? ""
+            }).ToList();
+
+            return Ok(new { success = true, data = formattedAppointments });
         }
 
         [HttpGet("appointment-history/{userId}")]
@@ -320,6 +328,18 @@ namespace BloodLine.Controllers
         public string Status { get; set; } = "";
         public string BloodType { get; set; } = "";
         public int Units { get; set; }
+    }
+
+    public class DonorAppointmentResponseDto
+    {
+        public int Id { get; set; }
+        public string HospitalName { get; set; } = "";
+        public DateTime Date { get; set; }
+        public TimeSpan Time { get; set; }
+        public string Status { get; set; } = "";
+        public string BloodType { get; set; } = "";
+        public int Units { get; set; }
+        public string? DoctorNotes { get; set; }
     }
 
     public class CompletedDonationDto
