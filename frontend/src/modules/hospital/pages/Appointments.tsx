@@ -40,7 +40,7 @@ export default function Appointments() {
 
   const completeAppointment = async (id: number) => {
     try {
-      await hospitalAPI.completeAppointment(id, doctorNotes);
+      await hospitalAPI.completeAppointment(id, { doctorNotes });
       setCompletingId(null);
       setDoctorNotes('');
       alert('Appointment completed successfully! Patient has been notified.');
