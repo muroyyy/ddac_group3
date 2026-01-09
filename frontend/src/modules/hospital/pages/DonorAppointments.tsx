@@ -27,18 +27,19 @@ const DonorAppointments: React.FC = () => {
       if (authLoading) return;
       
       // If no user after auth completes, stop loading
-      if (!user?.user?.id) {
+      if (!(user as any)?.user?.id) {
         setLoading(false);
         return;
       }
 
       try {
         setLoading(true);
-        console.log('🔍 Fetching donor appointments for user:', user.user.id);
-        console.log('🌐 API URL:', `https://bloodline.dev/api/hospital/donor-appointments/${user.user.id}`);
+        const userId = (user as any).user.id;
+        console.log('🔍 Fetching donor appointments for user:', userId);
+        console.log('🌐 API URL:', `https://bloodline.dev/api/hospital/donor-appointments/${userId}`);
         
         // Fetch real data from donor_appointments table
-        const response = await hospitalAPI.getDonorAppointments(user.user.id);
+        const response = await hospitalAPI.getDonorAppointments(userId);
         console.log('📦 API Response:', response);
         
         if (response.success) {
