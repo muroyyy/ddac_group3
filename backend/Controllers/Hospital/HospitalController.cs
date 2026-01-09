@@ -955,6 +955,55 @@ public class HospitalController : ControllerBase
         }
     }
     /// <summary>
+    /// Simple test endpoint to check blood requests directly
+    /// </summary>
+    [HttpGet("debug-blood-requests/{userId}")]
+    public async Task<IActionResult> DebugBloodRequests(int userId)
+    {
+        try
+        {
+            var hospitalId = await GetHospitalIdFromUser(userId);
+            
+            // Get raw count
+            var totalCount = await _context.BloodRequests
+                .Where(br => br.HospitalId == hospitalId)
+                .CountAsync();
+                
+            var pendingCount = await _context.BloodRequests
+                .Where(br => br.HospitalId == hospitalId && br.Status == "Pending")
+                .CountAsync();
+                
+            // Get raw data
+            var rawRequests = await _context.BloodRequests
+                .Where(br => br.HospitalId == hospitalId && br.Status == "Pending")
+                .Take(5)
+                .ToListAsync();
+            
+            return Ok(new { 
+                userId = userId,
+                hospitalId = hospitalId,
+                totalCount = totalCount,
+                pendingCount = pendingCount,
+                rawRequests = rawRequests.Select(r => new {
+                    r.RequestId,
+                    r.PatientId,
+                    r.BloodType,
+                    r.Status,
+                    r.CreatedAt
+                }),
+                success = true 
+            });
+        }
+        catch (Exception ex)
+        {
+            return Ok(new { 
+                error = ex.Message,
+                success = false 
+            });
+        }
+    }
+
+    /// <summary>
     /// Test endpoint to check hospital staff lookup
     /// </summary>
     [HttpGet("test/{userId}")]
