@@ -478,7 +478,7 @@ public class HospitalController : ControllerBase
                     appointmentDate = x.a.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
                     status = x.a.Status ?? "",
                     doctorNotes = x.a.DoctorNotes ?? "",
-                    createdAt = x.a.CreatedAt.HasValue ? x.a.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm") : ""
+                    createdAt = x.a.CreatedAt.ToString("yyyy-MM-dd HH:mm")
                 })
                 .Where(x => x.patientName != null)
                 .OrderByDescending(x => x.appointmentDate)
