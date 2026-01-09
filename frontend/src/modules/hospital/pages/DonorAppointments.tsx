@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
+import { hospitalAPI } from '../services/hospitalAPI';
 
 interface DonorAppointment {
   appointmentId: number;
@@ -29,39 +30,20 @@ const DonorAppointments: React.FC = () => {
 
       try {
         setLoading(true);
-        // Temporary mock data since API endpoint is not deployed
-        const mockData = [
-          {
-            appointmentId: 1,
-            donorName: "John Doe",
-            bloodType: "O+",
-            appointmentDate: "2025-12-15",
-            appointmentTime: "09:30",
-            status: "Scheduled",
-            createdAt: "2025-12-01 09:00"
-          },
-          {
-            appointmentId: 2,
-            donorName: "Jane Smith",
-            bloodType: "A+",
-            appointmentDate: "2025-12-20",
-            appointmentTime: "14:15",
-            status: "Completed",
-            createdAt: "2025-12-02 10:30"
-          }
-        ];
-        
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setAppointments(mockData);
-        
-        // Uncomment when API is deployed:
-        // const response = await hospitalAPI.getDonorAppointments(user.id);
-        // if (response.success) {
-        //   setAppointments(response.data || []);
-        // }
+        // Fetch real data from donor_appointments table
+        const response = await hospitalAPI.getDonorAppointments(user.id);
+        if (response.success) {
+          setAppointments(response.data || []);
+        } else {
+          console.error('Failed to fetch donor appointments:', response);
+          setAppointments([]);
+        }
       } catch (error) {
         console.error('Error fetching donor appointments:', error);
+        // Check if error is due to HTML response (endpoint not deployed)
+        if (error instanceof Error && error.message.includes('text/html')) {
+          console.error('❌ Backend endpoint not deployed - received HTML instead of JSON');
+        }
         setAppointments([]);
       } finally {
         setLoading(false);
