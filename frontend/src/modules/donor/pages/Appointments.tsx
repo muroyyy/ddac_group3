@@ -32,10 +32,18 @@ export default function Appointments() {
         const response = await donorAPI.getAppointments(user.id);
         if (response.success) {
           setAppointments(response.data);
+        } else {
+          console.error('API returned unsuccessful response:', response);
+          setAppointments([]);
         }
       }
     } catch (error) {
       console.error('Error fetching appointments:', error);
+      // Check if error is due to HTML response
+      if (error instanceof Error && error.message.includes('text/html')) {
+        console.error('❌ Received HTML instead of JSON - API endpoint may not be deployed');
+      }
+      setAppointments([]);
     } finally {
       setLoading(false);
     }
