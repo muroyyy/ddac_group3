@@ -606,11 +606,10 @@ public class HospitalController : ControllerBase
     {
         try
         {
-            // Only show requests that haven't been approved or rejected yet
+            // Only show requests with Pending status or null/empty status
             var requests = await _context.DonationRequests
                 .Where(dr => dr.HospitalId == 1 && 
-                       (dr.Status == null || dr.Status == "" || dr.Status == "Pending") &&
-                       dr.Status != "Approved" && dr.Status != "Rejected")
+                       (string.IsNullOrEmpty(dr.Status) || dr.Status == "Pending"))
                 .Select(dr => new
                 {
                     donationId = dr.DonationId,
@@ -983,40 +982,27 @@ public class HospitalController : ControllerBase
 
 
     /// <summary>
-    /// Debug endpoint to check donor appointments data
+    /// Debug endpoint to check donation requests data
     /// </summary>
-    [HttpGet("debug-donor-appointments/{userId}")]
-    public async Task<IActionResult> DebugDonorAppointments(int userId)
+    [HttpGet("debug-donation-requests")]
+    public async Task<IActionResult> DebugDonationRequests()
     {
         try
         {
-            var hospitalId = await GetHospitalIdFromUser(userId);
-            
-            // Get raw count from donor_appointments table
-            var totalCount = await _context.DonorAppointments.CountAsync();
-            var hospitalCount = await _context.DonorAppointments.Where(da => da.HospitalId == hospitalId).CountAsync();
-            
-            // Get raw appointments data
-            var rawAppointments = await _context.DonorAppointments
-                .Where(da => da.HospitalId == hospitalId)
-                .Select(da => new {
-                    da.AppointmentId,
-                    da.DonorId,
-                    da.HospitalId,
-                    da.AppointmentDate,
-                    da.AppointmentTime,
-                    da.Status,
-                    da.CreatedAt
+            var allRequests = await _context.DonationRequests
+                .Where(dr => dr.HospitalId == 1)
+                .Select(dr => new {
+                    dr.DonationId,
+                    dr.DonorId,
+                    dr.Status,
+                    dr.RequestedDate
                 })
                 .ToListAsync();
             
             return Ok(new { 
-                userId = userId,
-                hospitalId = hospitalId,
-                totalCount = totalCount,
-                hospitalCount = hospitalCount,
-                rawAppointments = rawAppointments,
-                success = true 
+                success = true, 
+                totalCount = allRequests.Count,
+                data = allRequests 
             });
         }
         catch (Exception ex)
