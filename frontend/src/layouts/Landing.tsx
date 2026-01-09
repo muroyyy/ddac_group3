@@ -1,17 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Heart, 
-  Droplet, 
-  Activity, 
-  ShieldCheck, 
-  Users, 
-  AlertCircle, 
-  CheckCircle2, 
-  ChevronDown, 
+import {
+  Heart,
+  Droplet,
+  Activity,
+  ShieldCheck,
+  Users,
+  AlertCircle,
+  CheckCircle2,
+  ChevronDown,
   ChevronUp,
   ArrowRight
 } from 'lucide-react';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 import BloodTable from './BloodTable';
 
 const HeroSection: React.FC = () => {
@@ -119,7 +121,7 @@ const StepCard: React.FC<{ number: string; title: string; desc: string; icon: Re
 const EmotionalSection: React.FC = () => (
   <section id="who-you-help" className="py-20 bg-gray-50">
     <div className="container mx-auto px-6">
-      <div className="text-center max-w-3xl mx-auto mb-16">
+      <div className="text-center max-w-3xl mx-auto mb-16" data-aos="fade-up">
         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Who Your Donation Helps</h2>
         <p className="text-lg text-gray-600">
           Behind every pint of blood is a beating heart. Your generosity supports people in their most critical moments.
@@ -133,7 +135,7 @@ const EmotionalSection: React.FC = () => (
           { icon: <ShieldCheck className="w-8 h-8" />, title: "Cancer Patients", desc: "Essential for those undergoing chemotherapy." },
           { icon: <Heart className="w-8 h-8" />, title: "Anemic Children", desc: "Lifesaving support for severe anemia cases." }
         ].map((item, idx) => (
-          <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-red-500 hover:shadow-lg hover:-translate-y-2 transition-all duration-300">
+          <div key={idx} data-aos="zoom-in" data-aos-delay={idx * 100} className="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-red-500 hover:shadow-lg hover:-translate-y-2 transition-all duration-300">
             <div className="text-red-600 mb-4 bg-red-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
               {item.icon}
             </div>
@@ -167,6 +169,15 @@ const FaqItem: React.FC<{ question: string; answer: string }> = ({ question, ans
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      easing: 'ease-out-cubic',
+      once: true,
+      offset: 50,
+    });
+  }, []);
+
   const faqs = [
     { q: "Is donating blood safe?", a: "Yes, absolutely. We use sterile, disposable equipment for every donor. There is zero risk of contracting any disease from the donation process." },
     { q: "Does it hurt?", a: "You might feel a slight pinch when the needle is inserted, similar to a quick mosquito bite. After that, you shouldn't feel any pain during the donation." },
@@ -181,7 +192,7 @@ const LandingPage: React.FC = () => {
 
       <section id="why-donate" className="py-24 bg-white">
         <div className="container mx-auto px-6">
-          <div className="text-center max-w-2xl mx-auto mb-16">
+          <div className="text-center max-w-2xl mx-auto mb-16" data-aos="fade-up">
             <span className="text-red-600 font-semibold tracking-wider uppercase text-sm">Why It Matters</span>
             <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mt-3 mb-6">Your Blood is a Lifeline</h2>
             <p className="text-lg text-gray-600">
@@ -190,33 +201,41 @@ const LandingPage: React.FC = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <FeatureCard 
-              icon={<AlertCircle className="w-7 h-7" />}
-              title="Emergency Aid"
-              desc="Immediate supply for trauma victims, accidents, and disasters where seconds count."
-            />
-            <FeatureCard 
-              icon={<Activity className="w-7 h-7" />}
-              title="Patient Support"
-              desc="Critical for cancer treatments, complex surgeries, and organ transplants."
-            />
-            <FeatureCard 
-              icon={<Droplet className="w-7 h-7" />}
-              title="No Manufacturing"
-              desc="Blood cannot be made in a lab. It is a biological gift that only humans can provide."
-            />
-            <FeatureCard 
-              icon={<Users className="w-7 h-7" />}
-              title="Community Health"
-              desc="Maintaining a stable national blood supply ensures hospitals are always ready."
-            />
+            <div data-aos="fade-up" data-aos-delay="0">
+              <FeatureCard
+                icon={<AlertCircle className="w-7 h-7" />}
+                title="Emergency Aid"
+                desc="Immediate supply for trauma victims, accidents, and disasters where seconds count."
+              />
+            </div>
+            <div data-aos="fade-up" data-aos-delay="100">
+              <FeatureCard
+                icon={<Activity className="w-7 h-7" />}
+                title="Patient Support"
+                desc="Critical for cancer treatments, complex surgeries, and organ transplants."
+              />
+            </div>
+            <div data-aos="fade-up" data-aos-delay="200">
+              <FeatureCard
+                icon={<Droplet className="w-7 h-7" />}
+                title="No Manufacturing"
+                desc="Blood cannot be made in a lab. It is a biological gift that only humans can provide."
+              />
+            </div>
+            <div data-aos="fade-up" data-aos-delay="300">
+              <FeatureCard
+                icon={<Users className="w-7 h-7" />}
+                title="Community Health"
+                desc="Maintaining a stable national blood supply ensures hospitals are always ready."
+              />
+            </div>
           </div>
         </div>
       </section>
 
       <section id="how-it-works" className="py-24 bg-red-50 relative overflow-hidden">
         <div className="container mx-auto px-6 relative z-10">
-          <div className="text-center mb-20">
+          <div className="text-center mb-20" data-aos="fade-up">
             <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-6">How Donating Works</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Becoming a hero is easier than you think. The whole process is simple, safe, and takes less than an hour.
@@ -226,24 +245,30 @@ const LandingPage: React.FC = () => {
           <div className="flex flex-col md:flex-row justify-center items-start gap-12 lg:gap-24 relative">
             <div className="hidden md:block absolute top-10 left-0 w-full h-1 bg-red-200 z-0 transform -translate-y-1/2 scale-x-75"></div>
 
-            <StepCard 
-              number="01"
-              title="Register"
-              desc="Create your donor profile and complete a quick health screening to ensure eligibility."
-              icon={<Users className="w-8 h-8" />}
-            />
-            <StepCard 
-              number="02"
-              title="Get Notified"
-              desc="Receive an alert when your specific blood type is critically needed in your area."
-              icon={<CheckCircle2 className="w-8 h-8" />}
-            />
-            <StepCard 
-              number="03"
-              title="Save Lives"
-              desc="Visit a center, relax while donating, and walk away knowing you saved up to 3 lives."
-              icon={<Heart className="w-8 h-8" />}
-            />
+            <div data-aos="fade-up" data-aos-delay="0">
+              <StepCard
+                number="01"
+                title="Register"
+                desc="Create your donor profile and complete a quick health screening to ensure eligibility."
+                icon={<Users className="w-8 h-8" />}
+              />
+            </div>
+            <div data-aos="fade-up" data-aos-delay="150">
+              <StepCard
+                number="02"
+                title="Get Notified"
+                desc="Receive an alert when your specific blood type is critically needed in your area."
+                icon={<CheckCircle2 className="w-8 h-8" />}
+              />
+            </div>
+            <div data-aos="fade-up" data-aos-delay="300">
+              <StepCard
+                number="03"
+                title="Save Lives"
+                desc="Visit a center, relax while donating, and walk away knowing you saved up to 3 lives."
+                icon={<Heart className="w-8 h-8" />}
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -253,7 +278,7 @@ const LandingPage: React.FC = () => {
       <section id="faqs" className="py-24 bg-white">
         <div className="container mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-16">
-            <div>
+            <div data-aos="fade-right">
               <h2 className="text-3xl font-bold text-gray-900 mb-8">Common Questions</h2>
               <div className="space-y-2">
                 {faqs.map((faq, idx) => (
@@ -262,7 +287,7 @@ const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            <div>
+            <div data-aos="fade-left">
               <div className="mb-8">
                 <h2 className="text-3xl font-bold text-gray-900 mb-4">Compatibility Chart</h2>
                 <p className="text-gray-600">
@@ -288,8 +313,8 @@ const LandingPage: React.FC = () => {
           <div className="absolute w-full h-full bg-gradient-to-t from-red-900 to-transparent"></div>
           <img src="https://picsum.photos/1920/600?blur=4" alt="Background" className="w-full h-full object-cover opacity-20" />
         </div>
-        
-        <div className="container mx-auto px-6 relative z-10">
+
+        <div className="container mx-auto px-6 relative z-10" data-aos="zoom-in">
           <Heart className="w-16 h-16 mx-auto mb-8 text-red-500 fill-red-500 animate-pulse" />
           <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
             Someone out there needs you today.
@@ -297,7 +322,7 @@ const LandingPage: React.FC = () => {
           <p className="text-xl md:text-2xl text-red-200 mb-10 max-w-2xl mx-auto">
             Take the first step. It costs nothing but means everything to the person receiving it.
           </p>
-          <button 
+          <button
             onClick={() => navigate('/register')}
             className="px-10 py-4 bg-white text-red-900 text-lg font-bold rounded-full hover:bg-red-50 hover:scale-105 transition-all duration-300 shadow-2xl cursor-pointer"
           >
