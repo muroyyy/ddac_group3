@@ -653,9 +653,9 @@ public class HospitalController : ControllerBase
             _logger.LogInformation($"Found donation request {id}: DonorId={donorRequest.DonorId}, HospitalId={donorRequest.HospitalId}, CurrentStatus={donorRequest.Status}");
 
             // Update donation request status and mark as modified
-            donorRequest.Status = "Approved";
+            donorRequest.Status = "Accepted";
             _context.DonationRequests.Update(donorRequest);
-            _logger.LogInformation($"Setting status to 'Approved' for donation request {id}");
+            _logger.LogInformation($"Setting status to 'Accepted' for donation request {id}");
             
             // Create appointment in donor_appointments table
             var appointment = new DonorAppointment
