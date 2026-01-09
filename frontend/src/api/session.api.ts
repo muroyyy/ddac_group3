@@ -5,8 +5,14 @@ export const sessionAPI = {
   validateToken: async (): Promise<{ valid: boolean; user?: any }> => {
     try {
       const response = await authenticatedFetch(`${API_BASE_URL}/auth/validate`);
-      return parseJsonResponse(response);
-    } catch {
+      const result = await parseJsonResponse(response);
+      return result;
+    } catch (error) {
+      console.error('Token validation failed:', error);
+      // Check if error is due to HTML response
+      if (error instanceof Error && error.message.includes('text/html')) {
+        console.error('❌ Received HTML instead of JSON - auth endpoint may not be deployed');
+      }
       return { valid: false };
     }
   },
@@ -17,7 +23,8 @@ export const sessionAPI = {
         method: 'POST',
       });
       return parseJsonResponse(response);
-    } catch {
+    } catch (error) {
+      console.error('Token refresh failed:', error);
       return { success: false };
     }
   },
@@ -27,8 +34,9 @@ export const sessionAPI = {
       await authenticatedFetch(`${API_BASE_URL}/auth/logout`, {
         method: 'POST',
       });
-    } catch {
-      // Ignore errors on logout
+    } catch (error) {
+      console.error('Logout request failed:', error);
+      // Ignore errors on logout - still clear session
     } finally {
       sessionManager.clearSession();
     }
