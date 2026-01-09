@@ -651,8 +651,9 @@ public class HospitalController : ControllerBase
 
             _logger.LogInformation($"Found donation request {id}: DonorId={donorRequest.DonorId}, HospitalId={donorRequest.HospitalId}, CurrentStatus={donorRequest.Status}");
 
-            // Update donation request status
+            // Update donation request status and mark as modified
             donorRequest.Status = "Approved";
+            _context.DonationRequests.Update(donorRequest);
             _logger.LogInformation($"Setting status to 'Approved' for donation request {id}");
             
             // Create appointment in donor_appointments table
@@ -700,8 +701,9 @@ public class HospitalController : ControllerBase
             if (donorRequest == null)
                 return NotFound(new { success = false, message = "Donor request not found" });
 
-            // Update donation request status first
+            // Update donation request status and mark as modified
             donorRequest.Status = "Rejected";
+            _context.DonationRequests.Update(donorRequest);
             await _context.SaveChangesAsync();
             
             // Create appointment in donor_appointments table with Cancelled status
