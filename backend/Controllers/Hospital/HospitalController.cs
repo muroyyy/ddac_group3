@@ -996,19 +996,6 @@ public class RejectRequestDto
     public string? RejectionNotes { get; set; }
 }
 
-public class DonorRequestDto
-{
-    public int DonationId { get; set; }
-    public string DonorName { get; set; } = "";
-    public string DonorEmail { get; set; } = "";
-    public string DonorPhone { get; set; } = "";
-    public string BloodType { get; set; } = "";
-    public int UnitsRequested { get; set; }
-    public string Status { get; set; } = "";
-    public DateTime RequestedDate { get; set; }
-    public string Notes { get; set; } = "";
-}
-
 public class ApproveRequestDto
 {
     public int DoctorId { get; set; }
