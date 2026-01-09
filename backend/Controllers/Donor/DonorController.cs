@@ -197,22 +197,26 @@ namespace BloodLine.Controllers
             var donorProfile = await _context.DonorProfiles.FirstOrDefaultAsync(d => d.UserId == userId);
             if (donorProfile == null)
             {
-                return Ok(new List<AppointmentDto>());
+                return Ok(new { success = true, data = new List<object>() });
             }
 
-            var appointments = await _context.Database
-                .SqlQueryRaw<AppointmentDto>(
-                    @"SELECT da.appointment_id as Id, h.hospital_name as HospitalName,
-                      da.appointment_date as Date, da.appointment_time as Time,
-                      da.status as Status, dp.blood_type as BloodType, 1 as Units
-                      FROM donor_appointments da
-                      JOIN hospital h ON da.hospital_id = h.hospital_id
-                      JOIN donor_profile dp ON da.donor_id = dp.donor_id
-                      WHERE da.donor_id = {0} AND da.status IN ('Scheduled', 'Cancelled')
-                      ORDER BY da.appointment_date DESC", donorProfile.DonorId)
+            var appointments = await _context.DonorAppointments
+                .Where(da => da.DonorId == donorProfile.DonorId && da.Status == "Scheduled")
+                .Select(da => new
+                {
+                    id = da.AppointmentId,
+                    hospitalName = "Hospital " + da.HospitalId,
+                    date = da.AppointmentDate.ToString("yyyy-MM-dd"),
+                    time = da.AppointmentTime.ToString(@"hh\:mm"),
+                    status = da.Status,
+                    bloodType = "O+",
+                    units = 1,
+                    doctorNotes = da.DoctorNotes ?? ""
+                })
+                .OrderBy(da => da.date)
                 .ToListAsync();
 
-            return Ok(appointments);
+            return Ok(new { success = true, data = appointments });
         }
 
         [HttpGet("appointment-history/{userId}")]

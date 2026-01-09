@@ -19,6 +19,7 @@ export default function HospitalLayout() {
 		{ path: '/hospital/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
 		{ path: '/hospital/blood-requests', label: 'Blood Requests', Icon: Droplets },
 		{ path: '/hospital/donor-requests', label: 'Donor Requests', Icon: Heart },
+		{ path: '/hospital/donor-appointments', label: 'Donor Appointments', Icon: Calendar },
 		{ path: '/hospital/appointments', label: 'Patient Appointments', Icon: Calendar },
 		{ path: '/hospital/inventory', label: 'Manage Inventory', Icon: Clipboard },
 		{ path: '/hospital/profile', label: 'Profile', Icon: User },

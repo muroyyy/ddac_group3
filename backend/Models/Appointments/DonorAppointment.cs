@@ -33,4 +33,13 @@ public class DonorAppointment
 
     [Column("updated_at")]
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+    [Column("doctor_id")]
+    public int? DoctorId { get; set; }
+
+    [Column("doctor_notes")]
+    public string? DoctorNotes { get; set; }
+
+    [Column("units_collected")]
+    public int? UnitsCollected { get; set; }
 }
