@@ -264,64 +264,25 @@ public class HospitalController : ControllerBase
             if (hospitalId == null)
                 return Ok(new { success = true, data = new List<object>() });
 
-            // First check if blood requests exist for this hospital
-            var bloodRequestsCount = await _context.BloodRequests
+            var requests = await _context.BloodRequests
                 .Where(br => br.HospitalId == hospitalId.Value && br.Status == "Pending")
-                .CountAsync();
-            
-            _logger.LogInformation($"Found {bloodRequestsCount} pending blood requests for hospital {hospitalId}");
-
-            if (bloodRequestsCount == 0)
-            {
-                return Ok(new { success = true, data = new List<object>() });
-            }
-
-            // Use raw SQL query with INNER JOINs to only show complete patient data
-            var query = @"
-                SELECT 
-                    br.request_id,
-                    br.blood_type,
-                    br.units_required,
-                    br.urgency_level,
-                    br.notes,
-                    br.created_at,
-                    u.full_name as patient_name,
-                    u.email as patient_email,
-                    u.phone as patient_phone
-                FROM blood_requests br
-                INNER JOIN patient_profile pp ON br.patient_id = pp.patient_id
-                INNER JOIN users u ON pp.user_id = u.user_id
-                WHERE br.hospital_id = @hospitalId 
-                AND br.status = 'Pending'
-                ORDER BY 
-                    CASE br.urgency_level 
-                        WHEN 'Critical' THEN 1
-                        WHEN 'High' THEN 2
-                        WHEN 'Medium' THEN 3
-                        WHEN 'Low' THEN 4
-                    END,
-                    br.created_at ASC";
-
-            var requests = await _context.Database
-                .SqlQuery<BloodRequestResult>($"{query}")
+                .Select(br => new
+                {
+                    requestId = br.RequestId,
+                    patientId = br.PatientId,
+                    patientName = "Patient " + br.PatientId,
+                    patientEmail = "patient@example.com",
+                    patientPhone = "123-456-7890",
+                    bloodType = br.BloodType,
+                    unitsRequired = br.UnitsRequired,
+                    status = br.Status,
+                    urgencyLevel = br.UrgencyLevel,
+                    notes = br.Notes ?? "",
+                    createdAt = br.CreatedAt.HasValue ? br.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm") : ""
+                })
                 .ToListAsync();
 
-            var requestData = requests.Select(r => new
-            {
-                requestId = r.request_id,
-                patientId = 0, // Not needed for display
-                patientName = r.patient_name ?? "",
-                patientEmail = r.patient_email ?? "",
-                patientPhone = r.patient_phone ?? "",
-                bloodType = r.blood_type ?? "",
-                unitsRequired = r.units_required,
-                status = "Pending",
-                urgencyLevel = r.urgency_level ?? "",
-                notes = r.notes ?? "",
-                createdAt = r.created_at.HasValue ? r.created_at.Value.ToString("yyyy-MM-dd HH:mm") : ""
-            }).ToList();
-
-            return Ok(new { success = true, data = requestData });
+            return Ok(new { success = true, data = requests });
         }
         catch (Exception ex)
         {
@@ -920,111 +881,6 @@ public class HospitalController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Debug endpoint to check user hospital associations
-    /// </summary>
-    [HttpGet("debug/user/{userId}")]
-    public async Task<IActionResult> DebugUserAssociations(int userId)
-    {
-        try
-        {
-            var user = await _context.Users.FindAsync(userId);
-            var staff = await _context.HospitalStaff.FirstOrDefaultAsync(hs => hs.UserId == userId);
-            var hospital = await _context.Hospitals.FirstOrDefaultAsync(h => h.UserId == userId);
-            
-            return Ok(new {
-                userId = userId,
-                userExists = user != null,
-                userRole = user?.Role.ToString(),
-                staffRecord = staff != null ? new { staff.StaffId, staff.HospitalId, staff.Position } : null,
-                hospitalRecord = hospital != null ? new { hospital.HospitalId, hospital.HospitalName } : null
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError($"Error in debug endpoint: {ex.Message}");
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-    /// <summary>
-    /// Simple test endpoint to check blood requests directly
-    /// </summary>
-    [HttpGet("debug-blood-requests/{userId}")]
-    public async Task<IActionResult> DebugBloodRequests(int userId)
-    {
-        try
-        {
-            var hospitalId = await GetHospitalIdFromUser(userId);
-            
-            // Get raw count
-            var totalCount = await _context.BloodRequests
-                .Where(br => br.HospitalId == hospitalId)
-                .CountAsync();
-                
-            var pendingCount = await _context.BloodRequests
-                .Where(br => br.HospitalId == hospitalId && br.Status == "Pending")
-                .CountAsync();
-                
-            // Get raw data
-            var rawRequests = await _context.BloodRequests
-                .Where(br => br.HospitalId == hospitalId && br.Status == "Pending")
-                .Take(5)
-                .ToListAsync();
-            
-            return Ok(new { 
-                userId = userId,
-                hospitalId = hospitalId,
-                totalCount = totalCount,
-                pendingCount = pendingCount,
-                rawRequests = rawRequests.Select(r => new {
-                    r.RequestId,
-                    r.PatientId,
-                    r.BloodType,
-                    r.Status,
-                    r.CreatedAt
-                }),
-                success = true 
-            });
-        }
-        catch (Exception ex)
-        {
-            return Ok(new { 
-                error = ex.Message,
-                success = false 
-            });
-        }
-    }
-
-    /// <summary>
-    /// Test endpoint to check hospital staff lookup
-    /// </summary>
-    [HttpGet("test/{userId}")]
-    public async Task<IActionResult> TestHospitalLookup(int userId)
-    {
-        try
-        {
-            var hospitalId = await GetHospitalIdFromUser(userId);
-            
-            var bloodRequestCount = await _context.BloodRequests
-                .Where(br => br.HospitalId == hospitalId)
-                .CountAsync();
-                
-            return Ok(new { 
-                userId = userId,
-                hospitalId = hospitalId,
-                bloodRequestCount = bloodRequestCount,
-                success = true 
-            });
-        }
-        catch (Exception ex)
-        {
-            return Ok(new { 
-                error = ex.Message,
-                success = false 
-            });
-        }
-    }
-
 
 }
 
@@ -1080,19 +936,6 @@ public class LinkHospitalRequest
 {
     public int HospitalId { get; set; }
     public string? Position { get; set; }
-}
-
-public class BloodRequestResult
-{
-    public int request_id { get; set; }
-    public string? blood_type { get; set; }
-    public int units_required { get; set; }
-    public string? urgency_level { get; set; }
-    public string? notes { get; set; }
-    public DateTime? created_at { get; set; }
-    public string? patient_name { get; set; }
-    public string? patient_email { get; set; }
-    public string? patient_phone { get; set; }
 }
 
 
