@@ -225,11 +225,11 @@ namespace BloodLine.Controllers
             var donorProfile = await _context.DonorProfiles.FirstOrDefaultAsync(d => d.UserId == userId);
             if (donorProfile == null)
             {
-                return Ok(new List<AppointmentDto>());
+                return Ok(new List<DonorAppointmentDto>());
             }
 
             var appointments = await _context.Database
-                .SqlQueryRaw<AppointmentDto>(
+                .SqlQueryRaw<DonorAppointmentDto>(
                     @"SELECT da.appointment_id as Id, h.hospital_name as HospitalName,
                       da.appointment_date as Date, da.appointment_time as Time,
                       da.status as Status, dp.blood_type as BloodType, 1 as Units
@@ -310,7 +310,7 @@ namespace BloodLine.Controllers
         public int HospitalId { get; set; }
     }
 
-    public class AppointmentDto
+    public class DonorAppointmentDto
     {
         public int Id { get; set; }
         public string HospitalName { get; set; } = "";
