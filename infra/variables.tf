@@ -35,3 +35,9 @@ variable "domain_name" {
   type        = string
   default     = "bloodline.dev"
 }
+
+variable "waf_web_acl_arn" {
+  description = "WAF Web ACL ARN for CloudFront (configured manually in AWS Console)"
+  type        = string
+  default     = "arn:aws:wafv2:us-east-1:007027391333:global/webacl/bloodline-production-waf/b97de16a-9d3e-40f3-8ea7-5211fbf7640e"
+}

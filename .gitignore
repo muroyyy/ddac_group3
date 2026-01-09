@@ -64,6 +64,9 @@ bloodline-db-dump.sql
 .DS_Store
 Thumbs.db
 
+# DB-related files
+/db_scripts
+
 # Documentation
 docs/
 

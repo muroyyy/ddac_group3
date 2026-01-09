@@ -27,3 +27,9 @@ variable "certificate_arn" {
   description = "ACM certificate ARN"
   type        = string
 }
+
+variable "waf_web_acl_arn" {
+  description = "WAF Web ACL ARN for CloudFront"
+  type        = string
+  default     = ""
+}

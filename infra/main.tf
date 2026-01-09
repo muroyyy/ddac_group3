@@ -134,6 +134,7 @@ module "cloudfront" {
   s3_website_endpoint = module.s3.website_endpoint
   ec2_public_dns      = module.ec2.public_dns
   certificate_arn     = module.acm.certificate_arn
+  waf_web_acl_arn     = var.waf_web_acl_arn
 }
 
 # SNS Module

@@ -1,4 +1,7 @@
 resource "aws_cloudfront_distribution" "main" {
+  # WAF Web ACL (configured manually in AWS Console)
+  web_acl_id = var.waf_web_acl_arn != "" ? var.waf_web_acl_arn : null
+
   # S3 origin for frontend static files
   origin {
     domain_name = var.s3_website_endpoint
