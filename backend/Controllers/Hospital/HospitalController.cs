@@ -590,40 +590,6 @@ public class HospitalController : ControllerBase
     }
 
     /// <summary>
-    /// Get donor appointments for hospital staff
-    /// </summary>
-    [HttpGet("donor-appointments/{userId}")]
-    public async Task<IActionResult> GetDonorAppointments(int userId)
-    {
-        try
-        {
-            var appointments = await _context.DonorAppointments
-                .Where(da => da.HospitalId == 1)
-                .Select(da => new
-                {
-                    appointmentId = da.AppointmentId,
-                    donorName = "Donor " + da.DonorId,
-                    donorEmail = "donor@example.com",
-                    donorPhone = "123-456-7890",
-                    bloodType = "O+",
-                    appointmentDate = da.AppointmentDate.ToString("yyyy-MM-dd"),
-                    appointmentTime = da.AppointmentTime.ToString(@"hh\:mm"),
-                    status = da.Status,
-                    unitsCollected = da.UnitsCollected ?? 0,
-                    doctorNotes = da.DoctorNotes ?? ""
-                })
-                .OrderByDescending(da => da.appointmentDate)
-                .ToListAsync();
-
-            return Ok(new { success = true, data = appointments });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { success = false, message = ex.Message });
-        }
-    }
-
-    /// <summary>
     /// Test endpoint for donor requests
     /// </summary>
     [HttpGet("test-donor-requests")]
