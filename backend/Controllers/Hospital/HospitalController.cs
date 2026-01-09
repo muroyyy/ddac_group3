@@ -266,20 +266,24 @@ public class HospitalController : ControllerBase
 
             var requests = await _context.BloodRequests
                 .Where(br => br.HospitalId == hospitalId.Value && br.Status == "Pending")
-                .Select(br => new
+                .GroupJoin(_context.PatientProfiles, br => br.PatientId, pp => pp.PatientId, (br, pp) => new { br, pp })
+                .SelectMany(x => x.pp.DefaultIfEmpty(), (x, pp) => new { x.br, pp })
+                .GroupJoin(_context.Users, x => x.pp != null ? x.pp.UserId : 0, u => u.Id, (x, u) => new { x.br, x.pp, u })
+                .SelectMany(x => x.u.DefaultIfEmpty(), (x, u) => new
                 {
-                    requestId = br.RequestId,
-                    patientId = br.PatientId,
-                    patientName = "Patient " + br.PatientId,
-                    patientEmail = "patient@example.com",
-                    patientPhone = "123-456-7890",
-                    bloodType = br.BloodType,
-                    unitsRequired = br.UnitsRequired,
-                    status = br.Status,
-                    urgencyLevel = br.UrgencyLevel,
-                    notes = br.Notes ?? "",
-                    createdAt = br.CreatedAt.HasValue ? br.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm") : ""
+                    requestId = x.br.RequestId,
+                    patientId = x.br.PatientId,
+                    patientName = u != null ? u.FullName : null,
+                    patientEmail = u != null ? u.Email : null,
+                    patientPhone = u != null ? u.Phone : null,
+                    bloodType = x.br.BloodType,
+                    unitsRequired = x.br.UnitsRequired,
+                    status = x.br.Status,
+                    urgencyLevel = x.br.UrgencyLevel,
+                    notes = x.br.Notes ?? "",
+                    createdAt = x.br.CreatedAt.HasValue ? x.br.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm") : ""
                 })
+                .Where(x => x.patientName != null)
                 .ToListAsync();
 
             return Ok(new { success = true, data = requests });
