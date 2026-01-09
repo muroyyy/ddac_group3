@@ -276,36 +276,52 @@ public class HospitalController : ControllerBase
                 return Ok(new { success = true, data = new List<object>() });
             }
 
-            // Try with INNER JOINs to only show complete patient data
-            try
-            {
-                var requests = await _context.BloodRequests
-                    .Where(br => br.HospitalId == hospitalId.Value && br.Status == "Pending")
-                    .Join(_context.PatientProfiles, br => br.PatientId, pp => pp.PatientId, (br, pp) => new { br, pp })
-                    .Join(_context.Users, x => x.pp.UserId, u => u.Id, (x, u) => new
-                    {
-                        requestId = x.br.RequestId,
-                        patientId = x.br.PatientId,
-                        patientName = u.FullName ?? "",
-                        patientEmail = u.Email ?? "",
-                        patientPhone = u.Phone ?? "",
-                        bloodType = x.br.BloodType ?? "",
-                        unitsRequired = x.br.UnitsRequired,
-                        status = x.br.Status ?? "",
-                        urgencyLevel = x.br.UrgencyLevel ?? "",
-                        notes = x.br.Notes ?? "",
-                        createdAt = x.br.CreatedAt.HasValue ? x.br.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm") : ""
-                    })
-                    .OrderByDescending(x => x.createdAt)
-                    .ToListAsync();
+            // Use raw SQL query with INNER JOINs to only show complete patient data
+            var query = @"
+                SELECT 
+                    br.request_id,
+                    br.blood_type,
+                    br.units_required,
+                    br.urgency_level,
+                    br.notes,
+                    br.created_at,
+                    u.full_name as patient_name,
+                    u.email as patient_email,
+                    u.phone as patient_phone
+                FROM blood_requests br
+                INNER JOIN patient_profile pp ON br.patient_id = pp.patient_id
+                INNER JOIN users u ON pp.user_id = u.user_id
+                WHERE br.hospital_id = @hospitalId 
+                AND br.status = 'Pending'
+                ORDER BY 
+                    CASE br.urgency_level 
+                        WHEN 'Critical' THEN 1
+                        WHEN 'High' THEN 2
+                        WHEN 'Medium' THEN 3
+                        WHEN 'Low' THEN 4
+                    END,
+                    br.created_at ASC";
 
-                return Ok(new { success = true, data = requests });
-            }
-            catch (Exception joinEx)
+            var requests = await _context.Database
+                .SqlQuery<BloodRequestResult>($"{query}")
+                .ToListAsync();
+
+            var requestData = requests.Select(r => new
             {
-                _logger.LogWarning($"JOIN query failed: {joinEx.Message}");
-                return Ok(new { success = true, data = new List<object>() });
-            }
+                requestId = r.request_id,
+                patientId = 0, // Not needed for display
+                patientName = r.patient_name ?? "",
+                patientEmail = r.patient_email ?? "",
+                patientPhone = r.patient_phone ?? "",
+                bloodType = r.blood_type ?? "",
+                unitsRequired = r.units_required,
+                status = "Pending",
+                urgencyLevel = r.urgency_level ?? "",
+                notes = r.notes ?? "",
+                createdAt = r.created_at.HasValue ? r.created_at.Value.ToString("yyyy-MM-dd HH:mm") : ""
+            }).ToList();
+
+            return Ok(new { success = true, data = requestData });
         }
         catch (Exception ex)
         {
@@ -1064,6 +1080,19 @@ public class LinkHospitalRequest
 {
     public int HospitalId { get; set; }
     public string? Position { get; set; }
+}
+
+public class BloodRequestResult
+{
+    public int request_id { get; set; }
+    public string? blood_type { get; set; }
+    public int units_required { get; set; }
+    public string? urgency_level { get; set; }
+    public string? notes { get; set; }
+    public DateTime? created_at { get; set; }
+    public string? patient_name { get; set; }
+    public string? patient_email { get; set; }
+    public string? patient_phone { get; set; }
 }
 
 

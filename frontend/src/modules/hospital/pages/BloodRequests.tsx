@@ -176,6 +176,7 @@ export default function BloodRequests() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
+            id="search-patients"
             type="text"
             placeholder="Search by patient name..."
             value={searchTerm}
@@ -330,6 +331,7 @@ export default function BloodRequests() {
             </p>
             
             <textarea
+              id="rejection-reason"
               placeholder="Rejection reason (required)..."
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
@@ -458,6 +460,7 @@ export default function BloodRequests() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Select Doctor</label>
                 <select
+                  id="doctor-select"
                   value={selectedDoctorId}
                   onChange={(e) => setSelectedDoctorId(Number(e.target.value))}
                   className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
@@ -474,6 +477,7 @@ export default function BloodRequests() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Appointment Date</label>
                 <input
+                  id="appointment-date"
                   type="date"
                   value={appointmentDate}
                   onChange={(e) => setAppointmentDate(e.target.value)}
@@ -485,6 +489,7 @@ export default function BloodRequests() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Appointment Time</label>
                 <input
+                  id="appointment-time"
                   type="time"
                   value={appointmentTime}
                   onChange={(e) => setAppointmentTime(e.target.value)}
