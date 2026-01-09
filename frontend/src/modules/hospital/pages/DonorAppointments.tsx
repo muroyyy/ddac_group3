@@ -18,8 +18,10 @@ const DonorAppointments: React.FC = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    fetchDonorAppointments();
-  }, []);
+    if (user?.id) {
+      fetchDonorAppointments();
+    }
+  }, [user]);
 
   const fetchDonorAppointments = async () => {
     try {
