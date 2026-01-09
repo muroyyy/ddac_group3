@@ -626,7 +626,7 @@ public class HospitalController : ControllerBase
     /// Approve donor request
     /// </summary>
     [HttpPost("donor-requests/{id}/approve")]
-    public async Task<IActionResult> ApproveDonorRequest(int id)
+    public async Task<IActionResult> ApproveDonorRequest(int id, [FromBody] ApproveRequestDto dto)
     {
         try
         {
@@ -634,10 +634,27 @@ public class HospitalController : ControllerBase
             if (donorRequest == null)
                 return NotFound(new { success = false, message = "Donor request not found" });
 
+            // Update donation request status
             donorRequest.Status = "Approved";
+            
+            // Create appointment in donor_appointments table
+            var appointment = new DonorAppointment
+            {
+                DonorId = donorRequest.DonorId,
+                DonationId = donorRequest.DonationId,
+                HospitalId = donorRequest.HospitalId,
+                DoctorId = dto.DoctorId,
+                AppointmentDate = dto.AppointmentDate.Date,
+                AppointmentTime = dto.AppointmentDate.TimeOfDay,
+                Status = "Scheduled",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            
+            _context.DonorAppointments.Add(appointment);
             await _context.SaveChangesAsync();
 
-            return Ok(new { success = true, message = "Donor request approved. Please create appointment." });
+            return Ok(new { success = true, message = "Donor request approved and appointment created successfully." });
         }
         catch (Exception ex)
         {
