@@ -275,39 +275,6 @@ namespace BloodLine.Controllers
                 });
             }
         }
-                        hospitalName = _db.Hospitals.Where(h => h.HospitalId == pa.HospitalId).Select(h => h.HospitalName).FirstOrDefault() ?? "Unknown Hospital",
-                        // JOIN with doctors table to get doctor name (handle null doctor_id)
-                        doctorName = pa.DoctorId.HasValue ? 
-                            _db.Doctors.Where(d => d.DoctorId == pa.DoctorId.Value).Select(d => d.DoctorName).FirstOrDefault() ?? "Not Assigned" : 
-                            "Not Assigned",
-                        appointmentDate = pa.AppointmentDate,
-                        status = pa.Status,
-                        doctorNotes = pa.DoctorNotes
-                    })
-                    .OrderByDescending(x => x.appointmentDate)  // SORT: Newest appointments first
-                    .ToListAsync();
-
-                // FORMAT RESPONSE - Convert dates to string format for frontend
-                var result = appointments.Select(a => new
-                {
-                    appointmentId = a.appointmentId,
-                    hospitalName = a.hospitalName,
-                    doctorName = a.doctorName,
-                    appointmentDate = a.appointmentDate.ToString("yyyy-MM-dd HH:mm"),  // Format for frontend display
-                    status = a.status,
-                    doctorNotes = a.doctorNotes
-                }).ToList();
-
-                // SUCCESS RESPONSE - Return formatted appointment data
-                return Ok(new { success = true, data = result });
-            }
-            catch (Exception ex)
-            {
-                // ERROR HANDLING - Log error and return generic message
-                Console.WriteLine($"Error in GetAppointments for userId {userId}: {ex.Message}");
-                return StatusCode(500, new { success = false, message = ex.Message });
-            }
-        }
 
 
         /// <summary>
