@@ -276,7 +276,7 @@ public class HospitalController : ControllerBase
                 return Ok(new { success = true, data = new List<object>() });
             }
 
-            // Try with JOINs first
+            // Try with INNER JOINs to only show complete patient data
             try
             {
                 var requests = await _context.BloodRequests
@@ -299,37 +299,13 @@ public class HospitalController : ControllerBase
                     .OrderByDescending(x => x.createdAt)
                     .ToListAsync();
 
-                if (requests.Any())
-                {
-                    return Ok(new { success = true, data = requests });
-                }
+                return Ok(new { success = true, data = requests });
             }
             catch (Exception joinEx)
             {
                 _logger.LogWarning($"JOIN query failed: {joinEx.Message}");
+                return Ok(new { success = true, data = new List<object>() });
             }
-
-            // Fallback: return basic blood request data without patient details
-            var basicRequests = await _context.BloodRequests
-                .Where(br => br.HospitalId == hospitalId.Value && br.Status == "Pending")
-                .Select(br => new
-                {
-                    requestId = br.RequestId,
-                    patientId = br.PatientId,
-                    patientName = $"Patient {br.PatientId}",
-                    patientEmail = "",
-                    patientPhone = "",
-                    bloodType = br.BloodType ?? "",
-                    unitsRequired = br.UnitsRequired,
-                    status = br.Status ?? "",
-                    urgencyLevel = br.UrgencyLevel ?? "",
-                    notes = br.Notes ?? "",
-                    createdAt = br.CreatedAt.HasValue ? br.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm") : ""
-                })
-                .OrderByDescending(x => x.createdAt)
-                .ToListAsync();
-
-            return Ok(new { success = true, data = basicRequests });
         }
         catch (Exception ex)
         {
