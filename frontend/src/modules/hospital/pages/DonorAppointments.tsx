@@ -63,6 +63,9 @@ const DonorAppointments: React.FC = () => {
 
     fetchData();
     
+    // Auto-refresh every 30 seconds to show new appointments
+    const interval = setInterval(fetchData, 30000);
+    
     // Fallback timeout to prevent infinite loading
     const timeout = setTimeout(() => {
       if (loading) {
@@ -71,7 +74,10 @@ const DonorAppointments: React.FC = () => {
       }
     }, 10000);
     
-    return () => clearTimeout(timeout);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
   }, [user, authLoading]);
 
   // Show loading while auth is loading OR data is loading
@@ -109,9 +115,17 @@ const DonorAppointments: React.FC = () => {
 
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Donor Appointments</h1>
-        <p className="text-gray-600">Manage and view all donor appointments</p>
+      <div className="mb-6 flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Donor Appointments</h1>
+          <p className="text-gray-600">Manage and view all donor appointments</p>
+        </div>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Refresh
+        </button>
       </div>
 
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
