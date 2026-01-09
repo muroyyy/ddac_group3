@@ -466,28 +466,21 @@ public class HospitalController : ControllerBase
             
             _logger.LogInformation($"Found {appointmentCount} appointments for hospital {hospitalId}");
 
-            // Get appointments with real patient data using LEFT JOINs
+            // Get all appointments for this hospital first
             var appointments = await _context.PatientAppointments
                 .Where(a => a.HospitalId == hospitalId.Value)
-                .GroupJoin(_context.BloodRequests, a => a.RequestId, br => br.RequestId, (a, br) => new { a, br })
-                .SelectMany(x => x.br.DefaultIfEmpty(), (x, br) => new { x.a, br })
-                .GroupJoin(_context.PatientProfiles, x => x.br != null ? x.br.PatientId : x.a.PatientId, pp => pp.PatientId, (x, pp) => new { x.a, x.br, pp })
-                .SelectMany(x => x.pp.DefaultIfEmpty(), (x, pp) => new { x.a, x.br, pp })
-                .GroupJoin(_context.Users, x => x.pp != null ? x.pp.UserId : 0, u => u.Id, (x, u) => new { x.a, x.br, x.pp, u })
-                .SelectMany(x => x.u.DefaultIfEmpty(), (x, u) => new { x.a, x.br, x.pp, u })
-                .GroupJoin(_context.Doctors, x => x.a.DoctorId, d => d.DoctorId, (x, d) => new { x.a, x.br, x.pp, x.u, d })
-                .SelectMany(x => x.d.DefaultIfEmpty(), (x, d) => new
+                .Select(a => new
                 {
-                    appointmentId = x.a.AppointmentId,
-                    requestId = x.a.RequestId,
-                    patientName = x.u != null ? x.u.FullName : "Patient " + x.a.PatientId,
-                    patientPhone = x.u != null ? x.u.Phone : "N/A",
-                    bloodType = x.br != null ? x.br.BloodType : "Unknown",
-                    doctorName = d != null ? d.DoctorName : "Dr. TBD",
-                    appointmentDate = x.a.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
-                    status = x.a.Status ?? "Upcoming",
-                    doctorNotes = x.a.DoctorNotes ?? "",
-                    createdAt = x.a.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                    appointmentId = a.AppointmentId,
+                    requestId = a.RequestId,
+                    patientName = "Patient " + a.PatientId,
+                    patientPhone = "N/A",
+                    bloodType = "Unknown",
+                    doctorName = "Dr. TBD",
+                    appointmentDate = a.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
+                    status = a.Status ?? "Upcoming",
+                    doctorNotes = a.DoctorNotes ?? "",
+                    createdAt = a.CreatedAt.ToString("yyyy-MM-dd HH:mm")
                 })
                 .OrderByDescending(x => x.appointmentDate)
                 .ToListAsync();
