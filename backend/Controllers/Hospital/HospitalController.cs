@@ -709,29 +709,51 @@ public class HospitalController : ControllerBase
             if (hospitalId == null)
                 return Ok(new { success = false, message = "Hospital staff not found", userId = userId });
 
+            // First check if we have any donor appointments
+            var appointmentCount = await _context.DonorAppointments
+                .Where(da => da.HospitalId == hospitalId.Value)
+                .CountAsync();
+            
+            _logger.LogInformation($"Found {appointmentCount} donor appointments for hospital {hospitalId}");
+
+            if (appointmentCount == 0)
+            {
+                return Ok(new { success = true, data = new List<object>() });
+            }
+
+            // Use GroupJoin for left joins to handle missing data gracefully
             var appointments = await _context.DonorAppointments
                 .Where(da => da.HospitalId == hospitalId.Value)
-                .Join(_context.DonorProfiles, da => da.DonorId, dp => dp.DonorId, (da, dp) => new { da, dp })
-                .Join(_context.Users, x => x.dp.UserId, u => u.Id, (x, u) => new
+                .GroupJoin(_context.DonorProfiles, 
+                    da => da.DonorId, 
+                    dp => dp.DonorId, 
+                    (da, dp) => new { da, dp })
+                .SelectMany(x => x.dp.DefaultIfEmpty(), (x, dp) => new { x.da, dp })
+                .GroupJoin(_context.Users, 
+                    x => x.dp != null ? x.dp.UserId : 0, 
+                    u => u.Id, 
+                    (x, u) => new { x.da, x.dp, u })
+                .SelectMany(x => x.u.DefaultIfEmpty(), (x, u) => new
                 {
                     appointmentId = x.da.AppointmentId,
-                    donorName = u.FullName,
-                    bloodType = x.dp.BloodType,
+                    donorName = u != null ? u.FullName : "Unknown Donor",
+                    bloodType = x.dp != null ? x.dp.BloodType : "Unknown",
                     appointmentDate = x.da.AppointmentDate.ToString("yyyy-MM-dd"),
                     appointmentTime = x.da.AppointmentTime.ToString(@"hh\:mm"),
-                    status = x.da.Status,
+                    status = x.da.Status ?? "Scheduled",
                     createdAt = x.da.CreatedAt.ToString("yyyy-MM-dd HH:mm")
                 })
                 .OrderByDescending(x => x.appointmentDate)
                 .ToListAsync();
 
-            _logger.LogInformation($"Found {appointments.Count} donor appointments for hospital {hospitalId}");
+            _logger.LogInformation($"Successfully retrieved {appointments.Count} donor appointments");
             return Ok(new { success = true, data = appointments });
         }
         catch (Exception ex)
         {
             _logger.LogError($"Error fetching donor appointments: {ex.Message}");
-            return StatusCode(500, new { success = false, message = "Failed to fetch donor appointments" });
+            _logger.LogError($"Stack trace: {ex.StackTrace}");
+            return Ok(new { success = false, message = $"Failed to fetch donor appointments: {ex.Message}" });
         }
     }
 
