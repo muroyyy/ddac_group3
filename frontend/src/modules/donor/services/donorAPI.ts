@@ -108,7 +108,7 @@ export const donorAPI = {
     return response.json();
   },
 
-  getAppointments: async (userId: number): Promise<Appointment[]> => {
+  getAppointments: async (userId: number): Promise<{ success: boolean; data: Appointment[] }> => {
     const response = await fetch(`${API_BASE_URL}/donor/appointments/${userId}`);
     return response.json();
   },
