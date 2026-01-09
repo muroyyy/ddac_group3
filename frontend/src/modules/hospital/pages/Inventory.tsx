@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Plus, Edit3, Droplet } from 'lucide-react';
-import { hospitalAPI } from '../services/hospitalAPI';
 import type { BloodInventoryItem } from '../services/hospitalAPI';
 
 export default function Inventory() {
