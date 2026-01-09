@@ -643,7 +643,6 @@ public class HospitalController : ControllerBase
                 DonorId = donorRequest.DonorId,
                 DonationId = donorRequest.DonationId,
                 HospitalId = donorRequest.HospitalId,
-                DoctorId = dto.DoctorId,
                 AppointmentDate = dto.AppointmentDate.Date,
                 AppointmentTime = dto.AppointmentDate.TimeOfDay,
                 Status = "Scheduled",
