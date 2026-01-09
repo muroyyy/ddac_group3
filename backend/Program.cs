@@ -28,7 +28,7 @@ builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 builder.Services.AddScoped<DatabaseMigrationService>();
 builder.Services.AddScoped<NotificationService>();
-builder.Services.AddScoped<ISNSService, SNSService>();
+builder.Services.AddScoped<SnsService>();
 builder.Services.AddScoped<SnsService>();
 
 // Add CORS
