@@ -638,6 +638,7 @@ public class HospitalController : ControllerBase
     [HttpPost("donor-requests/{id}/approve")]
     public async Task<IActionResult> ApproveDonorRequest(int id, [FromBody] ApproveRequestDto dto)
     {
+        using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
             _logger.LogInformation($"Attempting to approve donation request {id}");
@@ -673,9 +674,10 @@ public class HospitalController : ControllerBase
             _logger.LogInformation($"Creating appointment for donation {id}");
             _context.DonorAppointments.Add(appointment);
             
-            // Save both changes together
+            // Save both changes in transaction
             var saveResult = await _context.SaveChangesAsync();
-            _logger.LogInformation($"SaveChanges result: {saveResult} records affected");
+            await transaction.CommitAsync();
+            _logger.LogInformation($"Transaction committed: {saveResult} records affected");
             
             _logger.LogInformation($"Successfully approved donation {id} and created appointment {appointment.AppointmentId}");
 
@@ -683,6 +685,7 @@ public class HospitalController : ControllerBase
         }
         catch (Exception ex)
         {
+            await transaction.RollbackAsync();
             _logger.LogError($"Error approving donor request {id}: {ex.Message}");
             _logger.LogError($"Stack trace: {ex.StackTrace}");
             return StatusCode(500, new { success = false, message = $"Failed to approve donor request: {ex.Message}" });
@@ -695,6 +698,7 @@ public class HospitalController : ControllerBase
     [HttpPost("donor-requests/{id}/reject")]
     public async Task<IActionResult> RejectDonorRequest(int id, [FromBody] RejectRequestDto dto)
     {
+        using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
             var donorRequest = await _context.DonationRequests.FindAsync(id);
@@ -704,7 +708,6 @@ public class HospitalController : ControllerBase
             // Update donation request status and mark as modified
             donorRequest.Status = "Rejected";
             _context.DonationRequests.Update(donorRequest);
-            await _context.SaveChangesAsync();
             
             // Create appointment in donor_appointments table with Cancelled status
             var appointment = new DonorAppointment
@@ -721,12 +724,16 @@ public class HospitalController : ControllerBase
             };
             
             _context.DonorAppointments.Add(appointment);
+            
+            // Save both changes in transaction
             await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
 
             return Ok(new { success = true, message = "Donor request rejected and appointment cancelled.", appointmentId = appointment.AppointmentId });
         }
         catch (Exception ex)
         {
+            await transaction.RollbackAsync();
             _logger.LogError($"Error rejecting donor request: {ex.Message}");
             return StatusCode(500, new { success = false, message = "Failed to reject donor request" });
         }
