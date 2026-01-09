@@ -25,12 +25,18 @@ const DonorAppointments: React.FC = () => {
 
   const fetchDonorAppointments = async () => {
     try {
+      console.log('Fetching donor appointments for user:', user?.id);
       setLoading(true);
       if (user?.id) {
         const response = await hospitalAPI.getDonorAppointments(user.id);
+        console.log('API response:', response);
         if (response.success) {
           setAppointments(response.data);
+        } else {
+          console.error('API returned error:', response.message);
         }
+      } else {
+        console.log('No user ID available');
       }
     } catch (error) {
       console.error('Error fetching donor appointments:', error);
