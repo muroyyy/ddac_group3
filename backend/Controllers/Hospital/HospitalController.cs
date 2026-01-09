@@ -588,37 +588,46 @@ public class HospitalController : ControllerBase
     {
         try
         {
+            // Debug: Check if user exists and get hospital ID
             var hospitalId = await GetHospitalIdFromUser(userId);
             if (hospitalId == null)
-                return BadRequest(new { success = false, message = "Hospital staff not found" });
+            {
+                // Debug: Check if user exists in hospital_staff table
+                var staffExists = await _context.Database
+                    .SqlQuery<int>($"SELECT COUNT(*) as Value FROM hospital_staff WHERE user_id = {userId}")
+                    .FirstOrDefaultAsync();
+                    
+                return BadRequest(new { 
+                    success = false, 
+                    message = $"Hospital staff not found for user {userId}. Staff records: {staffExists}" 
+                });
+            }
 
-            var requests = await _context.DonationRequests
-                .Where(dr => dr.HospitalId == hospitalId.Value)
-                .Join(_context.DonorProfiles, dr => dr.DonorId, dp => dp.DonorId, (dr, dp) => new { dr, dp })
-                .Join(_context.Users, x => x.dp.UserId, u => u.Id, (x, u) => new
-                {
-                    donationId = x.dr.DonationId,
-                    donorName = u.FullName,
-                    donorEmail = u.Email,
-                    donorPhone = u.Phone,
-                    bloodType = x.dp.BloodType,
-                    unitsRequired = x.dr.UnitsRequired,
-                    status = x.dr.Status,
-                    requestedDate = x.dr.RequestedDate.ToString("yyyy-MM-dd"),
-                    donationDate = x.dr.DonationDate.HasValue ? x.dr.DonationDate.Value.ToString("yyyy-MM-dd") : null,
-                    location = x.dp.Location,
-                    totalDonations = x.dp.TotalDonations,
-                    isAvailable = x.dp.IsAvailable
-                })
-                .OrderByDescending(x => x.requestedDate)
+            var requests = await _context.Database
+                .SqlQueryRaw<DonorRequestDto>(
+                    @"SELECT 
+                        dr.donation_id as DonationId,
+                        u.full_name as DonorName,
+                        u.email as DonorEmail,
+                        u.phone as DonorPhone,
+                        dp.blood_type as BloodType,
+                        dr.units_required as UnitsRequested,
+                        dr.status as Status,
+                        dr.requested_date as RequestedDate,
+                        '' as Notes
+                      FROM donation_requests dr
+                      JOIN donor_profile dp ON dr.donor_id = dp.donor_id
+                      JOIN users u ON dp.user_id = u.id
+                      WHERE dr.hospital_id = {0}
+                      ORDER BY dr.requested_date DESC", hospitalId.Value)
                 .ToListAsync();
 
-            return Ok(new { success = true, data = requests });
+            return Ok(new { success = true, data = requests, hospitalId = hospitalId.Value });
         }
         catch (Exception ex)
         {
             _logger.LogError($"Error fetching donor requests: {ex.Message}");
-            return StatusCode(500, new { success = false, message = "Failed to fetch donor requests" });
+            return StatusCode(500, new { success = false, message = "Failed to fetch donor requests", error = ex.Message });
         }
     }
 
@@ -984,6 +993,19 @@ public class UpdateInventoryRequest
 public class RejectRequestDto
 {
     public string? RejectionNotes { get; set; }
+}
+
+public class DonorRequestDto
+{
+    public int DonationId { get; set; }
+    public string DonorName { get; set; } = "";
+    public string DonorEmail { get; set; } = "";
+    public string DonorPhone { get; set; } = "";
+    public string BloodType { get; set; } = "";
+    public int UnitsRequested { get; set; }
+    public string Status { get; set; } = "";
+    public DateTime RequestedDate { get; set; }
+    public string Notes { get; set; } = "";
 }
 
 public class ApproveRequestDto
