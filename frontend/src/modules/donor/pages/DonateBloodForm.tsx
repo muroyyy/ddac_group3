@@ -36,10 +36,18 @@ export default function DonateBloodForm() {
 
   const loadHospitals = async () => {
     try {
+      console.log('Loading hospitals...');
       const data = await donorAPI.getHospitals();
+      console.log('Hospitals loaded:', data);
       setHospitals(data);
     } catch (error) {
       console.error('Error loading hospitals:', error);
+      // Fallback to mock data if API fails
+      setHospitals([
+        { id: 1, name: 'City General Hospital', location: '123 Medical Drive, Kuala Lumpur', phone: '03-12345678' },
+        { id: 2, name: 'Kuala Lumpur Medical Centre', location: '456 Jalan Ampang, Kuala Lumpur', phone: '03-22889900' },
+        { id: 3, name: 'Penang Specialist Hospital', location: '22 Jalan Tun Dr Lim Chong Eu, Penang', phone: '04-2233445' }
+      ]);
     }
   };
 
