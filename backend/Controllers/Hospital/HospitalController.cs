@@ -606,14 +606,9 @@ public class HospitalController : ControllerBase
     {
         try
         {
-            var hospitalId = await GetHospitalIdFromUser(userId);
-            if (hospitalId == null)
-                return Ok(new { success = true, data = new List<object>() });
-
-            // Only show pending requests for this hospital
+            // Show all pending requests regardless of hospital_id for testing
             var requests = await _context.DonationRequests
-                .Where(dr => dr.HospitalId == hospitalId.Value && 
-                       (string.IsNullOrEmpty(dr.Status) || dr.Status == "Pending"))
+                .Where(dr => string.IsNullOrEmpty(dr.Status) || dr.Status == "Pending")
                 .Select(dr => new
                 {
                     donationId = dr.DonationId,
