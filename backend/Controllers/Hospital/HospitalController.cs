@@ -724,18 +724,9 @@ public class HospitalController : ControllerBase
     {
         try
         {
-            var hospitalId = await GetHospitalIdFromUser(userId);
-            _logger.LogInformation($"User {userId} mapped to hospital {hospitalId}");
-            
-            if (hospitalId == null)
-                return Ok(new { success = false, message = "Hospital staff not found", userId = userId });
-
-            // First check if we have any donor appointments
-            var appointmentCount = await _context.DonorAppointments
-                .Where(da => da.HospitalId == hospitalId.Value)
-                .CountAsync();
-            
-            _logger.LogInformation($"Found {appointmentCount} donor appointments for hospital {hospitalId}");
+            // Get all donor appointments for debugging
+            var appointmentCount = await _context.DonorAppointments.CountAsync();
+            _logger.LogInformation($"Total donor appointments in database: {appointmentCount}");
 
             if (appointmentCount == 0)
             {
@@ -744,7 +735,6 @@ public class HospitalController : ControllerBase
 
             // Get raw data first, then format on client side
             var rawAppointments = await _context.DonorAppointments
-                .Where(da => da.HospitalId == hospitalId.Value)
                 .GroupJoin(_context.DonorProfiles, 
                     da => da.DonorId, 
                     dp => dp.DonorId, 
@@ -762,7 +752,8 @@ public class HospitalController : ControllerBase
                     appointmentDate = x.da.AppointmentDate,
                     appointmentTime = x.da.AppointmentTime,
                     status = x.da.Status ?? "Scheduled",
-                    createdAt = x.da.CreatedAt
+                    createdAt = x.da.CreatedAt,
+                    hospitalId = x.da.HospitalId // Add for debugging
                 })
                 .OrderByDescending(x => x.appointmentDate)
                 .ToListAsync();
@@ -776,7 +767,8 @@ public class HospitalController : ControllerBase
                 appointmentDate = a.appointmentDate.ToString("yyyy-MM-dd"),
                 appointmentTime = a.appointmentTime.ToString(@"hh\:mm"),
                 status = a.status,
-                createdAt = a.createdAt.ToString("yyyy-MM-dd HH:mm")
+                createdAt = a.createdAt.ToString("yyyy-MM-dd HH:mm"),
+                hospitalId = a.hospitalId
             }).ToList();
 
             _logger.LogInformation($"Successfully retrieved {appointments.Count} donor appointments");
@@ -785,7 +777,6 @@ public class HospitalController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError($"Error fetching donor appointments: {ex.Message}");
-            _logger.LogError($"Stack trace: {ex.StackTrace}");
             return Ok(new { success = false, message = $"Failed to fetch donor appointments: {ex.Message}" });
         }
     }
