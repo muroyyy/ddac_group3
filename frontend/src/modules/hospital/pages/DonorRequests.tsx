@@ -26,7 +26,6 @@ interface Doctor {
 export default function DonorRequests() {
   const { user } = useAuth();
   const [requests, setRequests] = useState<DonorRequest[]>([]);
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRequest, setSelectedRequest] = useState<DonorRequest | null>(null);
@@ -37,7 +36,6 @@ export default function DonorRequests() {
   
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [approvingRequest, setApprovingRequest] = useState<DonorRequest | null>(null);
-  const [selectedDoctorId, setSelectedDoctorId] = useState<number>(0);
   const [appointmentDate, setAppointmentDate] = useState('');
   const [appointmentTime, setAppointmentTime] = useState('');
 
@@ -45,17 +43,10 @@ export default function DonorRequests() {
     if (!user?.id) return;
     setLoading(true);
     try {
-      const [requestsRes, doctorsRes] = await Promise.all([
-        hospitalAPI.getDonorRequests(user.id),
-        hospitalAPI.getDoctors(user.id)
-      ]);
+      const requestsRes = await hospitalAPI.getDonorRequests(user.id);
       
       if (requestsRes.success) {
         setRequests(requestsRes.data || []);
-      }
-      
-      if (doctorsRes.success) {
-        setDoctors(doctorsRes.data || []);
       }
     } catch (error) {
       console.error('Failed to load data:', error);
@@ -70,7 +61,6 @@ export default function DonorRequests() {
 
   const showApprovalDialog = (request: DonorRequest) => {
     setApprovingRequest(request);
-    setSelectedDoctorId(0);
     setAppointmentDate('');
     setAppointmentTime('');
     setShowApprovalModal(true);
