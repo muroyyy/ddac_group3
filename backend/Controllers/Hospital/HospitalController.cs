@@ -606,9 +606,14 @@ public class HospitalController : ControllerBase
     {
         try
         {
-            // Get all donation requests regardless of hospital_id for debugging
+            var hospitalId = await GetHospitalIdFromUser(userId);
+            if (hospitalId == null)
+                return Ok(new { success = true, data = new List<object>() });
+
+            // Only show pending requests for this hospital
             var requests = await _context.DonationRequests
-                .Where(dr => string.IsNullOrEmpty(dr.Status) || dr.Status == "Pending")
+                .Where(dr => dr.HospitalId == hospitalId.Value && 
+                       (string.IsNullOrEmpty(dr.Status) || dr.Status == "Pending"))
                 .Select(dr => new
                 {
                     donationId = dr.DonationId,
@@ -620,7 +625,7 @@ public class HospitalController : ControllerBase
                     status = dr.Status ?? "Pending",
                     requestedDate = dr.RequestedDate.ToString("yyyy-MM-dd"),
                     notes = "",
-                    hospitalId = dr.HospitalId // Add this for debugging
+                    hospitalId = dr.HospitalId // Keep for debugging
                 })
                 .ToListAsync();
 
@@ -638,17 +643,25 @@ public class HospitalController : ControllerBase
     [HttpPost("donor-requests/{id}/approve")]
     public async Task<IActionResult> ApproveDonorRequest(int id, [FromBody] ApproveRequestDto dto)
     {
+        using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
+            _logger.LogInformation($"Attempting to approve donation request {id}");
+            
             var donorRequest = await _context.DonationRequests.FindAsync(id);
             if (donorRequest == null)
+            {
+                _logger.LogError($"Donation request {id} not found");
                 return NotFound(new { success = false, message = "Donor request not found" });
+            }
+
+            _logger.LogInformation($"Found donation request {id}: DonorId={donorRequest.DonorId}, HospitalId={donorRequest.HospitalId}, CurrentStatus={donorRequest.Status}");
 
             // Update donation request status
             donorRequest.Status = "Approved";
-            _context.DonationRequests.Update(donorRequest);
+            _logger.LogInformation($"Setting status to 'Approved' for donation request {id}");
             
-            // Create appointment in donor_appointments table with Scheduled status
+            // Create appointment in donor_appointments table
             var appointment = new DonorAppointment
             {
                 DonorId = donorRequest.DonorId,
@@ -662,14 +675,22 @@ public class HospitalController : ControllerBase
                 DoctorId = dto.DoctorId > 0 ? dto.DoctorId : null
             };
             
+            _logger.LogInformation($"Creating appointment for donation {id}");
             _context.DonorAppointments.Add(appointment);
-            await _context.SaveChangesAsync();
+            
+            var saveResult = await _context.SaveChangesAsync();
+            _logger.LogInformation($"SaveChanges result: {saveResult} records affected");
+            
+            await transaction.CommitAsync();
+            _logger.LogInformation($"Transaction committed successfully for donation {id}");
 
             return Ok(new { success = true, message = "Donor request approved and appointment scheduled.", appointmentId = appointment.AppointmentId });
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error approving donor request: {ex.Message}");
+            await transaction.RollbackAsync();
+            _logger.LogError($"Error approving donor request {id}: {ex.Message}");
+            _logger.LogError($"Stack trace: {ex.StackTrace}");
             return StatusCode(500, new { success = false, message = $"Failed to approve donor request: {ex.Message}" });
         }
     }
@@ -686,9 +707,9 @@ public class HospitalController : ControllerBase
             if (donorRequest == null)
                 return NotFound(new { success = false, message = "Donor request not found" });
 
-            // Update donation request status
+            // Update donation request status first
             donorRequest.Status = "Rejected";
-            _context.DonationRequests.Update(donorRequest);
+            await _context.SaveChangesAsync();
             
             // Create appointment in donor_appointments table with Cancelled status
             var appointment = new DonorAppointment

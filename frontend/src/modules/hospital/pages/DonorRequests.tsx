@@ -92,7 +92,8 @@ export default function DonorRequests() {
       if (result.success) {
         setShowApprovalModal(false);
         setApprovingRequest(null);
-        loadRequests();
+        // Reload the requests list to remove the approved request
+        await loadRequests();
         alert('Donation request approved and appointment created successfully!');
       } else {
         alert('Failed to approve request');
@@ -117,7 +118,8 @@ export default function DonorRequests() {
         setShowRejectModal(false);
         setRejectingId(null);
         setRejectionReason('');
-        loadRequests();
+        // Reload the requests list to remove the rejected request
+        await loadRequests();
         alert('Donation request rejected successfully. Donor has been notified.');
       } else {
         alert('Failed to reject request');
