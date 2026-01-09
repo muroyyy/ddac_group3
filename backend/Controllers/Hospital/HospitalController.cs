@@ -606,9 +606,9 @@ public class HospitalController : ControllerBase
     {
         try
         {
-            // Use simple approach - get data from donation_requests table
+            // Only show requests that haven't been processed yet (Pending or null/empty status)
             var requests = await _context.DonationRequests
-                .Where(dr => dr.HospitalId == 1)
+                .Where(dr => dr.HospitalId == 1 && (dr.Status == "Pending" || dr.Status == null || dr.Status == ""))
                 .Select(dr => new
                 {
                     donationId = dr.DonationId,
@@ -617,7 +617,7 @@ public class HospitalController : ControllerBase
                     donorPhone = "123-456-7890",
                     bloodType = "O+",
                     unitsRequested = dr.UnitsRequired,
-                    status = dr.Status,
+                    status = dr.Status ?? "Pending",
                     requestedDate = dr.RequestedDate.ToString("yyyy-MM-dd"),
                     notes = ""
                 })
