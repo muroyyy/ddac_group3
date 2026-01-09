@@ -66,17 +66,16 @@ export const hospitalAPI = {
 
 
 
-  getAppointments: async (userId: number): Promise<any[]> => {
+  getAppointments: async (userId: number): Promise<any> => {
     const response = await fetch(`${API_BASE_URL}/hospital/appointments/${userId}`);
-    const result = await response.json();
-    return result.success ? (result.data || []) : [];
+    return response.json();
   },
 
-  completeAppointment: async (id: number, doctorNotes?: string): Promise<{ success: boolean }> => {
+  completeAppointment: async (id: number, data: { doctorNotes?: string }): Promise<{ success: boolean }> => {
     const response = await fetch(`${API_BASE_URL}/hospital/appointments/${id}/complete`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ doctorNotes }),
+      body: JSON.stringify(data),
     });
     return response.json();
   },
