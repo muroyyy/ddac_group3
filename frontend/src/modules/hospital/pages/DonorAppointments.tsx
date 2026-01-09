@@ -21,6 +21,27 @@ const DonorAppointments: React.FC = () => {
   console.log('👤 Current user:', user);
   console.log('⏳ Auth loading:', authLoading);
 
+  const handleMarkDone = async (appointmentId: number) => {
+    if (confirm('Are you sure this appointment is done?')) {
+      try {
+        const response = await hospitalAPI.completeDonorAppointment(appointmentId);
+        if (response.success) {
+          // Refresh the list
+          const userId = (user as any).user.id;
+          const refreshResponse = await hospitalAPI.getDonorAppointments(userId);
+          if (refreshResponse.success) {
+            setAppointments(refreshResponse.data || []);
+          }
+        } else {
+          alert('Failed to mark appointment as done');
+        }
+      } catch (error) {
+        console.error('Error marking appointment as done:', error);
+        alert('Failed to mark appointment as done');
+      }
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       // Wait for auth to complete
@@ -58,6 +79,22 @@ const DonorAppointments: React.FC = () => {
         setAppointments([]);
       } finally {
         setLoading(false);
+      }
+    };
+
+    const handleMarkDone = async (appointmentId: number) => {
+      if (confirm('Are you sure this appointment is done?')) {
+        try {
+          const response = await hospitalAPI.completeDonorAppointment(appointmentId);
+          if (response.success) {
+            fetchData(); // Refresh the list
+          } else {
+            alert('Failed to mark appointment as done');
+          }
+        } catch (error) {
+          console.error('Error marking appointment as done:', error);
+          alert('Failed to mark appointment as done');
+        }
       }
     };
 
@@ -151,12 +188,15 @@ const DonorAppointments: React.FC = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Created
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {appointments.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
                     No donor appointments found
                   </td>
                 </tr>
@@ -184,6 +224,16 @@ const DonorAppointments: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {appointment.createdAt}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {appointment.status.toLowerCase() === 'scheduled' && (
+                        <button
+                          onClick={() => handleMarkDone(appointment.appointmentId)}
+                          className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                        >
+                          DONE
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))

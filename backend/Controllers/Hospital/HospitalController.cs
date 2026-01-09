@@ -841,10 +841,10 @@ public class HospitalController : ControllerBase
     }
 
     /// <summary>
-    /// Complete donor appointment and update inventory
+    /// Complete donor appointment
     /// </summary>
     [HttpPost("donor-appointments/{id}/complete")]
-    public async Task<IActionResult> CompleteDonorAppointment(int id, [FromBody] CompleteDonorAppointmentDto dto)
+    public async Task<IActionResult> CompleteDonorAppointment(int id)
     {
         try
         {
@@ -852,41 +852,11 @@ public class HospitalController : ControllerBase
             if (appointment == null)
                 return NotFound(new { success = false, message = "Donor appointment not found" });
 
-            // Get donor profile to get blood type
-            var donor = await _context.DonorProfiles.FindAsync(appointment.DonorId);
-            if (donor == null)
-                return NotFound(new { success = false, message = "Donor not found" });
-
-            // Update appointment status
             appointment.Status = "Completed";
             appointment.UpdatedAt = DateTime.UtcNow;
-
-            // Update blood inventory
-            var inventory = await _context.BloodInventory
-                .FirstOrDefaultAsync(bi => bi.HospitalId == appointment.HospitalId && bi.BloodType == donor.BloodType);
-            
-            if (inventory != null)
-            {
-                inventory.QuantityUnits += dto.UnitsCollected;
-                inventory.LastUpdated = DateTime.UtcNow;
-            }
-            else
-            {
-                // Create new inventory entry if doesn't exist
-                inventory = new BloodInventory
-                {
-                    HospitalId = appointment.HospitalId,
-                    BloodType = donor.BloodType,
-                    QuantityUnits = dto.UnitsCollected,
-                    Status = "Available",
-                    LastUpdated = DateTime.UtcNow
-                };
-                _context.BloodInventory.Add(inventory);
-            }
-
             await _context.SaveChangesAsync();
 
-            return Ok(new { success = true, message = "Donor appointment completed and inventory updated" });
+            return Ok(new { success = true, message = "Donor appointment marked as completed" });
         }
         catch (Exception ex)
         {
