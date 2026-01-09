@@ -100,10 +100,11 @@ export const hospitalAPI = {
     return response.json();
   },
 
-  approveDonorRequest: async (id: number): Promise<{ success: boolean }> => {
+  approveDonorRequest: async (id: number, data?: { doctorId: number; appointmentDate: Date }): Promise<{ success: boolean }> => {
     const response = await fetch(`${API_BASE_URL}/hospital/donor-requests/${id}/approve`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      body: data ? JSON.stringify(data) : undefined,
     });
     return response.json();
   },

@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Clipboard, User, LogOut, Droplets, Calendar } from 'lucide-react';
+import { LayoutDashboard, Clipboard, User, LogOut, Droplets, Calendar, Heart } from 'lucide-react';
 
 export default function HospitalLayout() {
 	const { logout, user } = useAuth();
@@ -18,6 +18,7 @@ export default function HospitalLayout() {
 	const navItems = [
 		{ path: '/hospital/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
 		{ path: '/hospital/blood-requests', label: 'Blood Requests', Icon: Droplets },
+		{ path: '/hospital/donor-requests', label: 'Donor Requests', Icon: Heart },
 		{ path: '/hospital/appointments', label: 'Patient Appointments', Icon: Calendar },
 		{ path: '/hospital/inventory', label: 'Manage Inventory', Icon: Clipboard },
 		{ path: '/hospital/profile', label: 'Profile', Icon: User },
