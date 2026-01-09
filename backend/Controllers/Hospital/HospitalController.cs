@@ -581,6 +581,15 @@ public class HospitalController : ControllerBase
     }
 
     /// <summary>
+    /// Test endpoint for donor requests
+    /// </summary>
+    [HttpGet("test-donor-requests")]
+    public async Task<IActionResult> TestDonorRequests()
+    {
+        return Ok(new { success = true, message = "Donor requests endpoint is working" });
+    }
+
+    /// <summary>
     /// Get donor requests for hospital staff
     /// </summary>
     [HttpGet("donor-requests/{userId}")]
