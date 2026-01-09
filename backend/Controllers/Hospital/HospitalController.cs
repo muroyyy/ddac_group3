@@ -932,7 +932,7 @@ public class HospitalController : ControllerBase
             try
             {
                 totalCount = await _context.PatientAppointments.CountAsync();
-                rawAppointments = await _context.PatientAppointments
+                rawAppointments = (await _context.PatientAppointments
                     .Take(5)
                     .Select(a => new {
                         a.AppointmentId,
@@ -941,7 +941,7 @@ public class HospitalController : ControllerBase
                         a.HospitalId,
                         a.Status
                     })
-                    .ToListAsync();
+                    .ToListAsync()).Cast<object>().ToList();
             }
             catch (Exception tableEx)
             {
