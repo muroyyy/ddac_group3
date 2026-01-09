@@ -1,3 +1,5 @@
+using System;
+
 namespace BloodLine.Data.DTOs
 {
     public class HospitalDto
