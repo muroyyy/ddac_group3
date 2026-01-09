@@ -18,12 +18,14 @@ public class HospitalController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
     private readonly NotificationService _notificationService;
+    private readonly SnsService _snsService;
     private readonly ILogger<HospitalController> _logger;
 
-    public HospitalController(ApplicationDbContext context, NotificationService notificationService, ILogger<HospitalController> logger)
+    public HospitalController(ApplicationDbContext context, NotificationService notificationService, SnsService snsService, ILogger<HospitalController> logger)
     {
         _context = context;
         _notificationService = notificationService;
+        _snsService = snsService;
         _logger = logger;
     }
 
@@ -376,6 +378,13 @@ public class HospitalController : ControllerBase
 
             if (patient == null) return;
 
+            var bloodRequest = await _context.BloodRequests.FindAsync(requestId);
+            var bloodType = bloodRequest?.BloodType ?? "Unknown";
+
+            // Send SNS email notification
+            await _snsService.SendBloodRequestNotification(patient.User.Email, status, requestId, bloodType);
+
+            // Also create in-app notification
             var message = status.ToLower() switch
             {
                 "approved" => $"Good news! Your blood request #{requestId} has been approved.",
@@ -974,11 +983,6 @@ public class ApproveRequestDto
 {
     public int DoctorId { get; set; }
     public DateTime AppointmentDate { get; set; }
-}
-
-public class CompleteAppointmentDto
-{
-    public string? DoctorNotes { get; set; }
 }
 
 public class CreateDonorAppointmentDto

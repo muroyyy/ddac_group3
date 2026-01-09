@@ -194,21 +194,22 @@ namespace BloodLine.Controllers
         /// GET APPOINTMENTS ENDPOINT - Retrieves all appointments for a specific patient
         /// 
         /// BUSINESS LOGIC:
-        /// - Converts user ID to patient ID for security
-        /// - Queries patient_appointments table with JOINs
-        /// - Returns appointments with hospital and doctor information
-        /// - Orders by date (newest first)
+        /// - Converts user ID to patient ID for security isolation
+        /// - Queries patient_appointments table with hospital/doctor JOINs
+        /// - Returns appointments with complete scheduling information
+        /// - Orders by appointment date (newest first)
         /// 
         /// SECURITY: Only returns appointments for the authenticated patient
+        /// DATA JOINS: Links appointments → hospitals → doctors for complete info
         /// </summary>
-        /// <param name="userId">The authenticated user's ID from frontend</param>
-        /// <returns>JSON response with appointment data</returns>
+        /// <param name="userId">The authenticated user's ID from frontend session</param>
+        /// <returns>JSON response with appointment data including hospital and doctor details</returns>
         [HttpGet("appointments/{userId}")]
         public async Task<IActionResult> GetAppointments(int userId)
         {
             try
             {
-                // INPUT VALIDATION - Ensure valid user ID
+                // INPUT VALIDATION - Ensure valid user ID provided
                 if (userId <= 0)
                     return BadRequest(new { success = false, message = "Invalid user ID." });
 
@@ -217,17 +218,63 @@ namespace BloodLine.Controllers
                 var patientId = await GetPatientIdFromUser(userId);
                 if (patientId == null)
                 {
-                    // User has no patient profile - return empty list
+                    // User has no patient profile - return empty list instead of error
                     return Ok(new { success = true, data = new List<object>() });
                 }
 
-                // DATABASE QUERY - Get appointments with related data
+                // DATABASE QUERY - Get appointments with related hospital/doctor data
+                // Uses LINQ projections to avoid loading full entities into memory
                 var appointments = await _db.PatientAppointments
                     .Where(pa => pa.PatientId == patientId.Value)  // SECURITY: Only this patient's appointments
                     .Select(pa => new
                     {
                         appointmentId = pa.AppointmentId,
-                        // JOIN with hospitals table to get hospital name
+                        
+                        // JOIN with hospitals table to get hospital name and location
+                        hospitalName = _db.Hospitals
+                            .Where(h => h.HospitalId == pa.HospitalId)
+                            .Select(h => h.HospitalName)
+                            .FirstOrDefault() ?? "Unknown Hospital",
+                            
+                        // JOIN with doctors table to get assigned doctor information
+                        doctorName = _db.Doctors
+                            .Where(d => d.DoctorId == pa.DoctorId)
+                            .Select(d => d.DoctorName)
+                            .FirstOrDefault() ?? "Not Assigned",
+                            
+                        // APPOINTMENT SCHEDULING DETAILS
+                        appointmentDate = pa.AppointmentDate.HasValue 
+                            ? pa.AppointmentDate.Value.ToString("yyyy-MM-dd")
+                            : "Not Scheduled",
+                            
+                        appointmentTime = pa.AppointmentTime ?? "Not Set",
+                        
+                        // STATUS AND METADATA
+                        status = pa.Status ?? "Unknown",
+                        notes = pa.Notes,
+                        
+                        // CREATION TRACKING
+                        createdAt = pa.CreatedAt.HasValue
+                            ? pa.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm")
+                            : "Unknown"
+                    })
+                    .OrderByDescending(a => a.appointmentDate)  // SORT: Newest appointments first
+                    .ToListAsync();
+
+                // SUCCESS RESPONSE - Return appointment data for frontend display
+                return Ok(new { success = true, data = appointments });
+            }
+            catch (Exception ex)
+            {
+                // ERROR HANDLING - Log error and return user-friendly message
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Error loading appointments.",
+                    error = ex.Message
+                });
+            }
+        }
                         hospitalName = _db.Hospitals.Where(h => h.HospitalId == pa.HospitalId).Select(h => h.HospitalName).FirstOrDefault() ?? "Unknown Hospital",
                         // JOIN with doctors table to get doctor name (handle null doctor_id)
                         doctorName = pa.DoctorId.HasValue ? 
