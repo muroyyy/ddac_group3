@@ -606,9 +606,11 @@ public class HospitalController : ControllerBase
     {
         try
         {
-            // Only show requests that haven't been processed yet (Pending or null/empty status)
+            // Only show requests that haven't been approved or rejected yet
             var requests = await _context.DonationRequests
-                .Where(dr => dr.HospitalId == 1 && (dr.Status == "Pending" || dr.Status == null || dr.Status == ""))
+                .Where(dr => dr.HospitalId == 1 && 
+                       (dr.Status == null || dr.Status == "" || dr.Status == "Pending") &&
+                       dr.Status != "Approved" && dr.Status != "Rejected")
                 .Select(dr => new
                 {
                     donationId = dr.DonationId,
