@@ -27,10 +27,12 @@ const DonorAppointments: React.FC = () => {
         const response = await hospitalAPI.completeDonorAppointment(appointmentId);
         if (response.success) {
           // Refresh the list
-          const userId = (user as any).user.id;
-          const refreshResponse = await hospitalAPI.getDonorAppointments(userId);
-          if (refreshResponse.success) {
-            setAppointments(refreshResponse.data || []);
+          if ((user as any)?.user?.id) {
+            const userId = (user as any).user.id;
+            const refreshResponse = await hospitalAPI.getDonorAppointments(userId);
+            if (refreshResponse.success) {
+              setAppointments(refreshResponse.data || []);
+            }
           }
         } else {
           alert('Failed to mark appointment as done');
@@ -79,22 +81,6 @@ const DonorAppointments: React.FC = () => {
         setAppointments([]);
       } finally {
         setLoading(false);
-      }
-    };
-
-    const handleMarkDone = async (appointmentId: number) => {
-      if (confirm('Are you sure this appointment is done?')) {
-        try {
-          const response = await hospitalAPI.completeDonorAppointment(appointmentId);
-          if (response.success) {
-            fetchData(); // Refresh the list
-          } else {
-            alert('Failed to mark appointment as done');
-          }
-        } catch (error) {
-          console.error('Error marking appointment as done:', error);
-          alert('Failed to mark appointment as done');
-        }
       }
     };
 
