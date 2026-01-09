@@ -245,7 +245,7 @@ namespace BloodLine.Controllers
                       FROM donor_appointments da
                       JOIN hospital h ON da.hospital_id = h.hospital_id
                       JOIN donor_profile dp ON da.donor_id = dp.donor_id
-                      WHERE da.donor_id = {0}
+                      WHERE da.donor_id = {0} AND da.status IN ('Completed', 'Cancelled')
                       ORDER BY da.appointment_date DESC", donorProfile.DonorId)
                 .ToListAsync();
 
