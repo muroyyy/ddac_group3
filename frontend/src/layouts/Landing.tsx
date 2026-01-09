@@ -18,7 +18,16 @@ import BloodTable from './BloodTable';
 
 const HeroSection: React.FC = () => {
   const navigate = useNavigate();
-  
+
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      easing: 'ease-out-cubic',
+      once: true,
+      offset: 50,
+    });
+  }, []);
+
   const bloodDonationImages = [
     "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&h=600&fit=crop&crop=center",
     "https://images.unsplash.com/photo-1615461066841-6116e61058f4?w=800&h=600&fit=crop&crop=center", 
@@ -36,31 +45,31 @@ const HeroSection: React.FC = () => {
       </div>
 
       <div className="container mx-auto px-6 relative z-10 grid lg:grid-cols-2 gap-12 items-center">
-        <div className="space-y-8 animate-fade-in-up">
+        <div className="space-y-8" data-aos="fade-right">
           <div className="inline-flex items-center space-x-2 bg-red-500/30 px-4 py-2 rounded-full border border-red-400/30 backdrop-blur-sm">
             <Heart className="w-5 h-5 text-red-200 fill-red-200" />
             <span className="text-sm font-medium tracking-wide text-red-50">Lifesaving Impact</span>
           </div>
-          
+
           <h1 className="text-5xl lg:text-7xl font-extrabold leading-tight tracking-tight">
             One Donation <br/>
             Can Save Up To <br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-100 to-white">3 Lives.</span>
           </h1>
-          
+
           <p className="text-lg lg:text-xl text-red-100 max-w-xl leading-relaxed">
             Every two seconds, someone needs blood. Your simple act of kindness gives accident victims, cancer patients, and premature babies a second chance at life.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <button 
+            <button
               onClick={() => navigate('/register')}
               className="px-8 py-4 bg-white text-red-700 font-bold rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.2)] hover:shadow-[0_15px_35px_rgba(0,0,0,0.3)] hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 group cursor-pointer"
             >
               Become a Donor Today
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
-            <button 
+            <button
               onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
               className="px-8 py-4 bg-transparent border-2 border-red-300 text-red-50 font-semibold rounded-xl hover:bg-red-700/50 hover:border-red-200 transition-all duration-300 cursor-pointer"
             >
@@ -69,7 +78,7 @@ const HeroSection: React.FC = () => {
           </div>
         </div>
 
-        <div className="relative hidden lg:block">
+        <div className="relative hidden lg:block" data-aos="fade-left" data-aos-delay="200">
           <div className="relative z-10 bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20 shadow-2xl transform rotate-2 hover:rotate-0 transition-all duration-500">
              <img 
                src={randomImage} 
