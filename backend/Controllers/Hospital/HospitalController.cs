@@ -721,8 +721,8 @@ public class HospitalController : ControllerBase
                 return Ok(new { success = true, data = new List<object>() });
             }
 
-            // Use GroupJoin for left joins to handle missing data gracefully
-            var appointments = await _context.DonorAppointments
+            // Get raw data first, then format on client side
+            var rawAppointments = await _context.DonorAppointments
                 .Where(da => da.HospitalId == hospitalId.Value)
                 .GroupJoin(_context.DonorProfiles, 
                     da => da.DonorId, 
@@ -738,13 +738,25 @@ public class HospitalController : ControllerBase
                     appointmentId = x.da.AppointmentId,
                     donorName = u != null ? u.FullName : "Unknown Donor",
                     bloodType = x.dp != null ? x.dp.BloodType : "Unknown",
-                    appointmentDate = x.da.AppointmentDate.ToString("yyyy-MM-dd"),
-                    appointmentTime = x.da.AppointmentTime.ToString(@"hh\:mm"),
+                    appointmentDate = x.da.AppointmentDate,
+                    appointmentTime = x.da.AppointmentTime,
                     status = x.da.Status ?? "Scheduled",
-                    createdAt = x.da.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                    createdAt = x.da.CreatedAt
                 })
                 .OrderByDescending(x => x.appointmentDate)
                 .ToListAsync();
+
+            // Format dates after query execution
+            var appointments = rawAppointments.Select(a => new
+            {
+                appointmentId = a.appointmentId,
+                donorName = a.donorName,
+                bloodType = a.bloodType,
+                appointmentDate = a.appointmentDate.ToString("yyyy-MM-dd"),
+                appointmentTime = a.appointmentTime.ToString(@"hh\:mm"),
+                status = a.status,
+                createdAt = a.createdAt.ToString("yyyy-MM-dd HH:mm")
+            }).ToList();
 
             _logger.LogInformation($"Successfully retrieved {appointments.Count} donor appointments");
             return Ok(new { success = true, data = appointments });
