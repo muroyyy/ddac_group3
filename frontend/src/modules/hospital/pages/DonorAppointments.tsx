@@ -13,42 +13,72 @@ interface DonorAppointment {
 }
 
 const DonorAppointments: React.FC = () => {
-  console.log('DonorAppointments component mounted');
   const [appointments, setAppointments] = useState<DonorAppointment[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
-  
-  console.log('Component render, user:', user);
+  const { user, isLoading: authLoading } = useAuth();
 
   useEffect(() => {
-    console.log('useEffect triggered, user:', user);
-    if (user?.id) {
-      console.log('User ID found, calling fetchDonorAppointments');
-      fetchDonorAppointments();
-    } else {
-      console.log('No user ID, not fetching appointments');
-    }
-  }, [user]);
+    const fetchData = async () => {
+      // Wait for auth to complete
+      if (authLoading) return;
+      
+      // If no user after auth completes, stop loading
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
 
-  const fetchDonorAppointments = async () => {
-    try {
-      console.log('Fetching donor appointments for user:', user?.id);
-      setLoading(true);
-      if (user?.id) {
+      try {
+        setLoading(true);
         const response = await hospitalAPI.getDonorAppointments(user.id);
-        console.log('API response:', response);
+        
         if (response.success) {
-          setAppointments(response.data);
+          setAppointments(response.data || []);
         } else {
           console.error('API returned error:', response.message);
+          setAppointments([]);
         }
-      } else {
-        console.log('No user ID available');
+      } catch (error) {
+        console.error('Error fetching donor appointments:', error);
+        setAppointments([]);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching donor appointments:', error);
-    } finally {
-      setLoading(false);
+    };
+
+    fetchData();
+  }, [user, authLoading]);
+
+  // Show loading while auth is loading OR data is loading
+  if (authLoading || loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+        <p>Loading donor appointments...</p>
+      </div>
+    );
+  }
+
+  // Show message if no user
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <p>Please log in to view donor appointments.</p>
+      </div>
+    );
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'upcoming':
+      case 'scheduled':
+        return 'bg-blue-100 text-blue-800';
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -65,16 +95,6 @@ const DonorAppointments: React.FC = () => {
         return 'bg-gray-100 text-gray-800';
     }
   };
-
-  if (loading) {
-    console.log('Component is in loading state');
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
-        <p>Loading donor appointments...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="p-6">
