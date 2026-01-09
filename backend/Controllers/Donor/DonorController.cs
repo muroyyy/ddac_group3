@@ -132,20 +132,21 @@ namespace BloodLine.Controllers
         [HttpGet("hospitals")]
         public async Task<IActionResult> GetHospitals()
         {
-            var hospitals = await _context.Hospitals
-                .Include(h => h.User)
-                .Select(h => new
-                {
-                    id = h.HospitalId,
-                    name = h.HospitalName,
-                    location = h.Address,
-                    phone = h.ContactNumber ?? "N/A",
-                    email = h.User.Email,
-                    contactPerson = h.ContactPerson
-                })
-                .ToListAsync();
-            
-            return Ok(hospitals);
+            try
+            {
+                var hospitals = await _context.Database
+                    .SqlQueryRaw<HospitalDto>(
+                        @"SELECT hospital_id as Id, hospital_name as Name, 
+                          address as Location, contact_number as Phone
+                          FROM hospital")
+                    .ToListAsync();
+                
+                return Ok(hospitals);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error loading hospitals", error = ex.Message });
+            }
         }
 
         [HttpGet("donation-requests/{userId}")]
@@ -268,6 +269,14 @@ namespace BloodLine.Controllers
 
             return Ok(completedDonations);
         }
+    }
+
+    public class HospitalDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Location { get; set; } = "";
+        public string Phone { get; set; } = "";
     }
 
     public class DonorUpdateProfileRequest
