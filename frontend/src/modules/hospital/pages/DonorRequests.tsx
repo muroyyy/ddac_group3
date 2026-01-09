@@ -16,22 +16,46 @@ interface DonorRequest {
   requestedDate: string;
 }
 
+interface Doctor {
+  doctorId: number;
+  doctorName: string;
+  specialization: string;
+  contactNumber: string;
+}
+
 export default function DonorRequests() {
   const { user } = useAuth();
   const [requests, setRequests] = useState<DonorRequest[]>([]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRequest, setSelectedRequest] = useState<DonorRequest | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectingId, setRejectingId] = useState<number | null>(null);
+  
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [approvingRequest, setApprovingRequest] = useState<DonorRequest | null>(null);
+  const [selectedDoctorId, setSelectedDoctorId] = useState<number>(0);
+  const [appointmentDate, setAppointmentDate] = useState('');
+  const [appointmentTime, setAppointmentTime] = useState('');
 
   const loadRequests = async () => {
     if (!user?.id) return;
     setLoading(true);
     try {
-      const requestsRes = await hospitalAPI.getDonorRequests(user.id);
+      const [requestsRes, doctorsRes] = await Promise.all([
+        hospitalAPI.getDonorRequests(user.id),
+        hospitalAPI.getDoctors(user.id)
+      ]);
       
       if (requestsRes.success) {
         setRequests(requestsRes.data || []);
+      }
+      
+      if (doctorsRes.success) {
+        setDoctors(doctorsRes.data || []);
       }
     } catch (error) {
       console.error('Failed to load data:', error);
@@ -43,6 +67,66 @@ export default function DonorRequests() {
   useEffect(() => {
     loadRequests();
   }, []);
+
+  const showApprovalDialog = (request: DonorRequest) => {
+    setApprovingRequest(request);
+    setSelectedDoctorId(0);
+    setAppointmentDate('');
+    setAppointmentTime('');
+    setShowApprovalModal(true);
+  };
+
+  const approveRequest = async () => {
+    if (!approvingRequest || !selectedDoctorId || !appointmentDate || !appointmentTime) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      const appointmentDateTime = new Date(`${appointmentDate}T${appointmentTime}`);
+      const result = await hospitalAPI.approveDonorRequest(approvingRequest.donationId, {
+        doctorId: selectedDoctorId,
+        appointmentDate: appointmentDateTime
+      });
+      
+      if (result.success) {
+        setShowApprovalModal(false);
+        setApprovingRequest(null);
+        loadRequests();
+        alert('Donation request approved and appointment created successfully!');
+      } else {
+        alert('Failed to approve request');
+      }
+    } catch (error) {
+      console.error('Failed to approve request:', error);
+      alert('Failed to approve request');
+    }
+  };
+
+  const showRejectDialog = (id: number) => {
+    setRejectingId(id);
+    setRejectionReason('');
+    setShowRejectModal(true);
+  };
+
+  const rejectRequest = async () => {
+    if (!rejectingId) return;
+    try {
+      const result = await hospitalAPI.rejectDonorRequest(rejectingId, rejectionReason);
+      if (result.success) {
+        setShowRejectModal(false);
+        setRejectingId(null);
+        setRejectionReason('');
+        loadRequests();
+        alert('Donation request rejected successfully. Donor has been notified.');
+      } else {
+        alert('Failed to reject request');
+      }
+    } catch (error) {
+      console.error('Failed to reject request:', error);
+      alert('Failed to reject request');
+    }
+  };
 
   const filteredRequests = requests.filter(request => 
     request.donorName.toLowerCase().includes(searchTerm.toLowerCase())
@@ -168,15 +252,33 @@ export default function DonorRequests() {
                       </div>
                     </td>
                     <td className="px-8 py-6 whitespace-nowrap">
-                      <button
-                        onClick={() => {
-                          setSelectedRequest(request);
-                          setShowDetails(true);
-                        }}
-                        className="text-blue-700 hover:text-blue-900 px-4 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 font-medium transition-all duration-200 hover:shadow-md"
-                      >
-                        Details
-                      </button>
+                      <div className="flex space-x-2">
+                        {request.status === 'Pending' && (
+                          <>
+                            <button
+                              onClick={() => showApprovalDialog(request)}
+                              className="text-green-700 hover:text-green-900 px-4 py-2 rounded-lg bg-green-50 hover:bg-green-100 border border-green-200 font-medium transition-all duration-200 hover:shadow-md"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => showRejectDialog(request.donationId)}
+                              className="text-red-700 hover:text-red-900 px-4 py-2 rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 font-medium transition-all duration-200 hover:shadow-md"
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
+                        <button
+                          onClick={() => {
+                            setSelectedRequest(request);
+                            setShowDetails(true);
+                          }}
+                          className="text-blue-700 hover:text-blue-900 px-4 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 font-medium transition-all duration-200 hover:shadow-md"
+                        >
+                          Details
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -270,6 +372,116 @@ export default function DonorRequests() {
                 className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-xl hover:bg-gray-200 transition-colors font-medium"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rejection Modal */}
+      {showRejectModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md transform transition-all">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Reject Donation Request</h3>
+            <p className="text-gray-600 mb-6">
+              Please provide a reason for rejecting this donation request. The donor will be notified.
+            </p>
+            
+            <textarea
+              placeholder="Rejection reason (required)..."
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              className="w-full p-4 border border-gray-300 rounded-xl h-28 resize-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              required
+            />
+
+            <div className="flex gap-3 mt-8">
+              <button
+                onClick={rejectRequest}
+                disabled={!rejectionReason.trim()}
+                className="flex-1 bg-red-600 text-white py-3 px-4 rounded-xl hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+              >
+                Reject Request
+              </button>
+              <button
+                onClick={() => {
+                  setShowRejectModal(false);
+                  setRejectingId(null);
+                  setRejectionReason('');
+                }}
+                className="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Approval Modal */}
+      {showApprovalModal && approvingRequest && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md transform transition-all">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Approve Donation Request</h3>
+            <p className="text-gray-600 mb-6">
+              Donor: <strong>{approvingRequest.donorName}</strong> ({approvingRequest.bloodType})
+            </p>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Select Doctor</label>
+                <select
+                  value={selectedDoctorId}
+                  onChange={(e) => setSelectedDoctorId(Number(e.target.value))}
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                >
+                  <option value={0}>Select a doctor...</option>
+                  {doctors.map(doctor => (
+                    <option key={doctor.doctorId} value={doctor.doctorId}>
+                      {doctor.doctorName} - {doctor.specialization}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Appointment Date</label>
+                <input
+                  type="date"
+                  value={appointmentDate}
+                  onChange={(e) => setAppointmentDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Appointment Time</label>
+                <input
+                  type="time"
+                  value={appointmentTime}
+                  onChange={(e) => setAppointmentTime(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-8">
+              <button
+                onClick={approveRequest}
+                disabled={!selectedDoctorId || !appointmentDate || !appointmentTime}
+                className="flex-1 bg-green-600 text-white py-3 px-4 rounded-xl hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+              >
+                Approve & Create Appointment
+              </button>
+              <button
+                onClick={() => {
+                  setShowApprovalModal(false);
+                  setApprovingRequest(null);
+                }}
+                className="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+              >
+                Cancel
               </button>
             </div>
           </div>
