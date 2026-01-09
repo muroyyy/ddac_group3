@@ -30,14 +30,37 @@ const DonorAppointments: React.FC = () => {
 
       try {
         setLoading(true);
-        const response = await hospitalAPI.getDonorAppointments(user.id);
+        // Temporary mock data since API endpoint is not deployed
+        const mockData = [
+          {
+            appointmentId: 1,
+            donorName: "John Doe",
+            bloodType: "O+",
+            appointmentDate: "2025-12-15",
+            appointmentTime: "09:30",
+            status: "Scheduled",
+            createdAt: "2025-12-01 09:00"
+          },
+          {
+            appointmentId: 2,
+            donorName: "Jane Smith",
+            bloodType: "A+",
+            appointmentDate: "2025-12-20",
+            appointmentTime: "14:15",
+            status: "Completed",
+            createdAt: "2025-12-02 10:30"
+          }
+        ];
         
-        if (response.success) {
-          setAppointments(response.data || []);
-        } else {
-          console.error('API returned error:', response.message);
-          setAppointments([]);
-        }
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        setAppointments(mockData);
+        
+        // Uncomment when API is deployed:
+        // const response = await hospitalAPI.getDonorAppointments(user.id);
+        // if (response.success) {
+        //   setAppointments(response.data || []);
+        // }
       } catch (error) {
         console.error('Error fetching donor appointments:', error);
         setAppointments([]);
@@ -47,6 +70,16 @@ const DonorAppointments: React.FC = () => {
     };
 
     fetchData();
+    
+    // Fallback timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.log('Timeout reached, stopping loading');
+        setLoading(false);
+      }
+    }, 10000);
+    
+    return () => clearTimeout(timeout);
   }, [user, authLoading]);
 
   // Show loading while auth is loading OR data is loading
