@@ -1,5 +1,4 @@
 using BloodLine.Data;
-using BloodLine.Data.DTOs;
 using BloodLine.Models;
 using BloodLine.Models.Users;
 using BloodLine.Models.Auth;
@@ -994,6 +993,19 @@ public class UpdateInventoryRequest
 public class RejectRequestDto
 {
     public string? RejectionNotes { get; set; }
+}
+
+public class HospitalDonorRequestDto
+{
+    public int DonationId { get; set; }
+    public string DonorName { get; set; } = "";
+    public string DonorEmail { get; set; } = "";
+    public string DonorPhone { get; set; } = "";
+    public string BloodType { get; set; } = "";
+    public int UnitsRequested { get; set; }
+    public string Status { get; set; } = "";
+    public DateTime RequestedDate { get; set; }
+    public string Notes { get; set; } = "";
 }
 
 public class ApproveRequestDto
