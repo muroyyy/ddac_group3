@@ -316,7 +316,7 @@ export default function BloodRequests() {
 
       {/* Rejection Modal */}
       {showRejectModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
           <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md transform transition-all">
             <h3 className="text-xl font-bold text-gray-900 mb-2">Reject Blood Request</h3>
             <p className="text-gray-600 mb-6">
@@ -357,7 +357,7 @@ export default function BloodRequests() {
 
       {/* Patient Details Modal */}
       {showDetails && selectedRequest && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
           <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all">
             <div className="flex justify-between items-start mb-8">
               <h3 className="text-2xl font-bold text-gray-900">Patient Details</h3>
@@ -446,7 +446,7 @@ export default function BloodRequests() {
 
       {/* Approval Modal */}
       {showApprovalModal && approvingRequest && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
           <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md transform transition-all">
             <h3 className="text-xl font-bold text-gray-900 mb-2">Approve Blood Request</h3>
             <p className="text-gray-600 mb-6">
