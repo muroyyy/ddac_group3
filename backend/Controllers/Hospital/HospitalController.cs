@@ -598,17 +598,17 @@ public class HospitalController : ControllerBase
         try
         {
             var requests = await _context.Database
-                .SqlQueryRaw<DonorRequestDto>(
+                .SqlQueryRaw<dynamic>(
                     @"SELECT 
-                        dr.donation_id as DonationId,
-                        COALESCE(u.full_name, 'Unknown') as DonorName,
-                        COALESCE(u.email, 'Unknown') as DonorEmail,
-                        COALESCE(u.phone, 'Unknown') as DonorPhone,
-                        COALESCE(dp.blood_type, 'Unknown') as BloodType,
-                        dr.units_required as UnitsRequested,
-                        dr.status as Status,
-                        dr.requested_date as RequestedDate,
-                        '' as Notes
+                        dr.donation_id as donationId,
+                        COALESCE(u.full_name, 'Unknown') as donorName,
+                        COALESCE(u.email, 'Unknown') as donorEmail,
+                        COALESCE(u.phone, 'Unknown') as donorPhone,
+                        COALESCE(dp.blood_type, 'Unknown') as bloodType,
+                        dr.units_required as unitsRequested,
+                        dr.status as status,
+                        DATE_FORMAT(dr.requested_date, '%Y-%m-%d') as requestedDate,
+                        '' as notes
                       FROM donation_requests dr
                       LEFT JOIN donor_profile dp ON dr.donor_id = dp.donor_id
                       LEFT JOIN users u ON dp.user_id = u.id
