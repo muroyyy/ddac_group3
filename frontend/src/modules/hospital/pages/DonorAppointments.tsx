@@ -13,13 +13,20 @@ interface DonorAppointment {
 }
 
 const DonorAppointments: React.FC = () => {
+  console.log('DonorAppointments component mounted');
   const [appointments, setAppointments] = useState<DonorAppointment[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  
+  console.log('Component render, user:', user);
 
   useEffect(() => {
+    console.log('useEffect triggered, user:', user);
     if (user?.id) {
+      console.log('User ID found, calling fetchDonorAppointments');
       fetchDonorAppointments();
+    } else {
+      console.log('No user ID, not fetching appointments');
     }
   }, [user]);
 
@@ -60,9 +67,11 @@ const DonorAppointments: React.FC = () => {
   };
 
   if (loading) {
+    console.log('Component is in loading state');
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+        <p>Loading donor appointments...</p>
       </div>
     );
   }
