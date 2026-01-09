@@ -20,24 +20,27 @@ export const useAuth = () => {
         const currentUser = sessionManager.getUser();
         
         if (currentUser) {
-          // Validate token with backend
-          const validation = await sessionAPI.validateToken();
+          // Skip backend validation since auth endpoints aren't deployed
+          // Trust local session for now
+          setUser(currentUser);
+          setIsAuthenticated(true);
           
-          if (validation.valid) {
-            setUser(currentUser);
-            setIsAuthenticated(true);
-          } else {
-            sessionManager.clearSession();
-            setUser(null);
-            setIsAuthenticated(false);
-          }
+          // TODO: Uncomment when backend auth endpoints are deployed:
+          // const validation = await sessionAPI.validateToken();
+          // if (validation.valid) {
+          //   setUser(currentUser);
+          //   setIsAuthenticated(true);
+          // } else {
+          //   sessionManager.clearSession();
+          //   setUser(null);
+          //   setIsAuthenticated(false);
+          // }
         } else {
           setUser(null);
           setIsAuthenticated(false);
         }
       } catch (error) {
         console.error('Auth initialization failed:', error);
-        // Clear session on any error
         sessionManager.clearSession();
         setUser(null);
         setIsAuthenticated(false);
