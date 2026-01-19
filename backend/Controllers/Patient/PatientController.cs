@@ -281,24 +281,32 @@ namespace BloodLine.Controllers
                 if (patientId == null)
                     return Ok(new { success = true, data = new List<object>() });
 
-                var appointments = await _db.Database.SqlQueryRaw<AppointmentDto>(@"
-                    SELECT appointment_id, patient_id, appointment_date, status, doctor_notes
-                    FROM patient_appointments 
-                    WHERE patient_id = {0}
-                    ORDER BY appointment_date DESC
+                var appointments = await _db.Database.SqlQueryRaw<dynamic>(@"
+                    SELECT pa.appointment_id, pa.appointment_date, pa.status, pa.doctor_notes,
+                           h.hospital_name, d.doctor_name
+                    FROM patient_appointments pa
+                    LEFT JOIN hospital h ON pa.hospital_id = h.hospital_id
+                    LEFT JOIN doctors d ON pa.doctor_id = d.doctor_id
+                    WHERE pa.patient_id = {0}
+                    ORDER BY pa.appointment_date DESC
                 ", patientId.Value).ToListAsync();
 
-                var result = appointments.Select(a => new
+                var result = new List<object>();
+                foreach (var a in appointments)
                 {
-                    appointmentId = a.appointment_id,
-                    hospitalName = "Hospital",
-                    doctorName = "Doctor",
-                    appointmentDate = a.appointment_date.ToString("yyyy-MM-dd"),
-                    appointmentTime = a.appointment_date.ToString("HH:mm"),
-                    status = a.status ?? "Unknown",
-                    notes = a.doctor_notes ?? "",
-                    createdAt = a.appointment_date.ToString("yyyy-MM-dd HH:mm")
-                }).ToList();
+                    var dict = (IDictionary<string, object>)a;
+                    result.Add(new
+                    {
+                        appointmentId = dict["appointment_id"],
+                        hospitalName = dict["hospital_name"] ?? "Unknown Hospital",
+                        doctorName = dict["doctor_name"] ?? "Not Assigned",
+                        appointmentDate = ((DateTime)dict["appointment_date"]).ToString("yyyy-MM-dd"),
+                        appointmentTime = ((DateTime)dict["appointment_date"]).ToString("HH:mm"),
+                        status = dict["status"] ?? "Unknown",
+                        notes = dict["doctor_notes"] ?? "",
+                        createdAt = ((DateTime)dict["appointment_date"]).ToString("yyyy-MM-dd HH:mm")
+                    });
+                }
 
                 return Ok(new { success = true, data = result });
             }
