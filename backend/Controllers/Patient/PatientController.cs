@@ -461,20 +461,6 @@ namespace BloodLine.Controllers
         {
             try
             {
-                // Create table if it doesn't exist
-                await _db.Database.ExecuteSqlRawAsync(@"
-                    CREATE TABLE IF NOT EXISTS patient_medical_documents (
-                        document_id INT AUTO_INCREMENT PRIMARY KEY,
-                        patient_id INT NOT NULL,
-                        document_name VARCHAR(255) NOT NULL,
-                        s3_key VARCHAR(500) NOT NULL,
-                        cloudfront_url VARCHAR(500) NOT NULL,
-                        file_type VARCHAR(100),
-                        file_size BIGINT,
-                        uploaded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-                ");
-
                 if (file == null || file.Length == 0)
                     return BadRequest(new { success = false, message = "No file provided." });
 
@@ -482,22 +468,13 @@ namespace BloodLine.Controllers
                 if (patientId == null)
                     return BadRequest(new { success = false, message = "Patient profile not found." });
 
-                // Skip S3 upload for now, just test database insert
-                var document = new PatientMedicalDocument
-                {
-                    PatientId = patientId.Value,
-                    DocumentName = file.FileName,
-                    S3Key = "test-key",
-                    CloudFrontUrl = "test-url",
-                    FileType = file.ContentType,
-                    FileSize = file.Length,
-                    UploadedAt = DateTime.UtcNow
-                };
+                // Use raw SQL insert instead of Entity Framework
+                await _db.Database.ExecuteSqlRawAsync(@"
+                    INSERT INTO patient_medical_documents (patient_id, document_name, s3_key, cloudfront_url, file_type, file_size, uploaded_at)
+                    VALUES ({0}, {1}, {2}, {3}, {4}, {5}, NOW())
+                ", patientId.Value, file.FileName, "test-key", "test-url", file.ContentType, file.Length);
 
-                _db.PatientMedicalDocuments.Add(document);
-                await _db.SaveChangesAsync();
-
-                return Ok(new { success = true, message = "Test upload successful", documentId = document.DocumentId });
+                return Ok(new { success = true, message = "Upload successful" });
             }
             catch (Exception ex)
             {
