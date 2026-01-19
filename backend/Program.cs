@@ -42,7 +42,8 @@ builder.Services.AddCors(options =>
                 "https://bloodline.dev",
                 "https://www.bloodline.dev",
                 "https://api.bloodline.dev",
-                "https://d3vjqplzgxllwe.cloudfront.net"
+                "https://d3vjqplzgxllwe.cloudfront.net",
+                "https://d2giq4wa1emg24.cloudfront.net"
             )
               .AllowAnyHeader()
               .AllowAnyMethod()
