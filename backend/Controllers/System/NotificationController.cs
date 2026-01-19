@@ -30,34 +30,13 @@ namespace BloodLine.Controllers
         {
             try
             {
-                // First ensure table exists
-                await _db.Database.ExecuteSqlRawAsync(@"
-                    CREATE TABLE IF NOT EXISTS notifications (
-                        notification_id INT AUTO_INCREMENT PRIMARY KEY,
-                        user_id INT NOT NULL,
-                        title VARCHAR(255) NOT NULL,
-                        message TEXT NOT NULL,
-                        type VARCHAR(50) NOT NULL,
-                        is_read BOOLEAN DEFAULT FALSE,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        appointment_id INT NULL
-                    )
-                ");
-
-                // Get count first
-                var countResult = await _db.Database.SqlQueryRaw<int>(
-                    "SELECT COUNT(*) as Value FROM notifications WHERE user_id = {0}", userId)
-                    .FirstOrDefaultAsync();
-                    
-                Console.WriteLine($"Found {countResult} notifications for user {userId}");
-
-                var notifications = await _db.Database.SqlQueryRaw<NotificationDto>(
-                    @"SELECT notification_id as Id, title as Title, message as Message, 
-                             type as Type, is_read as IsRead, created_at as CreatedAt,
-                             appointment_id as AppointmentId
-                      FROM notifications 
-                      WHERE user_id = {0} 
-                      ORDER BY created_at DESC", userId)
+                var notifications = await _context.Database.SqlQueryRaw<NotificationDto>(@"
+                    SELECT notification_id as Id, 'Notification' as Title, message as Message, 
+                           type as Type, is_read as IsRead, created_at as CreatedAt,
+                           appointment_id as AppointmentId
+                    FROM notifications 
+                    WHERE user_id = {0} 
+                    ORDER BY created_at DESC", userId)
                     .ToListAsync();
 
                 var result = notifications.Select(n => new
@@ -71,14 +50,11 @@ namespace BloodLine.Controllers
                     appointmentId = n.AppointmentId
                 }).ToList();
 
-                Console.WriteLine($"Returning {result.Count} notifications");
                 return Ok(new { success = true, data = result });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Notification error: {ex.Message}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                return Ok(new { success = true, data = new object[0] });
+                return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
 
@@ -88,9 +64,9 @@ namespace BloodLine.Controllers
             try
             {
                 await _db.Database.ExecuteSqlRawAsync(@"
-                    INSERT INTO notifications (user_id, title, message, type, is_read, created_at)
-                    VALUES ({0}, {1}, {2}, {3}, 0, NOW())
-                ", userId, "Test Notification", "This is a test notification to verify the system is working.", "System");
+                    INSERT INTO notifications (user_id, message, type, is_read, created_at)
+                    VALUES ({0}, {1}, {2}, 0, NOW())
+                ", userId, "This is a test notification to verify the system is working.", "System");
                 
                 return Ok(new { success = true, message = "Test notification created" });
             }

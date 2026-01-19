@@ -382,7 +382,7 @@ public class HospitalController : ControllerBase
             var bloodType = bloodRequest?.BloodType ?? "Unknown";
 
             // Send SNS email notification
-            await _snsService.SendBloodRequestNotification(patient.User.Email, status, requestId, bloodType);
+            await _snsService.SendBloodRequestNotification(patient.User.Email, status, requestId, bloodType, patient.UserId);
 
             // Also create in-app notification
             var message = status.ToLower() switch

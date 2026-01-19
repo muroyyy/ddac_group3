@@ -1,21 +1,24 @@
 using Amazon.SimpleNotificationService;
 using Amazon.SimpleNotificationService.Model;
+using BloodLine.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace BloodLine.Services
 {
     public class SnsService
     {
         private readonly IAmazonSimpleNotificationService _snsClient;
+        private readonly ApplicationDbContext _db;
         private readonly string _topicArn;
 
-        public SnsService()
+        public SnsService(ApplicationDbContext db)
         {
             _snsClient = new AmazonSimpleNotificationServiceClient(Amazon.RegionEndpoint.APSoutheast1);
-            // Your actual SNS Topic ARN
+            _db = db;
             _topicArn = Environment.GetEnvironmentVariable("SNS_TOPIC_ARN") ?? "arn:aws:sns:ap-southeast-1:007027391333:bloodline-notifications";
         }
 
-        public async Task SendBloodRequestNotification(string patientEmail, string status, int requestId, string bloodType)
+        public async Task SendBloodRequestNotification(string patientEmail, string status, int requestId, string bloodType, int userId)
         {
             try
             {
@@ -27,6 +30,7 @@ namespace BloodLine.Services
                     _ => $"Your blood request #{requestId} status has been updated to {status}."
                 };
 
+                // Send SNS email
                 var request = new PublishRequest
                 {
                     TopicArn = _topicArn,
@@ -35,10 +39,15 @@ namespace BloodLine.Services
                 };
 
                 await _snsClient.PublishAsync(request);
+
+                // Also save to notifications table
+                await _db.Database.ExecuteSqlRawAsync(@"
+                    INSERT INTO notifications (user_id, message, type, is_read, created_at)
+                    VALUES ({0}, {1}, {2}, 0, NOW())
+                ", userId, message, "Request");
             }
             catch (Exception ex)
             {
-                // Log error but don't fail the main operation
                 Console.WriteLine($"SNS notification failed: {ex.Message}");
             }
         }
