@@ -39,6 +39,9 @@ export default function PatientAppointments() {
   const [selectedDoctorId, setSelectedDoctorId] = useState(0);
   const [appointmentDate, setAppointmentDate] = useState('');
 
+  // Ensure appointments is always an array
+  const safeAppointments = Array.isArray(appointments) ? appointments : [];
+
   const loadAppointments = async () => {
     if (!user?.id) return;
     setLoading(true);
@@ -47,7 +50,7 @@ export default function PatientAppointments() {
       console.log('Appointments API response:', response);
       if (response && response.success && Array.isArray(response.data)) {
         console.log('Setting appointments:', response.data);
-        setAppointments(response.data);
+        setAppointments([...response.data]);
       } else {
         console.log('Invalid response, setting empty array');
         setAppointments([]);
@@ -153,11 +156,11 @@ export default function PatientAppointments() {
     }
   };
 
-  const filteredAppointments = Array.isArray(appointments) ? appointments.filter(appointment => {
+  const filteredAppointments = safeAppointments.filter(appointment => {
     const matchesSearch = appointment.patientName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'All' || appointment.status === statusFilter;
     return matchesSearch && matchesStatus;
-  }) : [];
+  });
 
   if (loading || !Array.isArray(appointments)) {
     return (
