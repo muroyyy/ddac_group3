@@ -473,8 +473,8 @@ namespace BloodLine.Controllers
                     PatientId = patientId.Value,
                     DocumentName = file.FileName,
                     DocumentType = file.ContentType ?? "application/octet-stream",
-                    S3Key = "test-key",
-                    S3Url = "test-url",
+                    S3Key = $"patient/{patientId.Value}/{Guid.NewGuid()}-{file.FileName}",
+                    S3Url = "#", // Placeholder until S3 upload is implemented
                     FileSize = (int)file.Length,
                     UploadedAt = DateTime.UtcNow
                 };

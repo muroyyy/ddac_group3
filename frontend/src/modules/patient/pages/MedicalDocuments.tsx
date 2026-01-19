@@ -113,7 +113,7 @@ export default function MedicalDocuments() {
               type="file"
               onChange={handleFileSelect}
               disabled={uploading}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100"
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 file:cursor-pointer cursor-pointer"
             />
             {selectedFile && (
               <div className="flex items-center gap-4">
@@ -121,7 +121,7 @@ export default function MedicalDocuments() {
                 <button
                   onClick={handleUpload}
                   disabled={uploading}
-                  className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 disabled:bg-gray-400 transition"
+                  className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 disabled:bg-gray-400 transition cursor-pointer"
                 >
                   {uploading ? 'Uploading...' : 'Upload Document'}
                 </button>
@@ -154,17 +154,21 @@ export default function MedicalDocuments() {
                     <td className="px-4 py-3">{formatFileSize(doc.fileSize)}</td>
                     <td className="px-4 py-3">{doc.uploadedAt}</td>
                     <td className="px-4 py-3 text-center">
-                      <a
-                        href={doc.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline mr-4"
-                      >
-                        View
-                      </a>
+                      {doc.url !== "#" ? (
+                        <a
+                          href={doc.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-red-600 hover:text-red-800 hover:underline mr-4 cursor-pointer"
+                        >
+                          View
+                        </a>
+                      ) : (
+                        <span className="text-gray-400 mr-4">View (N/A)</span>
+                      )}
                       <button
                         onClick={() => handleDelete(doc.documentId)}
-                        className="text-red-600 hover:underline"
+                        className="text-red-600 hover:text-red-800 hover:underline cursor-pointer"
                       >
                         Delete
                       </button>
