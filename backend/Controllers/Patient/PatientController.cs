@@ -218,6 +218,29 @@ namespace BloodLine.Controllers
         /// </summary>
         /// <param name="userId">The authenticated user's ID from frontend session</param>
         /// <returns>JSON response with appointment data including hospital and doctor details</returns>
+        [HttpGet("test-appointments/{userId}")]
+        public async Task<IActionResult> TestAppointments(int userId)
+        {
+            try
+            {
+                var patientId = await GetPatientIdFromUser(userId);
+                
+                var result = new
+                {
+                    userId = userId,
+                    patientId = patientId,
+                    hasPatientProfile = patientId != null,
+                    message = patientId != null ? $"User {userId} maps to patient {patientId}" : $"User {userId} has no patient profile"
+                };
+                
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { error = ex.Message });
+            }
+        }
+
         [HttpGet("appointments/{userId}")]
         public async Task<IActionResult> GetAppointments(int userId)
         {
