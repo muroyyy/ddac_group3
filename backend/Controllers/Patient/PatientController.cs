@@ -20,8 +20,8 @@ namespace BloodLine.Controllers
         public int appointment_id { get; set; }
         public int patient_id { get; set; }
         public DateTime appointment_date { get; set; }
-        public string status { get; set; } = string.Empty;
-        public string doctor_notes { get; set; } = string.Empty;
+        public string? status { get; set; }
+        public string? doctor_notes { get; set; }
     }
 
     [ApiController]
