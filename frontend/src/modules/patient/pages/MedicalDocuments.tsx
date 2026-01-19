@@ -154,18 +154,14 @@ export default function MedicalDocuments() {
                     <td className="px-4 py-3">{formatFileSize(doc.fileSize)}</td>
                     <td className="px-4 py-3">{doc.uploadedAt}</td>
                     <td className="px-4 py-3 text-center">
-                      {doc.url !== "#" ? (
-                        <a
-                          href={doc.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-red-600 hover:text-red-800 hover:underline mr-4 cursor-pointer"
-                        >
-                          View
-                        </a>
-                      ) : (
-                        <span className="text-gray-400 mr-4">View (N/A)</span>
-                      )}
+                      <a
+                        href={doc.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-red-600 hover:text-red-800 hover:underline mr-4 cursor-pointer"
+                      >
+                        View
+                      </a>
                       <button
                         onClick={() => handleDelete(doc.documentId)}
                         className="text-red-600 hover:text-red-800 hover:underline cursor-pointer"

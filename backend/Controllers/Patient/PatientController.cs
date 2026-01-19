@@ -468,13 +468,31 @@ namespace BloodLine.Controllers
                 if (patientId == null)
                     return BadRequest(new { success = false, message = "Patient profile not found." });
 
+                // Generate S3 key
+                var s3Key = $"{S3Folder}/{patientId.Value}/{Guid.NewGuid()}-{file.FileName}";
+                
+                // Upload to S3
+                using var stream = file.OpenReadStream();
+                var uploadRequest = new PutObjectRequest
+                {
+                    BucketName = BucketName,
+                    Key = s3Key,
+                    InputStream = stream,
+                    ContentType = file.ContentType
+                };
+                
+                await _s3Client.PutObjectAsync(uploadRequest);
+                
+                // Generate CloudFront URL
+                var s3Url = $"https://{CloudFrontDomain}/{s3Key}";
+
                 var document = new PatientMedicalDocument
                 {
                     PatientId = patientId.Value,
                     DocumentName = file.FileName,
                     DocumentType = file.ContentType ?? "application/octet-stream",
-                    S3Key = $"patient/{patientId.Value}/{Guid.NewGuid()}-{file.FileName}",
-                    S3Url = "#", // Placeholder until S3 upload is implemented
+                    S3Key = s3Key,
+                    S3Url = s3Url,
                     FileSize = (int)file.Length,
                     UploadedAt = DateTime.UtcNow
                 };
