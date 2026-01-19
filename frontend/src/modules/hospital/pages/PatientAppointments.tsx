@@ -5,60 +5,44 @@ import { useAuth } from '../../../context/AuthContext';
 
 export default function PatientAppointments() {
   const { user } = useAuth();
-  const [appointments, setAppointments] = useState<any[]>([]);
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadAppointments = async () => {
+    async function load() {
       if (!user?.id) return;
       try {
-        const response = await hospitalAPI.getAppointments(user.id);
-        setAppointments(Array.isArray(response?.data) ? response.data : []);
-      } catch (error) {
-        setAppointments([]);
-      } finally {
-        setLoading(false);
+        const res = await hospitalAPI.getAppointments(user.id);
+        setData(res?.data || []);
+      } catch (e) {
+        setData([]);
       }
-    };
-    loadAppointments();
+      setLoading(false);
+    }
+    load();
   }, [user?.id]);
 
   if (loading) {
-    return (
-      <div className="text-center py-16">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-red-600 mx-auto mb-4"></div>
-        Loading appointments...
-      </div>
-    );
+    return <div className="p-8">Loading...</div>;
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <Calendar className="w-6 h-6 text-red-600" />
-          Patient Appointments
-        </h1>
-        <p className="text-gray-600">Manage patient appointments</p>
-      </div>
-
-      <div className="bg-white rounded-2xl shadow-lg p-6">
-        {appointments.length === 0 ? (
-          <div className="text-center py-16 text-gray-500">
-            <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            No appointments found
-          </div>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4 flex items-center gap-2">
+        <Calendar className="w-6 h-6" />
+        Patient Appointments
+      </h1>
+      
+      <div className="bg-white rounded-lg shadow p-6">
+        {data.length === 0 ? (
+          <p className="text-gray-500 text-center py-8">No appointments found</p>
         ) : (
           <div className="space-y-4">
-            {appointments.map((appointment, index) => (
-              <div key={index} className="border rounded-lg p-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="font-semibold">{appointment.patientName || 'Unknown Patient'}</h3>
-                    <p className="text-sm text-gray-600">{appointment.appointmentDate}</p>
-                    <p className="text-sm text-gray-600">Status: {appointment.status}</p>
-                  </div>
-                </div>
+            {data.map((item, i) => (
+              <div key={i} className="border rounded p-4">
+                <p><strong>Patient:</strong> {item?.patientName || 'Unknown'}</p>
+                <p><strong>Date:</strong> {item?.appointmentDate || 'N/A'}</p>
+                <p><strong>Status:</strong> {item?.status || 'Unknown'}</p>
               </div>
             ))}
           </div>
