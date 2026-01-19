@@ -30,6 +30,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<DonationRequest> DonationRequests { get; set; }
     public DbSet<DonorAppointment> DonorAppointments { get; set; }
     public DbSet<HospitalVerificationCode> HospitalVerificationCodes { get; set; }
+    public DbSet<PatientMedicalDocument> PatientMedicalDocuments { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -131,5 +132,7 @@ public class ApplicationDbContext : DbContext
                   .WithMany()
                   .HasForeignKey(e => e.HospitalId);
         });
+        
+        modelBuilder.Entity<PatientMedicalDocument>().ToTable("patient_medical_documents");
     }
 }

@@ -10,6 +10,7 @@ import {
   LogOut,
   ListChecks,
   BarChart3,
+  FileText,
 } from "lucide-react";
 import bloodlineLogo from "../assets/bloodline_logo.jpg";
 
@@ -31,6 +32,7 @@ export default function PatientLayout() {
     { path: "/patient/appointments", label: "Appointments", Icon: Calendar },
     { path: "/patient/notifications", label: "Notifications", Icon: Bell },
     { path: "/patient/insights", label: "Insights", Icon: BarChart3 },
+    { path: "/patient/medical-documents", label: "Medical Documents", Icon: FileText },
     { path: "/patient/profile", label: "Profile", Icon: User },
   ];
 

@@ -13,6 +13,7 @@ import PatientProfile from '../modules/patient/pages/Profile';
 import EditProfile from '../modules/patient/pages/EditProfile';
 import Notifications from '../modules/patient/pages/Notifications';
 import Insights from '../modules/patient/pages/Insights';
+import MedicalDocuments from '../modules/patient/pages/MedicalDocuments';
 import Logout from '../modules/patient/pages/Logout';
 
 export const getPatientRoutes = (): RouteObject => ({
@@ -28,6 +29,7 @@ export const getPatientRoutes = (): RouteObject => ({
     { path: 'edit-profile', element: <EditProfile /> },
     { path: 'notifications', element: <Notifications /> },
     { path: 'insights', element: <Insights /> },
+    { path: 'medical-documents', element: <MedicalDocuments /> },
     { path: 'logout', element: <Logout /> }
   ]
 });

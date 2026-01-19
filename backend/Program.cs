@@ -6,7 +6,7 @@ using Amazon.CloudWatch;
 using Amazon.SimpleNotificationService;
 using Amazon.Runtime;
 using Amazon;
-// using Amazon.S3;
+using Amazon.S3;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,8 +21,7 @@ var regionEndpoint = RegionEndpoint.GetBySystemName(awsRegion);
 builder.Services.AddSingleton<IAmazonSecretsManager>(new AmazonSecretsManagerClient(regionEndpoint));
 builder.Services.AddSingleton<IAmazonCloudWatch>(new AmazonCloudWatchClient(regionEndpoint));
 builder.Services.AddSingleton<IAmazonSimpleNotificationService>(new AmazonSimpleNotificationServiceClient(regionEndpoint));
-
-// builder.Services.AddAWSService<IAmazonS3>();
+builder.Services.AddSingleton<IAmazonS3>(new Amazon.S3.AmazonS3Client(regionEndpoint));
 builder.Services.AddScoped<DatabaseService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();

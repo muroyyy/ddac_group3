@@ -1,0 +1,144 @@
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+interface Document {
+  documentId: number;
+  documentName: string;
+  fileType: string;
+  fileSize: number;
+  uploadedAt: string;
+  url: string;
+}
+
+export default function MedicalDocuments() {
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const userId = localStorage.getItem('userId');
+
+  useEffect(() => {
+    loadDocuments();
+  }, []);
+
+  const loadDocuments = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/Patient/documents/${userId}`);
+      if (res.data.success) {
+        setDocuments(res.data.data);
+      }
+    } catch (err) {
+      console.error('Failed to load documents:', err);
+    }
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await axios.post(`${API_URL}/api/Patient/upload-document/${userId}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      if (res.data.success) {
+        alert('Document uploaded successfully');
+        loadDocuments();
+      }
+    } catch (err) {
+      alert('Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDelete = async (documentId: number) => {
+    if (!confirm('Delete this document?')) return;
+
+    try {
+      const res = await axios.delete(`${API_URL}/api/Patient/document/${documentId}`);
+      if (res.data.success) {
+        alert('Document deleted');
+        loadDocuments();
+      }
+    } catch (err) {
+      alert('Delete failed');
+    }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-50 p-6">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold text-red-800 mb-6">Medical Documents</h1>
+
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <label className="block">
+            <span className="text-gray-700 font-medium">Upload Document</span>
+            <input
+              type="file"
+              onChange={handleUpload}
+              disabled={uploading}
+              className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100"
+            />
+          </label>
+          {uploading && <p className="text-red-600 mt-2">Uploading...</p>}
+        </div>
+
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-red-600 text-white">
+              <tr>
+                <th className="px-4 py-3 text-left">Document Name</th>
+                <th className="px-4 py-3 text-left">Size</th>
+                <th className="px-4 py-3 text-left">Uploaded</th>
+                <th className="px-4 py-3 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {documents.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
+                    No documents uploaded yet
+                  </td>
+                </tr>
+              ) : (
+                documents.map((doc) => (
+                  <tr key={doc.documentId} className="border-b hover:bg-gray-50">
+                    <td className="px-4 py-3">{doc.documentName}</td>
+                    <td className="px-4 py-3">{formatFileSize(doc.fileSize)}</td>
+                    <td className="px-4 py-3">{doc.uploadedAt}</td>
+                    <td className="px-4 py-3 text-center">
+                      <a
+                        href={doc.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline mr-4"
+                      >
+                        View
+                      </a>
+                      <button
+                        onClick={() => handleDelete(doc.documentId)}
+                        className="text-red-600 hover:underline"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}

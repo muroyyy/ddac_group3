@@ -10,6 +10,8 @@ using BloodLine.Models.System;
 using BloodLine.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Amazon.S3;
+using Amazon.S3.Model;
 
 namespace BloodLine.Controllers
 {
@@ -19,11 +21,16 @@ namespace BloodLine.Controllers
     {
         private readonly ApplicationDbContext _db;
         private readonly NotificationService _notificationService;
+        private readonly IAmazonS3 _s3Client;
+        private const string BucketName = "dev-bloodline-assets-8826eb40";
+        private const string CloudFrontDomain = "d2giq4wa1emg24.cloudfront.net";
+        private const string S3Folder = "patient/patient-medical-documents";
 
-        public PatientController(ApplicationDbContext db, NotificationService notificationService)
+        public PatientController(ApplicationDbContext db, NotificationService notificationService, IAmazonS3 s3Client)
         {
             _db = db;
             _notificationService = notificationService;
+            _s3Client = s3Client;
         }
 
         /// <summary>
@@ -424,6 +431,110 @@ namespace BloodLine.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to send submission notification: {ex.Message}");
+            }
+        }
+
+        [HttpPost("upload-document/{userId}")]
+        public async Task<IActionResult> UploadDocument(int userId, IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                    return BadRequest(new { success = false, message = "No file provided." });
+
+                var patientId = await GetPatientIdFromUser(userId);
+                if (patientId == null)
+                    return BadRequest(new { success = false, message = "Patient profile not found." });
+
+                var fileExtension = Path.GetExtension(file.FileName);
+                var s3Key = $"{S3Folder}/{Guid.NewGuid()}{fileExtension}";
+
+                using (var stream = file.OpenReadStream())
+                {
+                    var request = new PutObjectRequest
+                    {
+                        BucketName = BucketName,
+                        Key = s3Key,
+                        InputStream = stream,
+                        ContentType = file.ContentType
+                    };
+                    await _s3Client.PutObjectAsync(request);
+                }
+
+                var cloudFrontUrl = $"https://{CloudFrontDomain}/{s3Key}";
+
+                var document = new PatientMedicalDocument
+                {
+                    PatientId = patientId.Value,
+                    DocumentName = file.FileName,
+                    S3Key = s3Key,
+                    CloudFrontUrl = cloudFrontUrl,
+                    FileType = file.ContentType,
+                    FileSize = file.Length,
+                    UploadedAt = DateTime.UtcNow
+                };
+
+                _db.PatientMedicalDocuments.Add(document);
+                await _db.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "Document uploaded.", documentId = document.DocumentId });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Upload failed.", error = ex.Message });
+            }
+        }
+
+        [HttpGet("documents/{userId}")]
+        public async Task<IActionResult> GetDocuments(int userId)
+        {
+            try
+            {
+                var patientId = await GetPatientIdFromUser(userId);
+                if (patientId == null)
+                    return Ok(new { success = true, data = new List<object>() });
+
+                var documents = await _db.PatientMedicalDocuments
+                    .Where(d => d.PatientId == patientId.Value)
+                    .OrderByDescending(d => d.UploadedAt)
+                    .Select(d => new
+                    {
+                        documentId = d.DocumentId,
+                        documentName = d.DocumentName,
+                        fileType = d.FileType,
+                        fileSize = d.FileSize,
+                        uploadedAt = d.UploadedAt.ToString("yyyy-MM-dd HH:mm"),
+                        url = d.CloudFrontUrl
+                    })
+                    .ToListAsync();
+
+                return Ok(new { success = true, data = documents });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Error loading documents.", error = ex.Message });
+            }
+        }
+
+        [HttpDelete("document/{documentId}")]
+        public async Task<IActionResult> DeleteDocument(int documentId)
+        {
+            try
+            {
+                var document = await _db.PatientMedicalDocuments.FindAsync(documentId);
+                if (document == null)
+                    return NotFound(new { success = false, message = "Document not found." });
+
+                await _s3Client.DeleteObjectAsync(BucketName, document.S3Key);
+
+                _db.PatientMedicalDocuments.Remove(document);
+                await _db.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "Document deleted." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Delete failed.", error = ex.Message });
             }
         }
     }
