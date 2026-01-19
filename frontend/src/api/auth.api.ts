@@ -154,10 +154,42 @@ export const authAPI = {
   },
 
   registerWithFiles: async (formData: FormData): Promise<AuthResponse> => {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
-      method: 'POST',
-      body: formData,
+    const registerUrl = `${API_BASE_URL}/auth/register`;
+    console.log('📝 Register with files attempt:', {
+      url: registerUrl,
+      timestamp: new Date().toISOString()
     });
-    return parseJsonResponse(response);
+
+    try {
+      const response = await fetch(registerUrl, {
+        method: 'POST',
+        body: formData,
+      });
+
+      console.log('📡 Register with files response:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        url: response.url,
+        contentType: response.headers.get('content-type')
+      });
+
+      const result = await parseJsonResponse(response);
+      console.log('📦 Register with files data:', result);
+
+      return result;
+    } catch (error) {
+      console.error('🚨 Register with files error:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        url: registerUrl
+      });
+
+      if (error instanceof Error && error.message.includes('Failed to fetch')) {
+        throw new Error(`Cannot connect to backend server at ${API_BASE_URL}. Please check if the server is running.`);
+      }
+
+      throw error;
+    }
   },
 };

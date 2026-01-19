@@ -22,3 +22,8 @@ variable "cloudfront_hosted_zone_id" {
   description = "CloudFront distribution hosted zone ID"
   type        = string
 }
+
+variable "api_elastic_ip" {
+  description = "Elastic IP address for API subdomain (EC2 backend)"
+  type        = string
+}

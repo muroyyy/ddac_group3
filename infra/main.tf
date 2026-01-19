@@ -102,7 +102,7 @@ module "iam" {
 # Route53 Module
 module "route53" {
   source = "./modules/route53"
-  
+
   providers = {
     aws.us_east_1 = aws.us_east_1
   }
@@ -112,6 +112,7 @@ module "route53" {
   environment               = var.environment
   cloudfront_domain_name    = module.cloudfront.domain_name
   cloudfront_hosted_zone_id = module.cloudfront.hosted_zone_id
+  api_elastic_ip            = module.ec2.public_ip
 }
 
 # ACM Certificate Module
