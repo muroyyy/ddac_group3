@@ -1,10 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Amazon.CloudWatch;
 using Amazon.CloudWatch.Model;
-using Amazon.S3;
-using Amazon.S3.Model;
-using Amazon.CloudFront;
-using Amazon.CloudFront.Model;
 
 namespace BloodLine.Controllers.Admin;
 
