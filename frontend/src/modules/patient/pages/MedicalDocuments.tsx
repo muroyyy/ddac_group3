@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import React from 'react';
 import { API_BASE_URL, authenticatedFetch, parseJsonResponse } from '../../../api/client';
 import { useAuth } from '../../../context/AuthContext';
 
@@ -17,6 +18,7 @@ export default function MedicalDocuments() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { user } = useAuth();
   const userId = user?.id;
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (userId) loadDocuments();
@@ -59,6 +61,7 @@ export default function MedicalDocuments() {
       if (data.success) {
         alert('Document uploaded successfully');
         setSelectedFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
         loadDocuments();
       } else {
         alert('Upload failed: ' + (data.message || 'Unknown error'));
@@ -100,6 +103,7 @@ export default function MedicalDocuments() {
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Upload New Document</h2>
           <div className="space-y-4">
             <input
+              ref={fileInputRef}
               type="file"
               onChange={handleFileSelect}
               disabled={uploading}
