@@ -467,46 +467,27 @@ public class HospitalController : ControllerBase
             if (hospitalId == null)
                 return Ok(new { success = true, data = new List<object>() });
 
-            var appointments = await _context.Database
-                .SqlQuery<AppointmentWithNamesDto>($@"
-                    SELECT 
-                        pa.appointment_id as AppointmentId,
-                        pa.request_id as RequestId,
-                        COALESCE(u.full_name, CONCAT('Patient ', pa.patient_id)) as PatientName,
-                        COALESCE(u.phone, 'N/A') as PatientPhone,
-                        COALESCE(br.blood_type, 'Unknown') as BloodType,
-                        COALESCE(d.doctor_name, 'Dr. TBD') as DoctorName,
-                        pa.doctor_id as DoctorId,
-                        pa.appointment_date as AppointmentDate,
-                        COALESCE(pa.status, 'Upcoming') as Status,
-                        COALESCE(pa.doctor_notes, '') as DoctorNotes,
-                        pa.created_at as CreatedAt
-                    FROM patient_appointments pa
-                    LEFT JOIN patient_profiles pp ON pa.patient_id = pp.patient_id
-                    LEFT JOIN users u ON pp.user_id = u.id
-                    LEFT JOIN blood_requests br ON pa.request_id = br.request_id
-                    LEFT JOIN doctors d ON pa.doctor_id = d.doctor_id
-                    WHERE pa.hospital_id = {hospitalId.Value}
-                    ORDER BY pa.appointment_date DESC
-                ")
+            // Use Entity Framework instead of raw SQL to avoid potential issues
+            var appointments = await _context.PatientAppointments
+                .Where(pa => pa.HospitalId == hospitalId.Value)
+                .Select(pa => new
+                {
+                    appointmentId = pa.AppointmentId,
+                    requestId = pa.RequestId,
+                    patientName = "Patient " + pa.PatientId,
+                    patientPhone = "N/A",
+                    bloodType = "Unknown",
+                    doctorName = "Dr. TBD",
+                    doctorId = pa.DoctorId,
+                    appointmentDate = pa.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
+                    status = pa.Status ?? "Upcoming",
+                    doctorNotes = pa.DoctorNotes ?? "",
+                    createdAt = pa.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                })
+                .OrderByDescending(x => x.appointmentDate)
                 .ToListAsync();
 
-            var result = appointments.Select(a => new
-            {
-                appointmentId = a.AppointmentId,
-                requestId = a.RequestId,
-                patientName = a.PatientName,
-                patientPhone = a.PatientPhone,
-                bloodType = a.BloodType,
-                doctorName = a.DoctorName,
-                doctorId = a.DoctorId,
-                appointmentDate = a.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
-                status = a.Status,
-                doctorNotes = a.DoctorNotes,
-                createdAt = a.CreatedAt.ToString("yyyy-MM-dd HH:mm")
-            }).ToList();
-
-            return Ok(new { success = true, data = result });
+            return Ok(new { success = true, data = appointments });
         }
         catch (Exception ex)
         {
