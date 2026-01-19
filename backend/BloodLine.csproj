@@ -15,7 +15,7 @@
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.301" />
     <PackageReference Include="AWSSDK.CloudWatch" Version="4.0.4" />
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="4.0.2.9" />
-    <!-- <PackageReference Include="AWSSDK.S3" Version="3.7.400" /> -->
+    <PackageReference Include="AWSSDK.S3" Version="3.7.400" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
   </ItemGroup>
 
