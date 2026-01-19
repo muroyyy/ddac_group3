@@ -20,22 +20,23 @@ public class PatientMedicalDocument
     public string DocumentName { get; set; } = string.Empty;
 
     [Required]
+    [StringLength(50)]
+    [Column("document_type")]
+    public string DocumentType { get; set; } = string.Empty;
+
+    [Required]
     [StringLength(500)]
     [Column("s3_key")]
     public string S3Key { get; set; } = string.Empty;
 
     [Required]
-    [StringLength(500)]
-    [Column("cloudfront_url")]
-    public string CloudFrontUrl { get; set; } = string.Empty;
-
-    [StringLength(100)]
-    [Column("file_type")]
-    public string? FileType { get; set; }
+    [StringLength(1000)]
+    [Column("s3_url")]
+    public string S3Url { get; set; } = string.Empty;
 
     [Column("file_size")]
-    public long? FileSize { get; set; }
+    public int? FileSize { get; set; }
 
     [Column("uploaded_at")]
-    public DateTime UploadedAt { get; set; }
+    public DateTime? UploadedAt { get; set; }
 }

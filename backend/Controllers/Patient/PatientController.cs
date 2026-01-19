@@ -468,8 +468,21 @@ namespace BloodLine.Controllers
                 if (patientId == null)
                     return BadRequest(new { success = false, message = "Patient profile not found." });
 
-                // Skip database for now - just return success
-                return Ok(new { success = true, message = "Upload successful (database disabled)", documentId = 1 });
+                var document = new PatientMedicalDocument
+                {
+                    PatientId = patientId.Value,
+                    DocumentName = file.FileName,
+                    DocumentType = file.ContentType ?? "application/octet-stream",
+                    S3Key = "test-key",
+                    S3Url = "test-url",
+                    FileSize = (int)file.Length,
+                    UploadedAt = DateTime.UtcNow
+                };
+
+                _db.PatientMedicalDocuments.Add(document);
+                await _db.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "Upload successful", documentId = document.DocumentId });
             }
             catch (Exception ex)
             {
@@ -486,8 +499,21 @@ namespace BloodLine.Controllers
                 if (patientId == null)
                     return Ok(new { success = true, data = new List<object>() });
 
-                // Return empty list for now
-                return Ok(new { success = true, data = new List<object>() });
+                var documents = await _db.PatientMedicalDocuments
+                    .Where(d => d.PatientId == patientId.Value)
+                    .OrderByDescending(d => d.UploadedAt)
+                    .Select(d => new
+                    {
+                        documentId = d.DocumentId,
+                        documentName = d.DocumentName,
+                        fileType = d.DocumentType,
+                        fileSize = d.FileSize ?? 0,
+                        uploadedAt = d.UploadedAt.HasValue ? d.UploadedAt.Value.ToString("yyyy-MM-dd HH:mm") : "Unknown",
+                        url = d.S3Url
+                    })
+                    .ToListAsync();
+
+                return Ok(new { success = true, data = documents });
             }
             catch (Exception ex)
             {
