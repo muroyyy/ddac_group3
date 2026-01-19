@@ -250,16 +250,20 @@ namespace BloodLine.Controllers
                             .FirstOrDefault() ?? "Not Assigned",
                             
                         // APPOINTMENT SCHEDULING DETAILS
-                        appointmentDate = pa.AppointmentDate.ToString("yyyy-MM-dd"),
+                        appointmentDate = pa.AppointmentDate.HasValue 
+                            ? pa.AppointmentDate.Value.ToString("yyyy-MM-dd")
+                            : "Not Scheduled",
                             
-                        appointmentTime = "Not Set", // PatientAppointment doesn't have time field
+                        appointmentTime = "Not Set",
                         
                         // STATUS AND METADATA
                         status = pa.Status ?? "Unknown",
-                        notes = pa.DoctorNotes ?? "", // Use DoctorNotes instead of Notes
+                        notes = pa.DoctorNotes ?? "",
                         
                         // CREATION TRACKING
-                        createdAt = pa.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                        createdAt = pa.CreatedAt.HasValue
+                            ? pa.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm")
+                            : "Unknown"
                     })
                     .OrderByDescending(a => a.appointmentDate)  // SORT: Newest appointments first
                     .ToListAsync();
