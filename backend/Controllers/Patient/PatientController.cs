@@ -218,6 +218,29 @@ namespace BloodLine.Controllers
         /// </summary>
         /// <param name="userId">The authenticated user's ID from frontend session</param>
         /// <returns>JSON response with appointment data including hospital and doctor details</returns>
+        [HttpGet("test-appointments-sql/{patientId}")]
+        public async Task<IActionResult> TestAppointmentsSQL(int patientId)
+        {
+            try
+            {
+                var count = await _db.Database.SqlQueryRaw<int>(
+                    "SELECT COUNT(*) as Value FROM patient_appointments WHERE patient_id = {0}", patientId)
+                    .FirstOrDefaultAsync();
+                    
+                var appointments = await _db.Database.SqlQueryRaw<dynamic>(@"
+                    SELECT appointment_id, patient_id, appointment_date, status 
+                    FROM patient_appointments 
+                    WHERE patient_id = {0}
+                ", patientId).ToListAsync();
+                
+                return Ok(new { patientId = patientId, count = count, appointments = appointments });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { error = ex.Message });
+            }
+        }
+
         [HttpGet("test-appointments/{userId}")]
         public async Task<IActionResult> TestAppointments(int userId)
         {
