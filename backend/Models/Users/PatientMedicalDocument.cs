@@ -37,5 +37,5 @@ public class PatientMedicalDocument
     public long? FileSize { get; set; }
 
     [Column("uploaded_at")]
-    public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UploadedAt { get; set; }
 }
