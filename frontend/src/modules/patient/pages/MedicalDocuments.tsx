@@ -57,17 +57,23 @@ export default function MedicalDocuments() {
         body: formData,
         credentials: 'include'
       });
+      
+      console.log('Upload response status:', res.status);
       const data = await res.json();
+      console.log('Upload response data:', data);
+      
       if (data.success) {
         alert('Document uploaded successfully');
         setSelectedFile(null);
         if (fileInputRef.current) fileInputRef.current.value = '';
         loadDocuments();
       } else {
-        alert('Upload failed: ' + (data.message || 'Unknown error'));
+        console.error('Upload failed:', data);
+        alert('Upload failed: ' + (data.message || data.error || 'Unknown error'));
       }
     } catch (err) {
-      alert('Upload failed');
+      console.error('Upload error:', err);
+      alert('Upload failed: Network error');
     } finally {
       setUploading(false);
     }
