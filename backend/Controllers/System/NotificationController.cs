@@ -82,6 +82,24 @@ namespace BloodLine.Controllers
             }
         }
 
+        [HttpPost("test/{userId}")]
+        public async Task<IActionResult> CreateTestNotification(int userId)
+        {
+            try
+            {
+                await _db.Database.ExecuteSqlRawAsync(@"
+                    INSERT INTO notifications (user_id, title, message, type, is_read, created_at)
+                    VALUES ({0}, {1}, {2}, {3}, 0, NOW())
+                ", userId, "Test Notification", "This is a test notification to verify the system is working.", "System");
+                
+                return Ok(new { success = true, message = "Test notification created" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, error = ex.Message });
+            }
+        }
+
         [HttpPut("mark-read/{notificationId}")]
         public async Task<IActionResult> MarkAsRead(int notificationId)
         {
