@@ -226,33 +226,25 @@ namespace BloodLine.Controllers
                 if (userId <= 0)
                     return BadRequest(new { success = false, message = "Invalid user ID." });
 
-                // Try both: patient profile mapping AND direct user_id as patient_id
+                // Get patient ID from user ID
                 var patientId = await GetPatientIdFromUser(userId);
-                
-                // If no patient profile, try using userId directly as patientId
-                var searchPatientId = patientId ?? userId;
-                
-                var appointments = await _db.PatientAppointments
-                    .Where(pa => pa.PatientId == searchPatientId)
-                    .Select(pa => new
-                    {
-                        appointmentId = pa.AppointmentId,
-                        hospitalName = "Hospital",
-                        doctorName = "Doctor",
-                        appointmentDate = pa.AppointmentDate.ToString("yyyy-MM-dd"),
-                        appointmentTime = "Not Set",
-                        status = pa.Status ?? "Unknown",
-                        notes = pa.DoctorNotes ?? "",
-                        createdAt = pa.CreatedAt.ToString("yyyy-MM-dd HH:mm")
-                    })
-                    .OrderByDescending(a => a.appointmentDate)
-                    .ToListAsync();
+                if (patientId == null)
+                    return Ok(new { success = true, data = new List<object>() });
+
+                // Use raw SQL to get appointments
+                var appointments = await _db.Database.SqlQueryRaw<dynamic>(@"
+                    SELECT appointment_id as appointmentId, appointment_date as appointmentDate,
+                           status, doctor_notes as notes, created_at as createdAt
+                    FROM patient_appointments 
+                    WHERE patient_id = {0}
+                    ORDER BY appointment_date DESC
+                ", patientId.Value).ToListAsync();
 
                 return Ok(new { success = true, data = appointments });
             }
             catch (Exception ex)
             {
-                return Ok(new { success = true, data = new List<object>() });
+                return Ok(new { success = true, data = new List<object>(), error = ex.Message });
             }
         }
 
@@ -446,7 +438,7 @@ namespace BloodLine.Controllers
                     return BadRequest(new { success = false, message = "Patient profile not found." });
 
                 // Generate S3 key
-                var s3Key = $"{S3Folder}/{patientId.Value}/{Guid.NewGuid()}-{file.FileName}";
+                var s3Key = $"patient/{patientId.Value}/{Guid.NewGuid()}-{file.FileName}";
                 
                 // Upload to S3
                 using var stream = file.OpenReadStream();
