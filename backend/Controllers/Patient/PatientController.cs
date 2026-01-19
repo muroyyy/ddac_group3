@@ -23,7 +23,7 @@ namespace BloodLine.Controllers
         private readonly NotificationService _notificationService;
         private readonly IAmazonS3 _s3Client;
         private const string BucketName = "dev-bloodline-assets-8826eb40";
-        private const string CloudFrontDomain = "d2giq4wa1emg24.cloudfront.net";
+        private const string CloudFrontDomain = "d3vjqplzgxllwe.cloudfront.net";
         private const string S3Folder = "patient/patient-medical-documents";
 
         public PatientController(ApplicationDbContext db, NotificationService notificationService, IAmazonS3 s3Client)
