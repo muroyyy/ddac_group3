@@ -3,13 +3,6 @@ import { Calendar } from 'lucide-react';
 import { hospitalAPI } from '../services/hospitalAPI';
 import { useAuth } from '../../../context/AuthContext';
 
-interface Appointment {
-  appointmentId: number;
-  patientName: string;
-  appointmentDate: string;
-  status: string;
-}
-
 export default function PatientAppointments() {
   const { user } = useAuth();
   const [appointments, setAppointments] = useState<any[]>([]);
