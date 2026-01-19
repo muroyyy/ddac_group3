@@ -326,7 +326,9 @@ const RegisterPage: React.FC = () => {
           alert(response.message || 'Registration failed');
         }
       } catch (error) {
-        alert('Network error. Please try again.');
+        console.error('Registration error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Network error. Please try again.';
+        alert(errorMessage);
       } finally {
         setIsLoading(false);
       }

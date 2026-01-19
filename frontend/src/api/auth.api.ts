@@ -89,14 +89,46 @@ export const authAPI = {
   },
 
   register: async (data: RegisterRequest): Promise<AuthResponse> => {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
+    console.log('📝 Register attempt:', {
+      url: `${API_BASE_URL}/auth/register`,
+      role: data.role,
+      email: data.email,
+      timestamp: new Date().toISOString()
     });
-    return parseJsonResponse(response);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      console.log('📡 Register response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        url: response.url
+      });
+
+      const result = await parseJsonResponse(response);
+      console.log('📦 Register response data:', result);
+
+      return result;
+    } catch (error) {
+      console.error('🚨 Register error caught:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        formData: { ...data, password: '[REDACTED]' }
+      });
+
+      if (error instanceof Error && error.message.includes('Failed to fetch')) {
+        throw new Error(`Cannot connect to backend server at ${API_BASE_URL}. Please check if the server is running.`);
+      }
+
+      throw error;
+    }
   },
 
   forgotPassword: async (data: ForgotPasswordRequest): Promise<AuthResponse> => {
