@@ -108,8 +108,8 @@ const AdminLayout: React.FC = () => {
               onClick={() => setActiveTab(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors cursor-pointer ${
                 activeTab === item.id
-                  ? 'bg-red-50 text-red-600 font-medium' 
-                  : 'text-gray-700 hover:bg-gray-50'
+                  ? 'bg-red-50 text-red-600 font-semibold' 
+                  : 'text-gray-700 hover:bg-gray-50 font-semibold'
               }`}
             >
               {item.icon}
