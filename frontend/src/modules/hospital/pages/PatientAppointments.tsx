@@ -44,9 +44,12 @@ export default function PatientAppointments() {
     setLoading(true);
     try {
       const response = await hospitalAPI.getAppointments(user.id);
-      if (response.success && Array.isArray(response.data)) {
+      console.log('Appointments API response:', response);
+      if (response && response.success && Array.isArray(response.data)) {
+        console.log('Setting appointments:', response.data);
         setAppointments(response.data);
       } else {
+        console.log('Invalid response, setting empty array');
         setAppointments([]);
       }
     } catch (error) {
