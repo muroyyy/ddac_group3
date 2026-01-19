@@ -14,6 +14,7 @@ interface Document {
 export default function MedicalDocuments() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { user } = useAuth();
   const userId = user?.id;
 
@@ -22,6 +23,7 @@ export default function MedicalDocuments() {
   }, [userId]);
 
   const loadDocuments = async () => {
+    if (!userId) return;
     try {
       const res = await authenticatedFetch(`${API_BASE_URL}/patient/documents/${userId}`, { method: 'GET' });
       const data = await parseJsonResponse(res);
@@ -33,13 +35,19 @@ export default function MedicalDocuments() {
     }
   };
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !userId) return;
+    if (file) {
+      setSelectedFile(file);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile || !userId) return;
 
     setUploading(true);
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', selectedFile);
 
     try {
       const res = await fetch(`${API_BASE_URL}/patient/upload-document/${userId}`, {
@@ -50,7 +58,10 @@ export default function MedicalDocuments() {
       const data = await res.json();
       if (data.success) {
         alert('Document uploaded successfully');
+        setSelectedFile(null);
         loadDocuments();
+      } else {
+        alert('Upload failed: ' + (data.message || 'Unknown error'));
       }
     } catch (err) {
       alert('Upload failed');
@@ -86,16 +97,27 @@ export default function MedicalDocuments() {
         <h1 className="text-3xl font-bold text-red-800 mb-6">Medical Documents</h1>
 
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <label className="block">
-            <span className="text-gray-700 font-medium">Upload Document</span>
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">Upload New Document</h2>
+          <div className="space-y-4">
             <input
               type="file"
-              onChange={handleUpload}
+              onChange={handleFileSelect}
               disabled={uploading}
-              className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100"
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100"
             />
-          </label>
-          {uploading && <p className="text-red-600 mt-2">Uploading...</p>}
+            {selectedFile && (
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-gray-600">Selected: {selectedFile.name}</span>
+                <button
+                  onClick={handleUpload}
+                  disabled={uploading}
+                  className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 disabled:bg-gray-400 transition"
+                >
+                  {uploading ? 'Uploading...' : 'Upload Document'}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
