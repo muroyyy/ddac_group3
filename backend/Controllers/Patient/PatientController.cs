@@ -446,29 +446,13 @@ namespace BloodLine.Controllers
                 if (patientId == null)
                     return BadRequest(new { success = false, message = "Patient profile not found." });
 
-                var fileExtension = Path.GetExtension(file.FileName);
-                var s3Key = $"{S3Folder}/{Guid.NewGuid()}{fileExtension}";
-
-                using (var stream = file.OpenReadStream())
-                {
-                    var request = new PutObjectRequest
-                    {
-                        BucketName = BucketName,
-                        Key = s3Key,
-                        InputStream = stream,
-                        ContentType = file.ContentType
-                    };
-                    await _s3Client.PutObjectAsync(request);
-                }
-
-                var cloudFrontUrl = $"https://{CloudFrontDomain}/{s3Key}";
-
+                // Skip S3 upload for now, just test database insert
                 var document = new PatientMedicalDocument
                 {
                     PatientId = patientId.Value,
                     DocumentName = file.FileName,
-                    S3Key = s3Key,
-                    CloudFrontUrl = cloudFrontUrl,
+                    S3Key = "test-key",
+                    CloudFrontUrl = "test-url",
                     FileType = file.ContentType,
                     FileSize = file.Length,
                     UploadedAt = DateTime.UtcNow
@@ -477,11 +461,11 @@ namespace BloodLine.Controllers
                 _db.PatientMedicalDocuments.Add(document);
                 await _db.SaveChangesAsync();
 
-                return Ok(new { success = true, message = "Document uploaded.", documentId = document.DocumentId });
+                return Ok(new { success = true, message = "Test upload successful", documentId = document.DocumentId });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { success = false, message = "Upload failed.", error = ex.Message });
+                return StatusCode(500, new { success = false, message = "Upload failed.", error = ex.Message, innerError = ex.InnerException?.Message });
             }
         }
 
