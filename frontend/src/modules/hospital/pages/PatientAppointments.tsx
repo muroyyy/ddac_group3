@@ -5,7 +5,7 @@ import { useAuth } from '../../../context/AuthContext';
 
 export default function PatientAppointments() {
   const { user } = useAuth();
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
