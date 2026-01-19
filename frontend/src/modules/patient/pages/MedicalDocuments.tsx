@@ -156,11 +156,10 @@ export default function MedicalDocuments() {
                     <td className="px-4 py-3 text-center">
                       <a
                         href={doc.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        download={doc.documentName}
                         className="text-red-600 hover:text-red-800 hover:underline mr-4 cursor-pointer"
                       >
-                        View
+                        Download
                       </a>
                       <button
                         onClick={() => handleDelete(doc.documentId)}

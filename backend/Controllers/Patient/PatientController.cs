@@ -223,15 +223,20 @@ namespace BloodLine.Controllers
         {
             try
             {
+                Console.WriteLine($"Getting appointments for user {userId}");
+                
                 if (userId <= 0)
                     return BadRequest(new { success = false, message = "Invalid user ID." });
 
-                // Get patient ID from user ID
                 var patientId = await GetPatientIdFromUser(userId);
+                Console.WriteLine($"Patient ID for user {userId}: {patientId}");
+                
                 if (patientId == null)
+                {
+                    Console.WriteLine($"No patient profile found for user {userId}");
                     return Ok(new { success = true, data = new List<object>() });
+                }
 
-                // Use raw SQL to get appointments
                 var appointments = await _db.Database.SqlQueryRaw<dynamic>(@"
                     SELECT appointment_id as appointmentId, appointment_date as appointmentDate,
                            status, doctor_notes as notes, created_at as createdAt
@@ -240,10 +245,12 @@ namespace BloodLine.Controllers
                     ORDER BY appointment_date DESC
                 ", patientId.Value).ToListAsync();
 
+                Console.WriteLine($"Found {appointments.Count} appointments for patient {patientId}");
                 return Ok(new { success = true, data = appointments });
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error getting appointments: {ex.Message}");
                 return Ok(new { success = true, data = new List<object>(), error = ex.Message });
             }
         }
