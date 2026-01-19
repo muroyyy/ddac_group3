@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { API_BASE_URL, authenticatedFetch, parseJsonResponse } from '../../../api/client';
 
 interface Document {
   documentId: number;
@@ -23,9 +21,10 @@ export default function MedicalDocuments() {
 
   const loadDocuments = async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/Patient/documents/${userId}`);
-      if (res.data.success) {
-        setDocuments(res.data.data);
+      const res = await authenticatedFetch(`${API_BASE_URL}/patient/documents/${userId}`, { method: 'GET' });
+      const data = await parseJsonResponse(res);
+      if (data.success) {
+        setDocuments(data.data);
       }
     } catch (err) {
       console.error('Failed to load documents:', err);
@@ -41,10 +40,13 @@ export default function MedicalDocuments() {
     formData.append('file', file);
 
     try {
-      const res = await axios.post(`${API_URL}/api/Patient/upload-document/${userId}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      const res = await fetch(`${API_BASE_URL}/patient/upload-document/${userId}`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
       });
-      if (res.data.success) {
+      const data = await res.json();
+      if (data.success) {
         alert('Document uploaded successfully');
         loadDocuments();
       }
@@ -59,8 +61,9 @@ export default function MedicalDocuments() {
     if (!confirm('Delete this document?')) return;
 
     try {
-      const res = await axios.delete(`${API_URL}/api/Patient/document/${documentId}`);
-      if (res.data.success) {
+      const res = await authenticatedFetch(`${API_BASE_URL}/patient/document/${documentId}`, { method: 'DELETE' });
+      const data = await parseJsonResponse(res);
+      if (data.success) {
         alert('Document deleted');
         loadDocuments();
       }
