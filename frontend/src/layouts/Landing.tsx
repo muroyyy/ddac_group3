@@ -15,6 +15,7 @@ import {
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import BloodTable from './BloodTable';
+import { useAuth } from '../context/AuthContext';
 
 const HeroSection: React.FC = () => {
   const navigate = useNavigate();
@@ -177,6 +178,24 @@ const FaqItem: React.FC<{ question: string; answer: string }> = ({ question, ans
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+
+  // Redirect authenticated users to their dashboard
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const dashboardPaths: Record<string, string> = {
+        Admin: '/admin/dashboard',
+        Donor: '/donor/dashboard',
+        Patient: '/patient/dashboard',
+        Hospital: '/hospital/dashboard'
+      };
+
+      const redirectPath = dashboardPaths[user.role];
+      if (redirectPath) {
+        navigate(redirectPath, { replace: true });
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
 
   useEffect(() => {
     AOS.init({
