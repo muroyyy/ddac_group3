@@ -430,6 +430,32 @@ namespace BloodLine.Controllers
             }
         }
 
+        [HttpPost("create-table")]
+        public async Task<IActionResult> CreateTable()
+        {
+            try
+            {
+                await _db.Database.ExecuteSqlRawAsync(@"
+                    DROP TABLE IF EXISTS patient_medical_documents;
+                    CREATE TABLE patient_medical_documents (
+                        document_id INT AUTO_INCREMENT PRIMARY KEY,
+                        patient_id INT NOT NULL,
+                        document_name VARCHAR(255) NOT NULL,
+                        s3_key VARCHAR(500) NOT NULL,
+                        cloudfront_url VARCHAR(500) NOT NULL,
+                        file_type VARCHAR(100),
+                        file_size BIGINT,
+                        uploaded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+                ");
+                return Ok(new { success = true, message = "Table created" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, error = ex.Message });
+            }
+        }
+
         [HttpPost("upload-document/{userId}")]
         public async Task<IActionResult> UploadDocument(int userId, IFormFile file)
         {
