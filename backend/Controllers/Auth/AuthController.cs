@@ -137,17 +137,19 @@ public class AuthController : ControllerBase
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             
-            // Create hospital staff profile
-            if (userRole == UserRole.Hospital && request.HospitalId.HasValue)
+            // Store registration data for later profile creation
+            if (userRole == UserRole.Donor || userRole == UserRole.Patient || userRole == UserRole.Hospital)
             {
-                var hospitalStaff = new HospitalStaff
+                var registrationData = new UserRegistrationData
                 {
                     UserId = user.Id,
-                    HospitalId = request.HospitalId.Value,
-                    Position = request.Position ?? "Staff",
-                    VerificationCodeUsed = request.VerificationCode
+                    BloodType = request.BloodType,
+                    Location = request.Location,
+                    HospitalId = request.HospitalId,
+                    Position = request.Position,
+                    VerificationCode = request.VerificationCode
                 };
-                _context.HospitalStaff.Add(hospitalStaff);
+                _context.UserRegistrationData.Add(registrationData);
                 await _context.SaveChangesAsync();
             }
             

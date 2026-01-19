@@ -42,6 +42,12 @@ jobs:
         
         echo "✅ Image pushed: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
     
+    - name: Upload Nginx configuration to S3
+      run: |
+        echo "📤 Uploading Nginx configuration to S3..."
+        aws s3 cp backend/nginx/api.bloodline.dev.conf s3://${{ secrets.S3_BUCKET_NAME }}/nginx/api.bloodline.dev.conf --region ap-southeast-1
+        echo "✅ Nginx configuration uploaded"
+
     - name: Deploy to EC2
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -49,7 +55,7 @@ jobs:
         IMAGE_TAG: ${{ github.sha }}
       run: |
         set -e
-        
+
         echo "🚀 Deploying to EC2..."
         
         # Create deployment script using echo
@@ -122,7 +128,7 @@ jobs:
         echo 'echo "✅ DEPLOYMENT COMPLETED SUCCESSFULLY!"' >> deploy-script.sh
         echo 'exit 0' >> deploy-script.sh
 
-        # Upload and execute script
+        # Upload deployment script to S3
         aws s3 cp deploy-script.sh s3://${{ secrets.S3_BUCKET_NAME }}/deploy-script.sh
         
         COMMAND_ID=$(aws ssm send-command \
@@ -203,6 +209,210 @@ jobs:
           echo "=== STDERR ==="
           aws ssm get-command-invocation \
             --command-id $COMMAND_ID \
+            --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
+            --region ap-southeast-1 \
+            --query 'StandardErrorContent' \
+            --output text || echo "No error output available"
+          exit 1
+        fi
+
+    - name: Setup Nginx and SSL
+      run: |
+        set -e
+
+        echo "🔧 Setting up Nginx reverse proxy..."
+
+        # Create Nginx setup script
+        echo '#!/bin/bash' > setup-nginx.sh
+        echo 'set -e' >> setup-nginx.sh
+        echo 'echo "🔧 === NGINX SETUP PHASE ==="' >> setup-nginx.sh
+        echo 'echo "Checking if Nginx is already installed..."' >> setup-nginx.sh
+        echo 'if ! command -v nginx &> /dev/null; then' >> setup-nginx.sh
+        echo '  echo "📦 Installing Nginx..."' >> setup-nginx.sh
+        echo '  sudo apt-get update -qq' >> setup-nginx.sh
+        echo '  sudo apt-get install -y nginx' >> setup-nginx.sh
+        echo '  echo "✅ Nginx installed"' >> setup-nginx.sh
+        echo 'else' >> setup-nginx.sh
+        echo '  echo "✅ Nginx already installed"' >> setup-nginx.sh
+        echo 'fi' >> setup-nginx.sh
+        echo 'echo' >> setup-nginx.sh
+        echo 'echo "Checking if Certbot is already installed..."' >> setup-nginx.sh
+        echo 'if ! command -v certbot &> /dev/null; then' >> setup-nginx.sh
+        echo '  echo "📦 Installing Certbot..."' >> setup-nginx.sh
+        echo '  sudo apt-get install -y certbot python3-certbot-nginx' >> setup-nginx.sh
+        echo '  echo "✅ Certbot installed"' >> setup-nginx.sh
+        echo 'else' >> setup-nginx.sh
+        echo '  echo "✅ Certbot already installed"' >> setup-nginx.sh
+        echo 'fi' >> setup-nginx.sh
+        echo 'echo' >> setup-nginx.sh
+        echo 'echo "📁 Creating certbot directory..."' >> setup-nginx.sh
+        echo 'sudo mkdir -p /var/www/certbot' >> setup-nginx.sh
+        echo 'echo' >> setup-nginx.sh
+        echo 'echo "📄 Copying Nginx configuration..."' >> setup-nginx.sh
+        echo 'if [ ! -f /home/ubuntu/backend/nginx/api.bloodline.dev.conf ]; then' >> setup-nginx.sh
+        echo '  echo "❌ Nginx config file not found at /home/ubuntu/backend/nginx/api.bloodline.dev.conf"' >> setup-nginx.sh
+        echo '  exit 1' >> setup-nginx.sh
+        echo 'fi' >> setup-nginx.sh
+        echo 'sudo cp /home/ubuntu/backend/nginx/api.bloodline.dev.conf /etc/nginx/sites-available/api.bloodline.dev' >> setup-nginx.sh
+        echo 'echo "✅ Configuration copied"' >> setup-nginx.sh
+        echo 'echo' >> setup-nginx.sh
+        echo 'echo "🗑️ Removing default site if exists..."' >> setup-nginx.sh
+        echo 'if [ -f /etc/nginx/sites-enabled/default ]; then' >> setup-nginx.sh
+        echo '  sudo rm /etc/nginx/sites-enabled/default' >> setup-nginx.sh
+        echo '  echo "✅ Default site removed"' >> setup-nginx.sh
+        echo 'fi' >> setup-nginx.sh
+        echo 'echo' >> setup-nginx.sh
+        echo 'echo "🔗 Enabling api.bloodline.dev site..."' >> setup-nginx.sh
+        echo 'sudo ln -sf /etc/nginx/sites-available/api.bloodline.dev /etc/nginx/sites-enabled/' >> setup-nginx.sh
+        echo 'echo "✅ Site enabled"' >> setup-nginx.sh
+        echo 'echo' >> setup-nginx.sh
+        echo 'echo "✅ Testing Nginx configuration..."' >> setup-nginx.sh
+        echo 'sudo nginx -t' >> setup-nginx.sh
+        echo 'echo' >> setup-nginx.sh
+        echo 'echo "🔄 Restarting Nginx..."' >> setup-nginx.sh
+        echo 'sudo systemctl restart nginx' >> setup-nginx.sh
+        echo 'sudo systemctl enable nginx' >> setup-nginx.sh
+        echo 'echo "✅ Nginx restarted and enabled"' >> setup-nginx.sh
+        echo 'echo' >> setup-nginx.sh
+        echo 'echo "🔐 === SSL CERTIFICATE PHASE ==="' >> setup-nginx.sh
+        echo 'echo "Checking if SSL certificate already exists..."' >> setup-nginx.sh
+        echo 'if [ -f /etc/letsencrypt/live/api.bloodline.dev/fullchain.pem ]; then' >> setup-nginx.sh
+        echo '  echo "✅ SSL certificate already exists"' >> setup-nginx.sh
+        echo '  echo "🔄 Reloading Nginx to apply any config changes..."' >> setup-nginx.sh
+        echo '  sudo systemctl reload nginx' >> setup-nginx.sh
+        echo 'else' >> setup-nginx.sh
+        echo '  echo "📜 Obtaining SSL certificate from Let'\''s Encrypt..."' >> setup-nginx.sh
+        echo '  sudo certbot --nginx -d api.bloodline.dev --non-interactive --agree-tos --email admin@bloodline.dev' >> setup-nginx.sh
+        echo '  echo "✅ SSL certificate obtained"' >> setup-nginx.sh
+        echo '  echo' >> setup-nginx.sh
+        echo '  echo "⏰ Setting up certificate auto-renewal..."' >> setup-nginx.sh
+        echo '  sudo systemctl enable certbot.timer' >> setup-nginx.sh
+        echo '  sudo systemctl start certbot.timer' >> setup-nginx.sh
+        echo '  echo "✅ Auto-renewal configured"' >> setup-nginx.sh
+        echo 'fi' >> setup-nginx.sh
+        echo 'echo' >> setup-nginx.sh
+        echo 'echo "🌐 === NGINX VERIFICATION ==="' >> setup-nginx.sh
+        echo 'NGINX_STATUS=$(sudo systemctl is-active nginx)' >> setup-nginx.sh
+        echo 'echo "Nginx status: $NGINX_STATUS"' >> setup-nginx.sh
+        echo 'if [ "$NGINX_STATUS" != "active" ]; then' >> setup-nginx.sh
+        echo '  echo "❌ Nginx is not running"' >> setup-nginx.sh
+        echo '  exit 1' >> setup-nginx.sh
+        echo 'fi' >> setup-nginx.sh
+        echo 'echo "✅ Nginx is running"' >> setup-nginx.sh
+        echo 'echo' >> setup-nginx.sh
+        echo 'echo "Testing HTTPS endpoint..."' >> setup-nginx.sh
+        echo 'for i in {1..10}; do' >> setup-nginx.sh
+        echo '  if curl -f -s -k https://api.bloodline.dev/api/health > /dev/null 2>&1; then' >> setup-nginx.sh
+        echo '    echo "✅ HTTPS endpoint is responding"' >> setup-nginx.sh
+        echo '    break' >> setup-nginx.sh
+        echo '  fi' >> setup-nginx.sh
+        echo '  if [ $i -eq 10 ]; then' >> setup-nginx.sh
+        echo '    echo "⚠️ HTTPS endpoint not responding after 10 attempts"' >> setup-nginx.sh
+        echo '  else' >> setup-nginx.sh
+        echo '    echo "Attempt $i/10: Waiting for HTTPS..."' >> setup-nginx.sh
+        echo '    sleep 2' >> setup-nginx.sh
+        echo '  fi' >> setup-nginx.sh
+        echo 'done' >> setup-nginx.sh
+        echo 'echo' >> setup-nginx.sh
+        echo 'echo "✅ NGINX SETUP COMPLETED SUCCESSFULLY!"' >> setup-nginx.sh
+        echo 'exit 0' >> setup-nginx.sh
+
+        # Upload Nginx setup script to S3
+        aws s3 cp setup-nginx.sh s3://${{ secrets.S3_BUCKET_NAME }}/setup-nginx.sh
+
+        # First, ensure backend directory exists and copy Nginx config
+        PREP_COMMAND_ID=$(aws ssm send-command \
+          --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
+          --document-name "AWS-RunShellScript" \
+          --parameters 'commands=[
+            "mkdir -p /home/ubuntu/backend/nginx",
+            "aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/nginx/api.bloodline.dev.conf /home/ubuntu/backend/nginx/api.bloodline.dev.conf"
+          ]' \
+          --region ap-southeast-1 \
+          --query 'Command.CommandId' \
+          --output text)
+
+        echo "📋 Prep Command ID: $PREP_COMMAND_ID"
+        echo "⏳ Waiting for preparation..."
+        sleep 10
+
+        # Execute Nginx setup script
+        NGINX_COMMAND_ID=$(aws ssm send-command \
+          --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
+          --document-name "AWS-RunShellScript" \
+          --parameters 'commands=[
+            "aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/setup-nginx.sh /tmp/setup-nginx.sh",
+            "chmod +x /tmp/setup-nginx.sh",
+            "/tmp/setup-nginx.sh"
+          ]' \
+          --region ap-southeast-1 \
+          --query 'Command.CommandId' \
+          --output text)
+
+        echo "📋 Nginx Command ID: $NGINX_COMMAND_ID"
+
+        # Clean up local script
+        rm -f setup-nginx.sh
+        echo "⏳ Waiting for Nginx setup..."
+
+        # Wait for command completion (max 120 seconds)
+        NGINX_SUCCESS=false
+        for i in {1..12}; do
+          STATUS=$(aws ssm get-command-invocation \
+            --command-id $NGINX_COMMAND_ID \
+            --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
+            --region ap-southeast-1 \
+            --query 'Status' \
+            --output text 2>/dev/null || echo "InProgress")
+
+          echo "Status: $STATUS (attempt $i/12)"
+
+          if [ "$STATUS" = "Success" ]; then
+            echo "✅ Nginx setup successful!"
+            aws ssm get-command-invocation \
+              --command-id $NGINX_COMMAND_ID \
+              --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
+              --region ap-southeast-1 \
+              --query 'StandardOutputContent' \
+              --output text
+            NGINX_SUCCESS=true
+            break
+          elif [ "$STATUS" = "Failed" ]; then
+            echo "❌ Nginx setup failed!"
+            echo "=== STDOUT ==="
+            aws ssm get-command-invocation \
+              --command-id $NGINX_COMMAND_ID \
+              --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
+              --region ap-southeast-1 \
+              --query 'StandardOutputContent' \
+              --output text
+            echo "=== STDERR ==="
+            aws ssm get-command-invocation \
+              --command-id $NGINX_COMMAND_ID \
+              --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
+              --region ap-southeast-1 \
+              --query 'StandardErrorContent' \
+              --output text
+            exit 1
+          fi
+
+          sleep 10
+        done
+
+        # Handle timeout
+        if [ "$NGINX_SUCCESS" = "false" ]; then
+          echo "⚠️ Nginx setup timed out after 120 seconds"
+          echo "Final status: $STATUS"
+          echo "=== STDOUT ==="
+          aws ssm get-command-invocation \
+            --command-id $NGINX_COMMAND_ID \
+            --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
+            --region ap-southeast-1 \
+            --query 'StandardOutputContent' \
+            --output text || echo "No output available"
+          echo "=== STDERR ==="
+          aws ssm get-command-invocation \
+            --command-id $NGINX_COMMAND_ID \
             --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
             --region ap-southeast-1 \
             --query 'StandardErrorContent' \

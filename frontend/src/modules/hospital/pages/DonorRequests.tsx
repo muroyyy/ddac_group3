@@ -16,17 +16,9 @@ interface DonorRequest {
   requestedDate: string;
 }
 
-interface Doctor {
-  doctorId: number;
-  doctorName: string;
-  specialization: string;
-  contactNumber: string;
-}
-
 export default function DonorRequests() {
   const { user } = useAuth();
   const [requests, setRequests] = useState<DonorRequest[]>([]);
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRequest, setSelectedRequest] = useState<DonorRequest | null>(null);
@@ -37,7 +29,6 @@ export default function DonorRequests() {
   
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [approvingRequest, setApprovingRequest] = useState<DonorRequest | null>(null);
-  const [selectedDoctorId, setSelectedDoctorId] = useState<number>(0);
   const [appointmentDate, setAppointmentDate] = useState('');
   const [appointmentTime, setAppointmentTime] = useState('');
 
@@ -45,17 +36,10 @@ export default function DonorRequests() {
     if (!user?.id) return;
     setLoading(true);
     try {
-      const [requestsRes, doctorsRes] = await Promise.all([
-        hospitalAPI.getDonorRequests(user.id),
-        hospitalAPI.getDoctors(user.id)
-      ]);
+      const requestsRes = await hospitalAPI.getDonorRequests(user.id);
       
       if (requestsRes.success) {
         setRequests(requestsRes.data || []);
-      }
-      
-      if (doctorsRes.success) {
-        setDoctors(doctorsRes.data || []);
       }
     } catch (error) {
       console.error('Failed to load data:', error);
@@ -70,14 +54,13 @@ export default function DonorRequests() {
 
   const showApprovalDialog = (request: DonorRequest) => {
     setApprovingRequest(request);
-    setSelectedDoctorId(0);
     setAppointmentDate('');
     setAppointmentTime('');
     setShowApprovalModal(true);
   };
 
   const approveRequest = async () => {
-    if (!approvingRequest || !selectedDoctorId || !appointmentDate || !appointmentTime) {
+    if (!approvingRequest || !appointmentDate || !appointmentTime) {
       alert('Please fill in all required fields');
       return;
     }
@@ -85,14 +68,15 @@ export default function DonorRequests() {
     try {
       const appointmentDateTime = new Date(`${appointmentDate}T${appointmentTime}`);
       const result = await hospitalAPI.approveDonorRequest(approvingRequest.donationId, {
-        doctorId: selectedDoctorId,
+        doctorId: 1, // Default doctor ID
         appointmentDate: appointmentDateTime
       });
       
       if (result.success) {
         setShowApprovalModal(false);
         setApprovingRequest(null);
-        loadRequests();
+        // Reload the requests list to remove the approved request
+        await loadRequests();
         alert('Donation request approved and appointment created successfully!');
       } else {
         alert('Failed to approve request');
@@ -117,7 +101,8 @@ export default function DonorRequests() {
         setShowRejectModal(false);
         setRejectingId(null);
         setRejectionReason('');
-        loadRequests();
+        // Reload the requests list to remove the rejected request
+        await loadRequests();
         alert('Donation request rejected successfully. Donor has been notified.');
       } else {
         alert('Failed to reject request');
@@ -429,22 +414,6 @@ export default function DonorRequests() {
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Select Doctor</label>
-                <select
-                  value={selectedDoctorId}
-                  onChange={(e) => setSelectedDoctorId(Number(e.target.value))}
-                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                >
-                  <option value={0}>Select a doctor...</option>
-                  {doctors.map(doctor => (
-                    <option key={doctor.doctorId} value={doctor.doctorId}>
-                      {doctor.doctorName} - {doctor.specialization}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Appointment Date</label>
                 <input
                   type="date"
@@ -469,7 +438,7 @@ export default function DonorRequests() {
             <div className="flex gap-3 mt-8">
               <button
                 onClick={approveRequest}
-                disabled={!selectedDoctorId || !appointmentDate || !appointmentTime}
+                disabled={!appointmentDate || !appointmentTime}
                 className="flex-1 bg-green-600 text-white py-3 px-4 rounded-xl hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
               >
                 Approve & Create Appointment

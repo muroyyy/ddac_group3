@@ -15,7 +15,7 @@ import { getHospitalRoutes } from './routes/hospitalRoutes';
 import { getAdminRoutes } from './routes/adminRoutes';
 
 const AppRoutes: React.FC = () => {
-  const { user, isLoading, login, logout } = useAuth();
+  const { isLoading, login } = useAuth();
 
   const routes = useRoutes([
     // Auth Routes (no layout)
@@ -32,13 +32,13 @@ const AppRoutes: React.FC = () => {
         getPatientRoutes(),
 
         // Admin Routes
-        getAdminRoutes(user, logout),
+        getAdminRoutes(),
 
         // Donor Routes
         getDonorRoutes(),
 
         // Hospital Routes - Role Protected
-        getHospitalRoutes(user)
+        getHospitalRoutes()
       ]
     },
 

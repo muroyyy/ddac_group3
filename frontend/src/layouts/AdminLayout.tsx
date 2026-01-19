@@ -1,10 +1,10 @@
 // Admin Layout
 import React, { useState } from 'react';
-import { 
-  Users, 
-  Droplet, 
-  Activity, 
-  TrendingUp, 
+import {
+  Users,
+  Droplet,
+  Activity,
+  TrendingUp,
   Server,
   Shield,
   Bell,
@@ -16,6 +16,7 @@ import {
   Settings
 } from 'lucide-react';
 import bloodlineLogo from '../assets/bloodline_logo.svg';
+import { useAuth } from '../context/AuthContext';
 
 // Import admin components
 import AdminDashboard from '../modules/admin/pages/Dashboard';
@@ -31,16 +32,8 @@ import UserVerification from '../modules/admin/pages/UserVerification';
 import SystemAlerts from '../modules/admin/pages/SystemAlerts';
 import HospitalCodes from '../modules/admin/pages/HospitalCodes';
 
-interface AdminLayoutProps {
-  user: {
-    email: string;
-    name: string;
-    role: string;
-  };
-  onLogout: () => void;
-}
-
-const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
+const AdminLayout: React.FC = () => {
+  const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -63,7 +56,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <AdminDashboard user={user} onNavigate={setActiveTab} />;
+        return <AdminDashboard user={user!} onNavigate={setActiveTab} />;
       case 'users':
         return <UserManagement />;
       case 'verification':
@@ -87,7 +80,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
       case 'profile':
         return <ProfileSettings />;
       default:
-        return <AdminDashboard user={user} onNavigate={setActiveTab} />;
+        return <AdminDashboard user={user!} onNavigate={setActiveTab} />;
     }
   };
 
@@ -115,8 +108,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
               onClick={() => setActiveTab(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors cursor-pointer ${
                 activeTab === item.id
-                  ? 'bg-red-50 text-red-600 font-medium' 
-                  : 'text-gray-700 hover:bg-gray-50'
+                  ? 'bg-red-50 text-red-600 font-semibold' 
+                  : 'text-gray-700 hover:bg-gray-50 font-semibold'
               }`}
             >
               {item.icon}
@@ -128,11 +121,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-white">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center text-white font-medium">
-              {user.name.charAt(0)}
+              {user?.name.charAt(0)}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
-              <p className="text-xs text-gray-500 truncate">{user.role}</p>
+              <p className="text-sm font-medium text-gray-900 truncate">{user?.name}</p>
+              <p className="text-xs text-gray-500 truncate">{user?.role}</p>
             </div>
           </div>
           <button
@@ -163,7 +156,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
                 <h1 className="text-2xl font-bold text-gray-900">
                   {navItems.find(item => item.id === activeTab)?.label || 'Admin Dashboard'}
                 </h1>
-                <p className="text-sm text-gray-600">Welcome back, {user.name}</p>
+                <p className="text-sm text-gray-600">Welcome back, {user?.name}</p>
               </div>
             </div>
           </div>
@@ -213,7 +206,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ user, onLogout }) => {
                 onClick={async () => {
                   const { sessionAPI } = await import('../api');
                   await sessionAPI.logout();
-                  onLogout();
+                  logout();
                 }}
                 className="flex-1 py-4 text-red-600 font-semibold hover:bg-red-50 transition rounded-br-3xl cursor-pointer"
               >

@@ -1,6 +1,4 @@
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  ? 'http://localhost:5000/api'
-  : 'https://bloodline.dev/api';
+import { API_BASE_URL } from '../../../api/config';
 
 export interface DonorProfile {
   userId: number;
@@ -67,7 +65,7 @@ export const donorAPI = {
     return response.json();
   },
 
-  updateProfile: async (userId: number, data: { bloodType?: string; location: string; isAvailable: boolean }) => {
+  updateProfile: async (userId: number, data: { fullName?: string; phone?: string; bloodType?: string; location: string; isAvailable: boolean }) => {
     const response = await fetch(`${API_BASE_URL}/donor/profile/${userId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -108,9 +106,24 @@ export const donorAPI = {
     return response.json();
   },
 
-  getAppointments: async (userId: number): Promise<Appointment[]> => {
-    const response = await fetch(`${API_BASE_URL}/donor/appointments/${userId}`);
-    return response.json();
+  getAppointments: async (userId: number): Promise<{ success: boolean; data: Appointment[] }> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/donor/appointments/${userId}`);
+      
+      // Check if response is HTML instead of JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType?.includes('application/json')) {
+        const text = await response.text();
+        const errorMsg = `Server returned ${contentType || 'unknown content type'}: ${text.substring(0, 200)}...`;
+        console.error('❌ Non-JSON Response:', { status: response.status, errorMsg });
+        throw new Error(errorMsg);
+      }
+      
+      return response.json();
+    } catch (error) {
+      console.error('API call failed:', error);
+      return { success: false, data: [] };
+    }
   },
 
   getCompletedDonations: async (userId: number): Promise<Appointment[]> => {

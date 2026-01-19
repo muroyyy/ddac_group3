@@ -13,6 +13,7 @@ interface PendingUser {
   documents: Array<{
     id: number;
     fileName: string;
+    filePath: string;
     documentType: string;
     uploadedAt: string;
   }>;
@@ -24,6 +25,8 @@ const UserVerification: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<PendingUser | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [viewingDocument, setViewingDocument] = useState<{ id: number; fileName: string; url: string } | null>(null);
+  const [loadingDocument, setLoadingDocument] = useState(false);
 
   useEffect(() => {
     fetchPendingUsers();
@@ -70,6 +73,19 @@ const UserVerification: React.FC = () => {
     } catch (error) {
       console.error('Error rejecting user:', error);
       alert('Error rejecting user');
+    }
+  };
+
+  const handleViewDocument = async (doc: { id: number; fileName: string }) => {
+    setLoadingDocument(true);
+    try {
+      const url = await verificationAPI.getDocumentUrl(doc.id);
+      setViewingDocument({ id: doc.id, fileName: doc.fileName, url });
+    } catch (error) {
+      console.error('Error fetching document URL:', error);
+      alert('Failed to load document');
+    } finally {
+      setLoadingDocument(false);
     }
   };
 
@@ -133,7 +149,11 @@ const UserVerification: React.FC = () => {
                         <FileText className="w-4 h-4 text-gray-500" />
                         <span className="text-sm text-gray-700">{doc.fileName}</span>
                       </div>
-                      <button className="text-red-600 hover:text-red-700 text-sm font-medium">
+                      <button 
+                        onClick={() => handleViewDocument({ id: doc.id, fileName: doc.fileName })}
+                        disabled={loadingDocument}
+                        className="text-red-600 hover:text-red-700 text-sm font-medium disabled:opacity-50"
+                      >
                         <Eye className="w-4 h-4" />
                       </button>
                     </div>
@@ -198,6 +218,35 @@ const UserVerification: React.FC = () => {
               >
                 Reject User
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Document Viewer Modal */}
+      {viewingDocument && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="text-lg font-semibold text-gray-900">{viewingDocument.fileName}</h3>
+              <button
+                onClick={() => setViewingDocument(null)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-auto p-4">
+              <img
+                src={viewingDocument.url}
+                alt={viewingDocument.fileName}
+                className="max-w-full h-auto mx-auto"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  target.parentElement!.innerHTML = '<div class="text-center text-gray-500 py-8">Unable to load document.</div>';
+                }}
+              />
             </div>
           </div>
         </div>

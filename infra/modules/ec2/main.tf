@@ -81,9 +81,12 @@ resource "aws_iam_role_policy" "ec2_secrets_policy" {
         Action = [
           "s3:PutObject",
           "s3:GetObject",
-          "s3:ListBucket"
+          "s3:ListBucket",
+          "s3:DeleteObject"
         ]
         Resource = [
+          "arn:aws:s3:::dev-bloodline-assets-8826eb40",
+          "arn:aws:s3:::dev-bloodline-assets-8826eb40/*",
           "arn:aws:s3:::bloodline-schema-backups-sha",
           "arn:aws:s3:::bloodline-schema-backups-sha/*"
         ]

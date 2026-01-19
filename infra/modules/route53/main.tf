@@ -44,6 +44,21 @@ resource "aws_route53_record" "www" {
   }
 }
 
+# A record for api subdomain pointing to API CloudFront
+resource "aws_route53_record" "api" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "api.${var.domain_name}"
+  type    = "A"
+
+  alias {
+    name                   = var.api_cloudfront_domain_name
+    zone_id                = var.api_cloudfront_hosted_zone_id
+    evaluate_target_health = false
+  }
+
+  depends_on = [aws_route53_zone.main]
+}
+
 # CloudWatch Log Group for Route53 Query Logging (must be in us-east-1)
 resource "aws_cloudwatch_log_group" "route53_query_log" {
   provider = aws.us_east_1

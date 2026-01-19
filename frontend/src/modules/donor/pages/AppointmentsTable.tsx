@@ -18,8 +18,8 @@ export default function AppointmentsTable() {
 
   const loadAppointments = async () => {
     try {
-      const data = await donorAPI.getAppointments(user!.id);
-      setAppointments(data || []);
+      const response = await donorAPI.getAppointments(user!.id);
+      setAppointments(response.success ? response.data : []);
     } catch (error) {
       console.error('Error loading appointments:', error);
     } finally {

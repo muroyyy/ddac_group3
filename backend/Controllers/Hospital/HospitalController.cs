@@ -606,9 +606,9 @@ public class HospitalController : ControllerBase
     {
         try
         {
-            // Use simple approach - get data from donation_requests table
+            // Show all pending requests regardless of hospital_id for testing
             var requests = await _context.DonationRequests
-                .Where(dr => dr.HospitalId == 1)
+                .Where(dr => string.IsNullOrEmpty(dr.Status) || dr.Status == "Pending")
                 .Select(dr => new
                 {
                     donationId = dr.DonationId,
@@ -617,9 +617,10 @@ public class HospitalController : ControllerBase
                     donorPhone = "123-456-7890",
                     bloodType = "O+",
                     unitsRequested = dr.UnitsRequired,
-                    status = dr.Status,
+                    status = dr.Status ?? "Pending",
                     requestedDate = dr.RequestedDate.ToString("yyyy-MM-dd"),
-                    notes = ""
+                    notes = "",
+                    hospitalId = dr.HospitalId // Keep for debugging
                 })
                 .ToListAsync();
 
@@ -637,37 +638,57 @@ public class HospitalController : ControllerBase
     [HttpPost("donor-requests/{id}/approve")]
     public async Task<IActionResult> ApproveDonorRequest(int id, [FromBody] ApproveRequestDto dto)
     {
+        using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
+            _logger.LogInformation($"Attempting to approve donation request {id}");
+            
             var donorRequest = await _context.DonationRequests.FindAsync(id);
             if (donorRequest == null)
+            {
+                _logger.LogError($"Donation request {id} not found");
                 return NotFound(new { success = false, message = "Donor request not found" });
+            }
 
-            // Update donation request status
-            donorRequest.Status = "Approved";
+            _logger.LogInformation($"Found donation request {id}: DonorId={donorRequest.DonorId}, HospitalId={donorRequest.HospitalId}, CurrentStatus={donorRequest.Status}");
+
+            // Update donation request status and mark as modified
+            donorRequest.Status = "Accepted";
+            _context.DonationRequests.Update(donorRequest);
+            _logger.LogInformation($"Setting status to 'Accepted' for donation request {id}");
             
             // Create appointment in donor_appointments table
             var appointment = new DonorAppointment
             {
                 DonorId = donorRequest.DonorId,
-                DonationId = donorRequest.DonationId,
+                DonationId = id,
                 HospitalId = donorRequest.HospitalId,
                 AppointmentDate = dto.AppointmentDate.Date,
                 AppointmentTime = dto.AppointmentDate.TimeOfDay,
                 Status = "Scheduled",
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
+                DoctorId = dto.DoctorId > 0 ? dto.DoctorId : null
             };
             
+            _logger.LogInformation($"Creating appointment for donation {id}");
             _context.DonorAppointments.Add(appointment);
-            await _context.SaveChangesAsync();
+            
+            // Save both changes in transaction
+            var saveResult = await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            _logger.LogInformation($"Transaction committed: {saveResult} records affected");
+            
+            _logger.LogInformation($"Successfully approved donation {id} and created appointment {appointment.AppointmentId}");
 
-            return Ok(new { success = true, message = "Donor request approved and appointment created successfully." });
+            return Ok(new { success = true, message = "Donor request approved and appointment scheduled.", appointmentId = appointment.AppointmentId });
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error approving donor request: {ex.Message}");
-            return StatusCode(500, new { success = false, message = "Failed to approve donor request" });
+            await transaction.RollbackAsync();
+            _logger.LogError($"Error approving donor request {id}: {ex.Message}");
+            _logger.LogError($"Stack trace: {ex.StackTrace}");
+            return StatusCode(500, new { success = false, message = $"Failed to approve donor request: {ex.Message}" });
         }
     }
 
@@ -677,19 +698,42 @@ public class HospitalController : ControllerBase
     [HttpPost("donor-requests/{id}/reject")]
     public async Task<IActionResult> RejectDonorRequest(int id, [FromBody] RejectRequestDto dto)
     {
+        using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
             var donorRequest = await _context.DonationRequests.FindAsync(id);
             if (donorRequest == null)
                 return NotFound(new { success = false, message = "Donor request not found" });
 
+            // Update donation request status and mark as modified
             donorRequest.Status = "Rejected";
+            _context.DonationRequests.Update(donorRequest);
+            
+            // Create appointment in donor_appointments table with Cancelled status
+            var appointment = new DonorAppointment
+            {
+                DonorId = donorRequest.DonorId,
+                DonationId = id,
+                HospitalId = donorRequest.HospitalId,
+                AppointmentDate = DateTime.Today.AddDays(1), // Default to tomorrow
+                AppointmentTime = TimeSpan.FromHours(9), // Default to 9 AM
+                Status = "Cancelled",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                DoctorNotes = dto.RejectionNotes
+            };
+            
+            _context.DonorAppointments.Add(appointment);
+            
+            // Save both changes in transaction
             await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
 
-            return Ok(new { success = true, message = "Donor request rejected." });
+            return Ok(new { success = true, message = "Donor request rejected and appointment cancelled.", appointmentId = appointment.AppointmentId });
         }
         catch (Exception ex)
         {
+            await transaction.RollbackAsync();
             _logger.LogError($"Error rejecting donor request: {ex.Message}");
             return StatusCode(500, new { success = false, message = "Failed to reject donor request" });
         }
@@ -703,32 +747,60 @@ public class HospitalController : ControllerBase
     {
         try
         {
-            var hospitalId = await GetHospitalIdFromUser(userId);
-            if (hospitalId == null)
-                return BadRequest(new { success = false, message = "Hospital staff not found" });
+            // Get all donor appointments for debugging
+            var appointmentCount = await _context.DonorAppointments.CountAsync();
+            _logger.LogInformation($"Total donor appointments in database: {appointmentCount}");
 
-            var appointments = await _context.DonorAppointments
-                .Where(da => da.HospitalId == hospitalId.Value)
-                .Join(_context.DonorProfiles, da => da.DonorId, dp => dp.DonorId, (da, dp) => new { da, dp })
-                .Join(_context.Users, x => x.dp.UserId, u => u.Id, (x, u) => new
+            if (appointmentCount == 0)
+            {
+                return Ok(new { success = true, data = new List<object>() });
+            }
+
+            // Get raw data first, then format on client side
+            var rawAppointments = await _context.DonorAppointments
+                .GroupJoin(_context.DonorProfiles, 
+                    da => da.DonorId, 
+                    dp => dp.DonorId, 
+                    (da, dp) => new { da, dp })
+                .SelectMany(x => x.dp.DefaultIfEmpty(), (x, dp) => new { x.da, dp })
+                .GroupJoin(_context.Users, 
+                    x => x.dp != null ? x.dp.UserId : 0, 
+                    u => u.Id, 
+                    (x, u) => new { x.da, x.dp, u })
+                .SelectMany(x => x.u.DefaultIfEmpty(), (x, u) => new
                 {
                     appointmentId = x.da.AppointmentId,
-                    donorName = u.FullName,
-                    bloodType = x.dp.BloodType,
-                    appointmentDate = x.da.AppointmentDate.ToString("yyyy-MM-dd"),
-                    appointmentTime = x.da.AppointmentTime.ToString(@"hh\:mm"),
-                    status = x.da.Status,
-                    createdAt = x.da.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                    donorName = u != null ? u.FullName : "Unknown Donor",
+                    bloodType = x.dp != null ? x.dp.BloodType : "Unknown",
+                    appointmentDate = x.da.AppointmentDate,
+                    appointmentTime = x.da.AppointmentTime,
+                    status = x.da.Status ?? "Scheduled",
+                    createdAt = x.da.CreatedAt,
+                    hospitalId = x.da.HospitalId // Add for debugging
                 })
                 .OrderByDescending(x => x.appointmentDate)
                 .ToListAsync();
 
+            // Format dates after query execution
+            var appointments = rawAppointments.Select(a => new
+            {
+                appointmentId = a.appointmentId,
+                donorName = a.donorName,
+                bloodType = a.bloodType,
+                appointmentDate = a.appointmentDate.ToString("yyyy-MM-dd"),
+                appointmentTime = a.appointmentTime.ToString(@"hh\:mm"),
+                status = a.status,
+                createdAt = a.createdAt.ToString("yyyy-MM-dd HH:mm"),
+                hospitalId = a.hospitalId
+            }).ToList();
+
+            _logger.LogInformation($"Successfully retrieved {appointments.Count} donor appointments");
             return Ok(new { success = true, data = appointments });
         }
         catch (Exception ex)
         {
             _logger.LogError($"Error fetching donor appointments: {ex.Message}");
-            return StatusCode(500, new { success = false, message = "Failed to fetch donor appointments" });
+            return Ok(new { success = false, message = $"Failed to fetch donor appointments: {ex.Message}" });
         }
     }
 
@@ -769,10 +841,10 @@ public class HospitalController : ControllerBase
     }
 
     /// <summary>
-    /// Complete donor appointment and update inventory
+    /// Complete donor appointment
     /// </summary>
     [HttpPost("donor-appointments/{id}/complete")]
-    public async Task<IActionResult> CompleteDonorAppointment(int id, [FromBody] CompleteDonorAppointmentDto dto)
+    public async Task<IActionResult> CompleteDonorAppointment(int id)
     {
         try
         {
@@ -780,41 +852,11 @@ public class HospitalController : ControllerBase
             if (appointment == null)
                 return NotFound(new { success = false, message = "Donor appointment not found" });
 
-            // Get donor profile to get blood type
-            var donor = await _context.DonorProfiles.FindAsync(appointment.DonorId);
-            if (donor == null)
-                return NotFound(new { success = false, message = "Donor not found" });
-
-            // Update appointment status
             appointment.Status = "Completed";
             appointment.UpdatedAt = DateTime.UtcNow;
-
-            // Update blood inventory
-            var inventory = await _context.BloodInventory
-                .FirstOrDefaultAsync(bi => bi.HospitalId == appointment.HospitalId && bi.BloodType == donor.BloodType);
-            
-            if (inventory != null)
-            {
-                inventory.QuantityUnits += dto.UnitsCollected;
-                inventory.LastUpdated = DateTime.UtcNow;
-            }
-            else
-            {
-                // Create new inventory entry if doesn't exist
-                inventory = new BloodInventory
-                {
-                    HospitalId = appointment.HospitalId,
-                    BloodType = donor.BloodType,
-                    QuantityUnits = dto.UnitsCollected,
-                    Status = "Available",
-                    LastUpdated = DateTime.UtcNow
-                };
-                _context.BloodInventory.Add(inventory);
-            }
-
             await _context.SaveChangesAsync();
 
-            return Ok(new { success = true, message = "Donor appointment completed and inventory updated" });
+            return Ok(new { success = true, message = "Donor appointment marked as completed" });
         }
         catch (Exception ex)
         {
@@ -924,47 +966,27 @@ public class HospitalController : ControllerBase
 
 
     /// <summary>
-    /// Debug endpoint to check appointments data
+    /// Debug endpoint to check donation requests data
     /// </summary>
-    [HttpGet("debug-appointments/{userId}")]
-    public async Task<IActionResult> DebugAppointments(int userId)
+    [HttpGet("debug-donation-requests")]
+    public async Task<IActionResult> DebugDonationRequests()
     {
         try
         {
-            var hospitalId = await GetHospitalIdFromUser(userId);
-            
-            // Try to query the table directly to see if it exists
-            var totalCount = 0;
-            var rawAppointments = new List<object>();
-            
-            try
-            {
-                totalCount = await _context.PatientAppointments.CountAsync();
-                rawAppointments = (await _context.PatientAppointments
-                    .Take(5)
-                    .Select(a => new {
-                        a.AppointmentId,
-                        a.RequestId,
-                        a.PatientId,
-                        a.HospitalId,
-                        a.Status
-                    })
-                    .ToListAsync()).Cast<object>().ToList();
-            }
-            catch (Exception tableEx)
-            {
-                return Ok(new { 
-                    error = $"Table access error: {tableEx.Message}",
-                    success = false 
-                });
-            }
+            var allRequests = await _context.DonationRequests
+                .Where(dr => dr.HospitalId == 1)
+                .Select(dr => new {
+                    dr.DonationId,
+                    dr.DonorId,
+                    dr.Status,
+                    dr.RequestedDate
+                })
+                .ToListAsync();
             
             return Ok(new { 
-                userId = userId,
-                hospitalId = hospitalId,
-                totalCount = totalCount,
-                rawAppointments = rawAppointments,
-                success = true 
+                success = true, 
+                totalCount = allRequests.Count,
+                data = allRequests 
             });
         }
         catch (Exception ex)
@@ -995,7 +1017,7 @@ public class RejectRequestDto
     public string? RejectionNotes { get; set; }
 }
 
-public class DonorRequestDto
+public class HospitalDonorRequestDto
 {
     public int DonationId { get; set; }
     public string DonorName { get; set; } = "";
@@ -1024,6 +1046,11 @@ public class CreateDonorAppointmentDto
 public class CompleteDonorAppointmentDto
 {
     public int UnitsCollected { get; set; }
+}
+
+public class CompleteAppointmentDto
+{
+    public string? DoctorNotes { get; set; }
 }
 
 public class UpdateStaffProfileDto

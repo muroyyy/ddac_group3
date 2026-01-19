@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Plus, Edit3, Droplet } from 'lucide-react';
-import { hospitalAPI } from '../services/hospitalAPI';
 import type { BloodInventoryItem } from '../services/hospitalAPI';
 
 export default function Inventory() {
@@ -14,8 +13,15 @@ export default function Inventory() {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await hospitalAPI.getBloodInventory(hospitalId);
-      setItems(res);
+      // Mock data until backend endpoint is deployed
+      const mockData: BloodInventoryItem[] = [
+        { id: 1, bloodType: 'A+', units: 25, status: 'Good Stock', lastUpdated: new Date().toISOString(), hospitalId: 1 },
+        { id: 2, bloodType: 'O-', units: 8, status: 'Low Stock', lastUpdated: new Date().toISOString(), hospitalId: 1 },
+        { id: 3, bloodType: 'B+', units: 15, status: 'Good Stock', lastUpdated: new Date().toISOString(), hospitalId: 1 },
+        { id: 4, bloodType: 'AB+', units: 3, status: 'Critical', lastUpdated: new Date().toISOString(), hospitalId: 1 },
+        { id: 5, bloodType: 'O+', units: 30, status: 'Good Stock', lastUpdated: new Date().toISOString(), hospitalId: 1 }
+      ];
+      setItems(mockData);
     } catch (e) {
       console.error(e);
     } finally {
@@ -29,10 +35,19 @@ export default function Inventory() {
 
   const handleAdd = async () => {
     try {
-      await hospitalAPI.addBloodInventory({ ...newItem, hospitalId });
+      // Mock add - just add to local state
+      const newId = Math.max(...items.map(i => i.id)) + 1;
+      const mockItem: BloodInventoryItem = {
+        id: newId,
+        bloodType: newItem.bloodType,
+        units: newItem.units,
+        status: newItem.units > 20 ? 'Good Stock' : newItem.units > 10 ? 'Low Stock' : 'Critical',
+        lastUpdated: new Date().toISOString(),
+        hospitalId
+      };
+      setItems([...items, mockItem]);
       setNewItem({ bloodType: '', units: 0 });
       setShowAdd(false);
-      load();
     } catch (e) {
       console.error(e);
     }
@@ -46,8 +61,12 @@ export default function Inventory() {
     const units = parseInt(v, 10);
     if (Number.isNaN(units)) return alert('Invalid number');
     try {
-      await hospitalAPI.updateBloodInventory(id, { units });
-      load();
+      // Mock update - just update local state
+      setItems(items.map(item => 
+        item.id === id 
+          ? { ...item, units, status: units > 20 ? 'Good Stock' : units > 10 ? 'Low Stock' : 'Critical', lastUpdated: new Date().toISOString() }
+          : item
+      ));
     } catch (e) {
       console.error(e);
     }

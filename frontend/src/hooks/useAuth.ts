@@ -16,23 +16,37 @@ export const useAuth = () => {
 
   useEffect(() => {
     const initAuth = async () => {
-      const currentUser = sessionManager.getUser();
-      
-      if (currentUser) {
-        // Validate token with backend
-        const validation = await sessionAPI.validateToken();
+      try {
+        const currentUser = sessionManager.getUser();
         
-        if (validation.valid) {
+        if (currentUser) {
+          // Skip backend validation since auth endpoints aren't deployed
+          // Trust local session for now
           setUser(currentUser);
           setIsAuthenticated(true);
+          
+          // TODO: Uncomment when backend auth endpoints are deployed:
+          // const validation = await sessionAPI.validateToken();
+          // if (validation.valid) {
+          //   setUser(currentUser);
+          //   setIsAuthenticated(true);
+          // } else {
+          //   sessionManager.clearSession();
+          //   setUser(null);
+          //   setIsAuthenticated(false);
+          // }
         } else {
-          sessionManager.clearSession();
           setUser(null);
           setIsAuthenticated(false);
         }
+      } catch (error) {
+        console.error('Auth initialization failed:', error);
+        sessionManager.clearSession();
+        setUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
     };
 
     initAuth();
@@ -55,18 +69,28 @@ export const useAuth = () => {
   };
 
   const logout = async () => {
-    await sessionAPI.logout();
-    setUser(null);
-    setIsAuthenticated(false);
+    try {
+      await sessionAPI.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+      setIsAuthenticated(false);
+    }
   };
 
   const refreshSession = async () => {
-    const result = await sessionAPI.refreshToken();
-    if (result.success && result.token && user) {
-      sessionManager.setSession(user, result.token);
-      return true;
+    try {
+      const result = await sessionAPI.refreshToken();
+      if (result.success && result.token && user) {
+        sessionManager.setSession(user, result.token);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Session refresh failed:', error);
+      return false;
     }
-    return false;
   };
 
   return {

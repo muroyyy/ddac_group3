@@ -44,6 +44,15 @@ namespace BloodLine.Controllers
         [HttpPut("profile/{userId}")]
         public async Task<IActionResult> UpdateProfile(int userId, [FromBody] DonorUpdateProfileRequest request)
         {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return NotFound();
+
+            // Update user table
+            if (!string.IsNullOrEmpty(request.FullName))
+                user.FullName = request.FullName;
+            if (!string.IsNullOrEmpty(request.Phone))
+                user.Phone = request.Phone;
+
             var profile = await _context.DonorProfiles.FirstOrDefaultAsync(d => d.UserId == userId);
             
             if (profile == null)
@@ -197,22 +206,35 @@ namespace BloodLine.Controllers
             var donorProfile = await _context.DonorProfiles.FirstOrDefaultAsync(d => d.UserId == userId);
             if (donorProfile == null)
             {
-                return Ok(new List<AppointmentDto>());
+                return Ok(new { success = true, data = new List<object>() });
             }
 
             var appointments = await _context.Database
-                .SqlQueryRaw<AppointmentDto>(
+                .SqlQueryRaw<DonorAppointmentResponseDto>(
                     @"SELECT da.appointment_id as Id, h.hospital_name as HospitalName,
                       da.appointment_date as Date, da.appointment_time as Time,
-                      da.status as Status, dp.blood_type as BloodType, 1 as Units
+                      da.status as Status, dp.blood_type as BloodType, 1 as Units,
+                      da.doctor_notes as DoctorNotes
                       FROM donor_appointments da
                       JOIN hospital h ON da.hospital_id = h.hospital_id
                       JOIN donor_profile dp ON da.donor_id = dp.donor_id
-                      WHERE da.donor_id = {0} AND da.status IN ('Scheduled', 'Cancelled')
-                      ORDER BY da.appointment_date DESC", donorProfile.DonorId)
+                      WHERE da.donor_id = {0} AND da.status = 'Scheduled'
+                      ORDER BY da.appointment_date ASC", donorProfile.DonorId)
                 .ToListAsync();
 
-            return Ok(appointments);
+            var formattedAppointments = appointments.Select(a => new
+            {
+                id = a.Id,
+                hospitalName = a.HospitalName,
+                date = a.Date.ToString("yyyy-MM-dd"),
+                time = a.Time.ToString(@"hh\:mm"),
+                status = a.Status,
+                bloodType = a.BloodType ?? "Unknown",
+                units = a.Units,
+                doctorNotes = a.DoctorNotes ?? ""
+            }).ToList();
+
+            return Ok(new { success = true, data = formattedAppointments });
         }
 
         [HttpGet("appointment-history/{userId}")]
@@ -221,18 +243,18 @@ namespace BloodLine.Controllers
             var donorProfile = await _context.DonorProfiles.FirstOrDefaultAsync(d => d.UserId == userId);
             if (donorProfile == null)
             {
-                return Ok(new List<AppointmentDto>());
+                return Ok(new List<DonorAppointmentDto>());
             }
 
             var appointments = await _context.Database
-                .SqlQueryRaw<AppointmentDto>(
+                .SqlQueryRaw<DonorAppointmentDto>(
                     @"SELECT da.appointment_id as Id, h.hospital_name as HospitalName,
                       da.appointment_date as Date, da.appointment_time as Time,
                       da.status as Status, dp.blood_type as BloodType, 1 as Units
                       FROM donor_appointments da
                       JOIN hospital h ON da.hospital_id = h.hospital_id
                       JOIN donor_profile dp ON da.donor_id = dp.donor_id
-                      WHERE da.donor_id = {0} AND da.status != 'Scheduled'
+                      WHERE da.donor_id = {0} AND da.status IN ('Completed', 'Cancelled')
                       ORDER BY da.appointment_date DESC", donorProfile.DonorId)
                 .ToListAsync();
 
@@ -281,6 +303,8 @@ namespace BloodLine.Controllers
 
     public class DonorUpdateProfileRequest
     {
+        public string? FullName { get; set; }
+        public string? Phone { get; set; }
         public string? BloodType { get; set; }
         public string Location { get; set; } = "";
         public bool IsAvailable { get; set; } = true;
@@ -306,7 +330,7 @@ namespace BloodLine.Controllers
         public int HospitalId { get; set; }
     }
 
-    public class AppointmentDto
+    public class DonorAppointmentDto
     {
         public int Id { get; set; }
         public string HospitalName { get; set; } = "";
@@ -315,6 +339,18 @@ namespace BloodLine.Controllers
         public string Status { get; set; } = "";
         public string BloodType { get; set; } = "";
         public int Units { get; set; }
+    }
+
+    public class DonorAppointmentResponseDto
+    {
+        public int Id { get; set; }
+        public string HospitalName { get; set; } = "";
+        public DateTime Date { get; set; }
+        public TimeSpan Time { get; set; }
+        public string Status { get; set; } = "";
+        public string BloodType { get; set; } = "";
+        public int Units { get; set; }
+        public string? DoctorNotes { get; set; }
     }
 
     public class CompletedDonationDto

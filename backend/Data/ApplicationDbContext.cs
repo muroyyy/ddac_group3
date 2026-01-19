@@ -31,6 +31,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<DonorAppointment> DonorAppointments { get; set; }
     public DbSet<HospitalVerificationCode> HospitalVerificationCodes { get; set; }
     public DbSet<PatientMedicalDocument> PatientMedicalDocuments { get; set; }
+    public DbSet<UserRegistrationData> UserRegistrationData { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -134,5 +135,15 @@ public class ApplicationDbContext : DbContext
         });
         
         modelBuilder.Entity<PatientMedicalDocument>().ToTable("patient_medical_documents");
+        
+        modelBuilder.Entity<UserRegistrationData>(entity =>
+        {
+            entity.ToTable("user_registration_data");
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId).IsUnique();
+            entity.HasOne(e => e.User)
+                  .WithOne()
+                  .HasForeignKey<UserRegistrationData>(e => e.UserId);
+        });
     }
 }

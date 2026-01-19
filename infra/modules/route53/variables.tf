@@ -22,3 +22,13 @@ variable "cloudfront_hosted_zone_id" {
   description = "CloudFront distribution hosted zone ID"
   type        = string
 }
+
+variable "api_cloudfront_domain_name" {
+  description = "API CloudFront distribution domain name"
+  type        = string
+}
+
+variable "api_cloudfront_hosted_zone_id" {
+  description = "API CloudFront distribution hosted zone ID"
+  type        = string
+}

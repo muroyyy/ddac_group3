@@ -35,6 +35,18 @@ export const hospitalAPI = {
     const response = await fetch(`${API_BASE_URL}/hospital/list`);
     return parseJsonResponse(response);
   },
+
+  getDonorAppointments: async (userId: number): Promise<any> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/hospital/donor-appointments/${userId}`);
+    return parseJsonResponse(response);
+  },
+
+  completeDonorAppointment: async (appointmentId: number): Promise<any> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/hospital/donor-appointments/${appointmentId}/complete`, {
+      method: 'POST',
+    });
+    return parseJsonResponse(response);
+  },
 };
 
 export const hospitalCodeAPI = {

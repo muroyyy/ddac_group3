@@ -120,8 +120,23 @@ export const hospitalAPI = {
 
   // Donor Appointments Management
   getDonorAppointments: async (userId: number): Promise<any> => {
-    const response = await fetch(`${API_BASE_URL}/hospital/donor-appointments/${userId}`);
-    return response.json();
+    try {
+      const response = await fetch(`${API_BASE_URL}/hospital/donor-appointments/${userId}`);
+      
+      // Check if response is HTML instead of JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType?.includes('application/json')) {
+        const text = await response.text();
+        const errorMsg = `Server returned ${contentType || 'unknown content type'}: ${text.substring(0, 200)}...`;
+        console.error('❌ Non-JSON Response:', { status: response.status, errorMsg });
+        throw new Error(errorMsg);
+      }
+      
+      return response.json();
+    } catch (error) {
+      console.error('getDonorAppointments failed:', error);
+      return { success: false, data: [] };
+    }
   },
 
   createDonorAppointment: async (data: { donationId: number; appointmentDate: Date; appointmentTime: string }): Promise<{ success: boolean }> => {
@@ -133,11 +148,10 @@ export const hospitalAPI = {
     return response.json();
   },
 
-  completeDonorAppointment: async (id: number, unitsCollected: number): Promise<{ success: boolean }> => {
+  completeDonorAppointment: async (id: number): Promise<{ success: boolean }> => {
     const response = await fetch(`${API_BASE_URL}/hospital/donor-appointments/${id}/complete`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ unitsCollected }),
     });
     return response.json();
   },

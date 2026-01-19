@@ -4,9 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using Amazon.SecretsManager;
 using Amazon.CloudWatch;
 using Amazon.SimpleNotificationService;
+using Amazon.S3;
 using Amazon.Runtime;
 using Amazon;
-using Amazon.S3;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,13 +22,12 @@ var regionEndpoint = RegionEndpoint.GetBySystemName(awsRegion);
 builder.Services.AddSingleton<IAmazonSecretsManager>(new AmazonSecretsManagerClient(regionEndpoint));
 builder.Services.AddSingleton<IAmazonCloudWatch>(new AmazonCloudWatchClient(regionEndpoint));
 builder.Services.AddSingleton<IAmazonSimpleNotificationService>(new AmazonSimpleNotificationServiceClient(regionEndpoint));
-builder.Services.AddSingleton<IAmazonS3>(new Amazon.S3.AmazonS3Client(regionEndpoint));
+builder.Services.AddSingleton<IAmazonS3>(new AmazonS3Client(regionEndpoint));
 builder.Services.AddScoped<DatabaseService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 builder.Services.AddScoped<DatabaseMigrationService>();
 builder.Services.AddScoped<NotificationService>();
-builder.Services.AddScoped<ISNSService, SNSService>();
 builder.Services.AddScoped<SnsService>();
 
 // Add CORS
@@ -36,13 +36,16 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy.WithOrigins(
-                "http://localhost:3000", 
+                "http://localhost:3000",
+                "http://localhost:5173",
                 "http://dev-bloodline-frontend-8826eb40.s3-website-ap-southeast-1.amazonaws.com",
                 "https://bloodline.dev",
-                "https://www.bloodline.dev"
+                "https://www.bloodline.dev",
+                "https://api.bloodline.dev"
             )
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 

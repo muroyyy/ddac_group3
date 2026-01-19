@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { donorAPI } from '../services/donorAPI';
+import { useAuth } from '../../../hooks/useAuth';
 
 interface Appointment {
   id: number;
@@ -9,38 +11,47 @@ interface Appointment {
   status: string;
   bloodType: string;
   units: number;
-  notes?: string;
+  doctorNotes?: string;
 }
 
 export default function Appointments() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock appointments data
-  const appointments: Appointment[] = [
-    {
-      id: 1,
-      hospitalName: 'Kuala Lumpur General Hospital',
-      date: '2024-01-25',
-      time: '10:00 AM',
-      status: 'Confirmed',
-      bloodType: 'O+',
-      units: 1,
-      notes: 'Please arrive 15 minutes early'
-    },
-    {
-      id: 2,
-      hospitalName: 'Pantai Hospital Kuala Lumpur',
-      date: '2024-01-30',
-      time: '2:00 PM',
-      status: 'Pending',
-      bloodType: 'O+',
-      units: 1
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
+
+  const fetchAppointments = async () => {
+    try {
+      setLoading(true);
+      if (user?.id) {
+        const response = await donorAPI.getAppointments(user.id);
+        if (response.success) {
+          setAppointments(response.data);
+        } else {
+          console.error('API returned unsuccessful response:', response);
+          setAppointments([]);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+      // Check if error is due to HTML response
+      if (error instanceof Error && error.message.includes('text/html')) {
+        console.error('❌ Received HTML instead of JSON - API endpoint may not be deployed');
+      }
+      setAppointments([]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
+      case 'scheduled': return 'bg-blue-100 text-blue-800';
       case 'confirmed': return 'bg-green-100 text-green-800';
       case 'pending': return 'bg-yellow-100 text-yellow-800';
       case 'completed': return 'bg-blue-100 text-blue-800';
@@ -48,6 +59,14 @@ export default function Appointments() {
       default: return 'bg-gray-100 text-gray-800';
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -129,15 +148,15 @@ export default function Appointments() {
                     <label className="block text-sm font-medium text-gray-700">Units</label>
                     <p className="text-gray-900">{selectedAppointment.units}</p>
                   </div>
-                  {selectedAppointment.notes && (
+                  {selectedAppointment.doctorNotes && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Notes</label>
-                      <p className="text-gray-900">{selectedAppointment.notes}</p>
+                      <p className="text-gray-900">{selectedAppointment.doctorNotes}</p>
                     </div>
                   )}
                 </div>
                 
-                {selectedAppointment.status === 'Confirmed' && (
+                {selectedAppointment.status === 'Scheduled' && (
                   <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
                     <p className="text-sm text-green-700">
                       <strong>Reminder:</strong> Please bring a valid ID and ensure you've had a good meal before your appointment.

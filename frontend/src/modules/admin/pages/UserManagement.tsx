@@ -8,11 +8,13 @@ import {
   UserX,
   Mail,
   Calendar,
-  RefreshCw
+  RefreshCw,
+  Eye
 } from 'lucide-react';
 import { adminAPI } from '../services/adminAPI';
 import type { User } from '../services/adminAPI';
 import EditUserModal from '../components/EditUserModal';
+import ViewUserModal from '../components/ViewUserModal';
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -21,6 +23,7 @@ const UserManagement: React.FC = () => {
   const [filterRole, setFilterRole] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
+  const [viewingUserId, setViewingUserId] = useState<number | null>(null);
 
   const loadUsers = async () => {
     try {
@@ -237,6 +240,13 @@ const UserManagement: React.FC = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setViewingUserId(user.id)}
+                          className="p-1 text-blue-600 hover:bg-blue-50 rounded cursor-pointer transition-colors"
+                          title="View Details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
                         {user.status === 'Active' ? (
                           <button
                             onClick={() => handleStatusChange(user.id, 'Suspended')}
@@ -309,6 +319,15 @@ const UserManagement: React.FC = () => {
           isOpen={editingUserId !== null}
           onClose={() => setEditingUserId(null)}
           onUserUpdated={handleUserUpdated}
+        />
+      )}
+
+      {/* View User Modal */}
+      {viewingUserId && (
+        <ViewUserModal
+          userId={viewingUserId}
+          isOpen={viewingUserId !== null}
+          onClose={() => setViewingUserId(null)}
         />
       )}
     </div>
