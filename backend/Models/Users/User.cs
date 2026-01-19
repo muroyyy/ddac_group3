@@ -15,21 +15,24 @@ public class User
     
     [Required]
     [EmailAddress]
+    [Column("email")]
     public string Email { get; set; } = string.Empty;
-    
-    [Required]
+
+    [Column("phone")]
     public string? Phone { get; set; }
-    
+
     [Required]
     [Column("password_hash")]
     public string PasswordHash { get; set; } = string.Empty;
     
     [Required]
+    [Column("role")]
     public UserRole Role { get; set; }
     
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    
+
+    [Column("status")]
     public UserStatus Status { get; set; } = UserStatus.Active;
     
     [Column("verification_status")]
