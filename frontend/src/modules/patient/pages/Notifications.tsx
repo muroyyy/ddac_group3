@@ -68,6 +68,18 @@ export default function Notifications() {
   // Define styling for different notification types - makes UI more intuitive
   // Each type has its own color scheme and icon for better user experience
   const typeStyles: any = {
+    Request: {
+      icon: CheckCircle,
+      border: "border-green-500",
+      bg: "bg-green-50",
+      text: "text-green-700",
+    },
+    Donation: {
+      icon: CheckCircle,
+      border: "border-blue-500",
+      bg: "bg-blue-50",
+      text: "text-blue-700",
+    },
     appointment_update: {
       icon: Calendar,
       border: "border-blue-500",
@@ -87,6 +99,12 @@ export default function Notifications() {
       text: "text-blue-700",
     },
     Alert: {
+      icon: XCircle,
+      border: "border-red-500",
+      bg: "bg-red-50",
+      text: "text-red-700",
+    },
+    'Urgent Alert': {
       icon: XCircle,
       border: "border-red-500",
       bg: "bg-red-50",
