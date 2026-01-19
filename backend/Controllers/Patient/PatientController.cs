@@ -446,6 +446,7 @@ namespace BloodLine.Controllers
 
                 // Generate S3 key
                 var s3Key = $"patient/{patientId.Value}/{Guid.NewGuid()}-{file.FileName}";
+                Console.WriteLine($"Uploading to S3 key: {s3Key}");
                 
                 // Upload to S3
                 using var stream = file.OpenReadStream();
@@ -457,7 +458,8 @@ namespace BloodLine.Controllers
                     ContentType = file.ContentType
                 };
                 
-                await _s3Client.PutObjectAsync(uploadRequest);
+                var uploadResult = await _s3Client.PutObjectAsync(uploadRequest);
+                Console.WriteLine($"S3 upload result: {uploadResult.HttpStatusCode}");
                 
                 // Generate presigned URL for viewing (24 hour expiry)
                 var request = new GetPreSignedUrlRequest
@@ -488,6 +490,7 @@ namespace BloodLine.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Upload error: {ex.Message}");
                 return StatusCode(500, new { success = false, message = "Upload failed.", error = ex.Message });
             }
         }
