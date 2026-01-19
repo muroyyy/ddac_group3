@@ -445,10 +445,7 @@ namespace BloodLine.Controllers
                         cloudfront_url VARCHAR(500) NOT NULL,
                         file_type VARCHAR(100),
                         file_size BIGINT,
-                        uploaded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                        FOREIGN KEY (patient_id) REFERENCES patient_profile(patient_id) ON DELETE CASCADE,
-                        INDEX idx_patient_id (patient_id),
-                        INDEX idx_uploaded_at (uploaded_at)
+                        uploaded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
                 ");
 
@@ -497,10 +494,7 @@ namespace BloodLine.Controllers
                         cloudfront_url VARCHAR(500) NOT NULL,
                         file_type VARCHAR(100),
                         file_size BIGINT,
-                        uploaded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                        FOREIGN KEY (patient_id) REFERENCES patient_profile(patient_id) ON DELETE CASCADE,
-                        INDEX idx_patient_id (patient_id),
-                        INDEX idx_uploaded_at (uploaded_at)
+                        uploaded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
                 ");
 
