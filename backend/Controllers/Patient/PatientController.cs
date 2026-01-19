@@ -24,6 +24,16 @@ namespace BloodLine.Controllers
         public string? doctor_notes { get; set; }
     }
 
+    public class AppointmentWithNamesDto
+    {
+        public int appointment_id { get; set; }
+        public DateTime appointment_date { get; set; }
+        public string? status { get; set; }
+        public string? doctor_notes { get; set; }
+        public string? hospital_name { get; set; }
+        public string? doctor_name { get; set; }
+    }
+
     [ApiController]
     [Route("api/[controller]")]
     public class PatientController : ControllerBase
@@ -281,24 +291,30 @@ namespace BloodLine.Controllers
                 if (patientId == null)
                     return Ok(new { success = true, data = new List<object>() });
 
-                // Use Entity Framework with proper navigation
-                var appointments = await _db.PatientAppointments
-                    .Where(pa => pa.PatientId == patientId.Value)
-                    .OrderByDescending(pa => pa.AppointmentDate)
-                    .Select(pa => new
-                    {
-                        appointmentId = pa.AppointmentId,
-                        hospitalName = "Hospital " + pa.HospitalId,
-                        doctorName = pa.DoctorId != null ? "Doctor " + pa.DoctorId : "Not Assigned",
-                        appointmentDate = pa.AppointmentDate.ToString("yyyy-MM-dd"),
-                        appointmentTime = pa.AppointmentDate.ToString("HH:mm"),
-                        status = pa.Status ?? "Unknown",
-                        notes = pa.DoctorNotes ?? "",
-                        createdAt = pa.CreatedAt.ToString("yyyy-MM-dd HH:mm")
-                    })
-                    .ToListAsync();
+                var appointments = await _db.Database.SqlQueryRaw<AppointmentWithNamesDto>(@"
+                    SELECT pa.appointment_id, pa.appointment_date, pa.status, pa.doctor_notes,
+                           COALESCE(h.hospital_name, 'Unknown Hospital') as hospital_name,
+                           COALESCE(d.doctor_name, 'Not Assigned') as doctor_name
+                    FROM patient_appointments pa
+                    LEFT JOIN hospital h ON pa.hospital_id = h.hospital_id
+                    LEFT JOIN doctors d ON pa.doctor_id = d.doctor_id
+                    WHERE pa.patient_id = {0}
+                    ORDER BY pa.appointment_date DESC
+                ", patientId.Value).ToListAsync();
 
-                return Ok(new { success = true, data = appointments });
+                var result = appointments.Select(a => new
+                {
+                    appointmentId = a.appointment_id,
+                    hospitalName = a.hospital_name,
+                    doctorName = a.doctor_name,
+                    appointmentDate = a.appointment_date.ToString("yyyy-MM-dd"),
+                    appointmentTime = a.appointment_date.ToString("HH:mm"),
+                    status = a.status ?? "Unknown",
+                    notes = a.doctor_notes ?? "",
+                    createdAt = a.appointment_date.ToString("yyyy-MM-dd HH:mm")
+                }).ToList();
+
+                return Ok(new { success = true, data = result });
             }
             catch (Exception ex)
             {
