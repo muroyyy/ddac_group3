@@ -44,6 +44,15 @@ namespace BloodLine.Controllers
         [HttpPut("profile/{userId}")]
         public async Task<IActionResult> UpdateProfile(int userId, [FromBody] DonorUpdateProfileRequest request)
         {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return NotFound();
+
+            // Update user table
+            if (!string.IsNullOrEmpty(request.FullName))
+                user.FullName = request.FullName;
+            if (!string.IsNullOrEmpty(request.Phone))
+                user.Phone = request.Phone;
+
             var profile = await _context.DonorProfiles.FirstOrDefaultAsync(d => d.UserId == userId);
             
             if (profile == null)
@@ -294,6 +303,8 @@ namespace BloodLine.Controllers
 
     public class DonorUpdateProfileRequest
     {
+        public string? FullName { get; set; }
+        public string? Phone { get; set; }
         public string? BloodType { get; set; }
         public string Location { get; set; } = "";
         public bool IsAvailable { get; set; } = true;

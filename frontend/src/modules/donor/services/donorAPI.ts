@@ -65,7 +65,7 @@ export const donorAPI = {
     return response.json();
   },
 
-  updateProfile: async (userId: number, data: { bloodType?: string; location: string; isAvailable: boolean }) => {
+  updateProfile: async (userId: number, data: { fullName?: string; phone?: string; bloodType?: string; location: string; isAvailable: boolean }) => {
     const response = await fetch(`${API_BASE_URL}/donor/profile/${userId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },

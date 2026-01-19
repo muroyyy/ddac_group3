@@ -41,6 +41,8 @@ export default function DonorProfile() {
     setLoading(true);
     try {
       const result = await donorAPI.updateProfile(user!.id, {
+        fullName: formData.fullName,
+        phone: formData.phone,
         location: formData.location,
         isAvailable: formData.isAvailable,
       });
@@ -63,13 +65,14 @@ export default function DonorProfile() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Full Name
+              Full Name *
             </label>
             <input
               type="text"
               value={formData.fullName}
-              disabled
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
+              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              required
             />
           </div>
 
@@ -88,13 +91,14 @@ export default function DonorProfile() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Phone
+              Phone *
             </label>
             <input
               type="tel"
               value={formData.phone}
-              disabled
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              required
             />
           </div>
 
