@@ -232,8 +232,8 @@ namespace BloodLine.Controllers
         {
             try
             {
-                var appointments = await _db.Database.SqlQueryRaw<dynamic>(@"
-                    SELECT appointment_id, patient_id, appointment_date, status 
+                var appointments = await _db.Database.SqlQueryRaw<AppointmentDto>(@"
+                    SELECT appointment_id, patient_id, appointment_date, status, doctor_notes 
                     FROM patient_appointments 
                     WHERE patient_id = {0}
                 ", patientId).ToListAsync();
@@ -242,7 +242,7 @@ namespace BloodLine.Controllers
             }
             catch (Exception ex)
             {
-                return Ok(new { error = ex.Message });
+                return Ok(new { error = ex.Message, stackTrace = ex.StackTrace });
             }
         }
 
