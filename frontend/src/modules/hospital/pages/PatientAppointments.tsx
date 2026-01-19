@@ -353,7 +353,7 @@ export default function PatientAppointments() {
                   className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value={0}>Select Doctor</option>
-                  {doctors.map(doctor => (
+                  {Array.isArray(doctors) && doctors.map(doctor => (
                     <option key={doctor.doctorId} value={doctor.doctorId}>
                       {doctor.doctorName} - {doctor.specialization}
                     </option>
