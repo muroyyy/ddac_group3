@@ -159,6 +159,17 @@ export default function PatientAppointments() {
     return matchesSearch && matchesStatus;
   }) : [];
 
+  if (loading || !Array.isArray(appointments)) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-16 text-gray-500">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-red-600 mx-auto mb-4"></div>
+          Loading appointments...
+        </div>
+      </div>
+    );
+  }
+
   const getStatusStyle = (status: string) => {
     switch (status.toLowerCase()) {
       case 'upcoming': return 'bg-blue-100 text-blue-700 border-blue-200';
