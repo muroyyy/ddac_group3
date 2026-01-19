@@ -44,13 +44,17 @@ resource "aws_route53_record" "www" {
   }
 }
 
-# A record for api subdomain pointing to EC2 Elastic IP
+# A record for api subdomain pointing to API CloudFront
 resource "aws_route53_record" "api" {
   zone_id = aws_route53_zone.main.zone_id
   name    = "api.${var.domain_name}"
   type    = "A"
-  ttl     = 300
-  records = [var.api_elastic_ip]
+
+  alias {
+    name                   = var.api_cloudfront_domain_name
+    zone_id                = var.api_cloudfront_hosted_zone_id
+    evaluate_target_health = false
+  }
 
   depends_on = [aws_route53_zone.main]
 }

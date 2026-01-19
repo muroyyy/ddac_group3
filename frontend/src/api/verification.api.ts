@@ -20,4 +20,10 @@ export const verificationAPI = {
     });
     return parseJsonResponse(response);
   },
+
+  getDocumentUrl: async (documentId: number): Promise<string> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/verification/document/${documentId}`);
+    const data = await parseJsonResponse(response);
+    return data.data.url;
+  },
 };

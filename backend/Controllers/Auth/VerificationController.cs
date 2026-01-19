@@ -8,6 +8,8 @@ using BloodLine.Models.Hospital;
 using BloodLine.Models.Blood;
 using BloodLine.Models.Appointments;
 using BloodLine.Services;
+using Amazon.S3;
+using Amazon.S3.Model;
 
 namespace BloodLine.Controllers.Auth;
 
@@ -18,12 +20,15 @@ public class VerificationController : ControllerBase
     private readonly ApplicationDbContext _context;
     private readonly ILogger<VerificationController> _logger;
     private readonly IAuditLogService _auditLog;
+    private readonly IAmazonS3 _s3Client;
+    private const string BucketName = "dev-bloodline-assets-8826eb40";
 
-    public VerificationController(ApplicationDbContext context, ILogger<VerificationController> logger, IAuditLogService auditLog)
+    public VerificationController(ApplicationDbContext context, ILogger<VerificationController> logger, IAuditLogService auditLog, IAmazonS3 s3Client)
     {
         _context = context;
         _logger = logger;
         _auditLog = auditLog;
+        _s3Client = s3Client;
     }
 
     [HttpGet("pending")]
@@ -48,6 +53,7 @@ public class VerificationController : ControllerBase
                     {
                         d.Id,
                         d.FileName,
+                        d.FilePath,
                         d.DocumentType,
                         d.UploadedAt
                     }).ToList()
@@ -107,6 +113,35 @@ public class VerificationController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error rejecting user");
+            return StatusCode(500, new { success = false, message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("document/{documentId}")]
+    public async Task<IActionResult> GetDocument(int documentId)
+    {
+        try
+        {
+            var document = await _context.UserDocuments.FindAsync(documentId);
+            if (document == null)
+            {
+                return NotFound(new { success = false, message = "Document not found" });
+            }
+
+            // Generate presigned URL valid for 5 minutes
+            var request = new GetPreSignedUrlRequest
+            {
+                BucketName = BucketName,
+                Key = document.FilePath,
+                Expires = DateTime.UtcNow.AddMinutes(5)
+            };
+            
+            var url = await _s3Client.GetPreSignedURLAsync(request);
+            return Ok(new { success = true, data = new { url } });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching document");
             return StatusCode(500, new { success = false, message = "Internal server error" });
         }
     }

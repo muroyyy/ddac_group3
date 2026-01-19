@@ -107,12 +107,13 @@ module "route53" {
     aws.us_east_1 = aws.us_east_1
   }
 
-  domain_name               = var.domain_name
-  project_name              = var.project_name
-  environment               = var.environment
-  cloudfront_domain_name    = module.cloudfront.domain_name
-  cloudfront_hosted_zone_id = module.cloudfront.hosted_zone_id
-  api_elastic_ip            = module.ec2.public_ip
+  domain_name                    = var.domain_name
+  project_name                   = var.project_name
+  environment                    = var.environment
+  cloudfront_domain_name         = module.cloudfront.domain_name
+  cloudfront_hosted_zone_id      = module.cloudfront.hosted_zone_id
+  api_cloudfront_domain_name     = module.cloudfront.api_domain_name
+  api_cloudfront_hosted_zone_id  = module.cloudfront.api_hosted_zone_id
 }
 
 # ACM Certificate Module
