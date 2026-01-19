@@ -15,6 +15,15 @@ using Amazon.S3.Model;
 
 namespace BloodLine.Controllers
 {
+    public class AppointmentDto
+    {
+        public int appointment_id { get; set; }
+        public int patient_id { get; set; }
+        public DateTime appointment_date { get; set; }
+        public string status { get; set; } = string.Empty;
+        public string doctor_notes { get; set; } = string.Empty;
+    }
+
     [ApiController]
     [Route("api/[controller]")]
     public class PatientController : ControllerBase
@@ -223,17 +232,13 @@ namespace BloodLine.Controllers
         {
             try
             {
-                var count = await _db.Database.SqlQueryRaw<int>(
-                    "SELECT COUNT(*) as Value FROM patient_appointments WHERE patient_id = {0}", patientId)
-                    .FirstOrDefaultAsync();
-                    
                 var appointments = await _db.Database.SqlQueryRaw<dynamic>(@"
                     SELECT appointment_id, patient_id, appointment_date, status 
                     FROM patient_appointments 
                     WHERE patient_id = {0}
                 ", patientId).ToListAsync();
                 
-                return Ok(new { patientId = patientId, count = count, appointments = appointments });
+                return Ok(new { patientId = patientId, count = appointments.Count, appointments = appointments });
             }
             catch (Exception ex)
             {
@@ -269,34 +274,36 @@ namespace BloodLine.Controllers
         {
             try
             {
-                Console.WriteLine($"Getting appointments for user {userId}");
-                
                 if (userId <= 0)
                     return BadRequest(new { success = false, message = "Invalid user ID." });
 
                 var patientId = await GetPatientIdFromUser(userId);
-                Console.WriteLine($"Patient ID for user {userId}: {patientId}");
-                
                 if (patientId == null)
-                {
-                    Console.WriteLine($"No patient profile found for user {userId}");
                     return Ok(new { success = true, data = new List<object>() });
-                }
 
-                var appointments = await _db.Database.SqlQueryRaw<dynamic>(@"
-                    SELECT appointment_id as appointmentId, appointment_date as appointmentDate,
-                           status, doctor_notes as notes, created_at as createdAt
+                var appointments = await _db.Database.SqlQueryRaw<AppointmentDto>(@"
+                    SELECT appointment_id, patient_id, appointment_date, status, doctor_notes
                     FROM patient_appointments 
                     WHERE patient_id = {0}
                     ORDER BY appointment_date DESC
                 ", patientId.Value).ToListAsync();
 
-                Console.WriteLine($"Found {appointments.Count} appointments for patient {patientId}");
-                return Ok(new { success = true, data = appointments });
+                var result = appointments.Select(a => new
+                {
+                    appointmentId = a.appointment_id,
+                    hospitalName = "Hospital",
+                    doctorName = "Doctor",
+                    appointmentDate = a.appointment_date.ToString("yyyy-MM-dd"),
+                    appointmentTime = a.appointment_date.ToString("HH:mm"),
+                    status = a.status ?? "Unknown",
+                    notes = a.doctor_notes ?? "",
+                    createdAt = a.appointment_date.ToString("yyyy-MM-dd HH:mm")
+                }).ToList();
+
+                return Ok(new { success = true, data = result });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error getting appointments: {ex.Message}");
                 return Ok(new { success = true, data = new List<object>(), error = ex.Message });
             }
         }
