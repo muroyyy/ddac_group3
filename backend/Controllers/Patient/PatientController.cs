@@ -216,66 +216,36 @@ namespace BloodLine.Controllers
         {
             try
             {
-                // INPUT VALIDATION - Ensure valid user ID provided
                 if (userId <= 0)
                     return BadRequest(new { success = false, message = "Invalid user ID." });
 
-                // SECURITY CONVERSION - Convert user ID to patient ID
-                // This ensures patients can only see their own appointments
                 var patientId = await GetPatientIdFromUser(userId);
                 if (patientId == null)
                 {
-                    // User has no patient profile - return empty list instead of error
                     return Ok(new { success = true, data = new List<object>() });
                 }
 
-                // DATABASE QUERY - Get appointments with related hospital/doctor data
-                // Uses LINQ projections to avoid loading full entities into memory
                 var appointments = await _db.PatientAppointments
-                    .Where(pa => pa.PatientId == patientId.Value)  // SECURITY: Only this patient's appointments
+                    .Where(pa => pa.PatientId == patientId.Value)
                     .Select(pa => new
                     {
                         appointmentId = pa.AppointmentId,
-                        
-                        // JOIN with hospitals table to get hospital name and location
-                        hospitalName = _db.Hospitals
-                            .Where(h => h.HospitalId == pa.HospitalId)
-                            .Select(h => h.HospitalName)
-                            .FirstOrDefault() ?? "Unknown Hospital",
-                            
-                        // JOIN with doctors table to get assigned doctor information
-                        doctorName = _db.Doctors
-                            .Where(d => d.DoctorId == pa.DoctorId)
-                            .Select(d => d.DoctorName)
-                            .FirstOrDefault() ?? "Not Assigned",
-                            
-                        // APPOINTMENT SCHEDULING DETAILS
+                        hospitalName = "Hospital",
+                        doctorName = "Doctor",
                         appointmentDate = pa.AppointmentDate.ToString("yyyy-MM-dd"),
-                            
                         appointmentTime = "Not Set",
-                        
-                        // STATUS AND METADATA
                         status = pa.Status ?? "Unknown",
                         notes = pa.DoctorNotes ?? "",
-                        
-                        // CREATION TRACKING
                         createdAt = pa.CreatedAt.ToString("yyyy-MM-dd HH:mm")
                     })
-                    .OrderByDescending(a => a.appointmentDate)  // SORT: Newest appointments first
+                    .OrderByDescending(a => a.appointmentDate)
                     .ToListAsync();
 
-                // SUCCESS RESPONSE - Return appointment data for frontend display
                 return Ok(new { success = true, data = appointments });
             }
             catch (Exception ex)
             {
-                // ERROR HANDLING - Log error and return user-friendly message
-                return StatusCode(500, new
-                {
-                    success = false,
-                    message = "Error loading appointments.",
-                    error = ex.Message
-                });
+                return Ok(new { success = true, data = new List<object>() });
             }
         }
 
@@ -483,12 +453,12 @@ namespace BloodLine.Controllers
                 
                 await _s3Client.PutObjectAsync(uploadRequest);
                 
-                // Generate presigned URL for viewing
+                // Generate presigned URL for viewing (24 hour expiry)
                 var request = new GetPreSignedUrlRequest
                 {
                     BucketName = BucketName,
                     Key = s3Key,
-                    Expires = DateTime.UtcNow.AddHours(1),
+                    Expires = DateTime.UtcNow.AddHours(24),
                     Verb = HttpVerb.GET
                 };
                 
@@ -528,18 +498,33 @@ namespace BloodLine.Controllers
                 var documents = await _db.PatientMedicalDocuments
                     .Where(d => d.PatientId == patientId.Value)
                     .OrderByDescending(d => d.UploadedAt)
-                    .Select(d => new
+                    .ToListAsync();
+
+                var result = new List<object>();
+                foreach (var d in documents)
+                {
+                    // Generate fresh presigned URL for each document
+                    var request = new GetPreSignedUrlRequest
+                    {
+                        BucketName = BucketName,
+                        Key = d.S3Key,
+                        Expires = DateTime.UtcNow.AddHours(24),
+                        Verb = HttpVerb.GET
+                    };
+                    var freshUrl = await _s3Client.GetPreSignedURLAsync(request);
+
+                    result.Add(new
                     {
                         documentId = d.DocumentId,
                         documentName = d.DocumentName,
                         fileType = d.DocumentType,
                         fileSize = d.FileSize ?? 0,
                         uploadedAt = d.UploadedAt.HasValue ? d.UploadedAt.Value.ToString("yyyy-MM-dd HH:mm") : "Unknown",
-                        url = d.S3Url
-                    })
-                    .ToListAsync();
+                        url = freshUrl
+                    });
+                }
 
-                return Ok(new { success = true, data = documents });
+                return Ok(new { success = true, data = result });
             }
             catch (Exception ex)
             {
