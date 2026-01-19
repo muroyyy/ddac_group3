@@ -12,7 +12,7 @@ interface Appointment {
 
 export default function PatientAppointments() {
   const { user } = useAuth();
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
