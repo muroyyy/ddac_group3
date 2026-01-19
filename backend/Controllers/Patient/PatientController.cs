@@ -483,8 +483,16 @@ namespace BloodLine.Controllers
                 
                 await _s3Client.PutObjectAsync(uploadRequest);
                 
-                // Generate CloudFront URL
-                var s3Url = $"https://{CloudFrontDomain}/{s3Key}";
+                // Generate presigned URL for viewing
+                var request = new GetPreSignedUrlRequest
+                {
+                    BucketName = BucketName,
+                    Key = s3Key,
+                    Expires = DateTime.UtcNow.AddHours(1),
+                    Verb = HttpVerb.GET
+                };
+                
+                var s3Url = await _s3Client.GetPreSignedURLAsync(request);
 
                 var document = new PatientMedicalDocument
                 {

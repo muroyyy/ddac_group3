@@ -30,7 +30,7 @@ namespace BloodLine.Controllers
         {
             try
             {
-                var notifications = await _context.Database.SqlQueryRaw<NotificationDto>(@"
+                var notifications = await _db.Database.SqlQueryRaw<NotificationDto>(@"
                     SELECT notification_id as Id, 'Notification' as Title, message as Message, 
                            type as Type, is_read as IsRead, created_at as CreatedAt,
                            appointment_id as AppointmentId
