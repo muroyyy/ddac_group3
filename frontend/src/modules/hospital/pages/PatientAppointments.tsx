@@ -44,11 +44,14 @@ export default function PatientAppointments() {
     setLoading(true);
     try {
       const response = await hospitalAPI.getAppointments(user.id);
-      if (response.success) {
-        setAppointments(response.data || []);
+      if (response.success && Array.isArray(response.data)) {
+        setAppointments(response.data);
+      } else {
+        setAppointments([]);
       }
     } catch (error) {
       console.error('Failed to load appointments:', error);
+      setAppointments([]);
     } finally {
       setLoading(false);
     }
@@ -147,11 +150,11 @@ export default function PatientAppointments() {
     }
   };
 
-  const filteredAppointments = appointments.filter(appointment => {
+  const filteredAppointments = Array.isArray(appointments) ? appointments.filter(appointment => {
     const matchesSearch = appointment.patientName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'All' || appointment.status === statusFilter;
     return matchesSearch && matchesStatus;
-  });
+  }) : [];
 
   const getStatusStyle = (status: string) => {
     switch (status.toLowerCase()) {
