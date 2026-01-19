@@ -30,6 +30,8 @@ namespace BloodLine.Controllers
         {
             try
             {
+                Console.WriteLine($"Getting notifications for user {userId}");
+                
                 var notifications = await _db.Database.SqlQueryRaw<NotificationDto>(@"
                     SELECT notification_id as Id, 'Notification' as Title, message as Message, 
                            type as Type, is_read as IsRead, created_at as CreatedAt,
@@ -38,6 +40,8 @@ namespace BloodLine.Controllers
                     WHERE user_id = {0} 
                     ORDER BY created_at DESC", userId)
                     .ToListAsync();
+
+                Console.WriteLine($"Found {notifications.Count} notifications for user {userId}");
 
                 var result = notifications.Select(n => new
                 {
@@ -50,10 +54,12 @@ namespace BloodLine.Controllers
                     appointmentId = n.AppointmentId
                 }).ToList();
 
+                Console.WriteLine($"Returning {result.Count} formatted notifications");
                 return Ok(new { success = true, data = result });
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error getting notifications: {ex.Message}");
                 return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
