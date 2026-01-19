@@ -281,34 +281,24 @@ namespace BloodLine.Controllers
                 if (patientId == null)
                     return Ok(new { success = true, data = new List<object>() });
 
-                var appointments = await _db.Database.SqlQueryRaw<dynamic>(@"
-                    SELECT pa.appointment_id, pa.appointment_date, pa.status, pa.doctor_notes,
-                           h.hospital_name, d.doctor_name
-                    FROM patient_appointments pa
-                    LEFT JOIN hospital h ON pa.hospital_id = h.hospital_id
-                    LEFT JOIN doctors d ON pa.doctor_id = d.doctor_id
-                    WHERE pa.patient_id = {0}
-                    ORDER BY pa.appointment_date DESC
-                ", patientId.Value).ToListAsync();
-
-                var result = new List<object>();
-                foreach (var a in appointments)
-                {
-                    var dict = (IDictionary<string, object>)a;
-                    result.Add(new
+                // Use Entity Framework with proper navigation
+                var appointments = await _db.PatientAppointments
+                    .Where(pa => pa.PatientId == patientId.Value)
+                    .OrderByDescending(pa => pa.AppointmentDate)
+                    .Select(pa => new
                     {
-                        appointmentId = dict["appointment_id"],
-                        hospitalName = dict["hospital_name"] ?? "Unknown Hospital",
-                        doctorName = dict["doctor_name"] ?? "Not Assigned",
-                        appointmentDate = ((DateTime)dict["appointment_date"]).ToString("yyyy-MM-dd"),
-                        appointmentTime = ((DateTime)dict["appointment_date"]).ToString("HH:mm"),
-                        status = dict["status"] ?? "Unknown",
-                        notes = dict["doctor_notes"] ?? "",
-                        createdAt = ((DateTime)dict["appointment_date"]).ToString("yyyy-MM-dd HH:mm")
-                    });
-                }
+                        appointmentId = pa.AppointmentId,
+                        hospitalName = "Hospital " + pa.HospitalId,
+                        doctorName = pa.DoctorId != null ? "Doctor " + pa.DoctorId : "Not Assigned",
+                        appointmentDate = pa.AppointmentDate.ToString("yyyy-MM-dd"),
+                        appointmentTime = pa.AppointmentDate.ToString("HH:mm"),
+                        status = pa.Status ?? "Unknown",
+                        notes = pa.DoctorNotes ?? "",
+                        createdAt = pa.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                    })
+                    .ToListAsync();
 
-                return Ok(new { success = true, data = result });
+                return Ok(new { success = true, data = appointments });
             }
             catch (Exception ex)
             {
