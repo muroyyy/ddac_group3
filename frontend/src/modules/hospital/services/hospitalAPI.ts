@@ -80,6 +80,15 @@ export const hospitalAPI = {
     return response.json();
   },
 
+  updateAppointment: async (id: number, data: { doctorId: number; appointmentDate: string; doctorNotes?: string }): Promise<{ success: boolean }> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/appointments/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+
   cancelAppointment: async (id: number): Promise<{ success: boolean }> => {
     const response = await fetch(`${API_BASE_URL}/hospital/appointments/${id}/cancel`, {
       method: 'POST',

@@ -51,5 +51,40 @@ namespace BloodLine.Services
                 Console.WriteLine($"SNS notification failed: {ex.Message}");
             }
         }
+
+        public async Task SendAppointmentNotification(string patientEmail, string status, int appointmentId, int userId)
+        {
+            try
+            {
+                var subject = $"Appointment {status} - BloodLine";
+                var message = status.ToLower() switch
+                {
+                    "completed" => $"Your appointment #{appointmentId} has been completed. Thank you for using BloodLine.",
+                    "cancelled" => $"Your appointment #{appointmentId} has been cancelled. Please contact the hospital for rescheduling.",
+                    "updated" => $"Your appointment #{appointmentId} details have been updated. Please check your appointments for the latest information.",
+                    _ => $"Your appointment #{appointmentId} status has been updated to {status}."
+                };
+
+                // Send SNS email
+                var request = new PublishRequest
+                {
+                    TopicArn = _topicArn,
+                    Subject = subject,
+                    Message = $"Dear Patient,\n\n{message}\n\nBest regards,\nBloodLine Team"
+                };
+
+                await _snsClient.PublishAsync(request);
+
+                // Also save to notifications table
+                await _db.Database.ExecuteSqlRawAsync(@"
+                    INSERT INTO notifications (user_id, message, type, is_read, created_at, appointment_id)
+                    VALUES ({0}, {1}, {2}, 0, NOW(), {3})
+                ", userId, message, "Appointment", appointmentId);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"SNS appointment notification failed: {ex.Message}");
+            }
+        }
     }
 }

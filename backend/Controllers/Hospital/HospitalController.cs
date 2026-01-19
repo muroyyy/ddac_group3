@@ -467,34 +467,46 @@ public class HospitalController : ControllerBase
             if (hospitalId == null)
                 return Ok(new { success = true, data = new List<object>() });
 
-            var appointmentCount = await _context.PatientAppointments
-                .Where(a => a.HospitalId == hospitalId.Value)
-                .CountAsync();
-            
-            _logger.LogInformation($"Found {appointmentCount} appointments for hospital {hospitalId}");
-            
-            _logger.LogInformation($"Found {appointmentCount} appointments for hospital {hospitalId}");
-
-            // Get all appointments for this hospital first
-            var appointments = await _context.PatientAppointments
-                .Where(a => a.HospitalId == hospitalId.Value)
-                .Select(a => new
-                {
-                    appointmentId = a.AppointmentId,
-                    requestId = a.RequestId,
-                    patientName = "Patient " + a.PatientId,
-                    patientPhone = "N/A",
-                    bloodType = "Unknown",
-                    doctorName = "Dr. TBD",
-                    appointmentDate = a.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
-                    status = a.Status ?? "Upcoming",
-                    doctorNotes = a.DoctorNotes ?? "",
-                    createdAt = a.CreatedAt.ToString("yyyy-MM-dd HH:mm")
-                })
-                .OrderByDescending(x => x.appointmentDate)
+            var appointments = await _context.Database
+                .SqlQuery<AppointmentWithNamesDto>($@"
+                    SELECT 
+                        pa.appointment_id as AppointmentId,
+                        pa.request_id as RequestId,
+                        COALESCE(u.full_name, CONCAT('Patient ', pa.patient_id)) as PatientName,
+                        COALESCE(u.phone, 'N/A') as PatientPhone,
+                        COALESCE(br.blood_type, 'Unknown') as BloodType,
+                        COALESCE(d.doctor_name, 'Dr. TBD') as DoctorName,
+                        pa.doctor_id as DoctorId,
+                        pa.appointment_date as AppointmentDate,
+                        COALESCE(pa.status, 'Upcoming') as Status,
+                        COALESCE(pa.doctor_notes, '') as DoctorNotes,
+                        pa.created_at as CreatedAt
+                    FROM patient_appointments pa
+                    LEFT JOIN patient_profiles pp ON pa.patient_id = pp.patient_id
+                    LEFT JOIN users u ON pp.user_id = u.id
+                    LEFT JOIN blood_requests br ON pa.request_id = br.request_id
+                    LEFT JOIN doctors d ON pa.doctor_id = d.doctor_id
+                    WHERE pa.hospital_id = {hospitalId.Value}
+                    ORDER BY pa.appointment_date DESC
+                ")
                 .ToListAsync();
 
-            return Ok(new { success = true, data = appointments });
+            var result = appointments.Select(a => new
+            {
+                appointmentId = a.AppointmentId,
+                requestId = a.RequestId,
+                patientName = a.PatientName,
+                patientPhone = a.PatientPhone,
+                bloodType = a.BloodType,
+                doctorName = a.DoctorName,
+                doctorId = a.DoctorId,
+                appointmentDate = a.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
+                status = a.Status,
+                doctorNotes = a.DoctorNotes,
+                createdAt = a.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+            }).ToList();
+
+            return Ok(new { success = true, data = result });
         }
         catch (Exception ex)
         {
@@ -519,7 +531,7 @@ public class HospitalController : ControllerBase
             appointment.DoctorNotes = dto.DoctorNotes;
             await _context.SaveChangesAsync();
 
-            await _notificationService.SendAppointmentNotification(id, "Completed");
+            await SendAppointmentNotification(appointment.PatientId, "Completed", id);
 
             return Ok(new { success = true });
         }
@@ -545,7 +557,7 @@ public class HospitalController : ControllerBase
             appointment.Status = "Cancelled";
             await _context.SaveChangesAsync();
 
-            await _notificationService.SendAppointmentNotification(id, "Cancelled");
+            await SendAppointmentNotification(appointment.PatientId, "Cancelled", id);
 
             return Ok(new { success = true });
         }
@@ -590,12 +602,31 @@ public class HospitalController : ControllerBase
     }
 
     /// <summary>
-    /// Test endpoint for donor requests
+    /// Update appointment details
     /// </summary>
-    [HttpGet("test-donor-requests")]
-    public async Task<IActionResult> TestDonorRequests()
+    [HttpPut("appointments/{id}")]
+    public async Task<IActionResult> UpdateAppointment(int id, [FromBody] UpdateAppointmentDto dto)
     {
-        return Ok(new { success = true, message = "Donor requests endpoint is working" });
+        try
+        {
+            var appointment = await _context.PatientAppointments.FindAsync(id);
+            if (appointment == null)
+                return NotFound(new { error = "Appointment not found" });
+
+            appointment.DoctorId = dto.DoctorId;
+            appointment.AppointmentDate = dto.AppointmentDate;
+            appointment.DoctorNotes = dto.DoctorNotes;
+            await _context.SaveChangesAsync();
+
+            await SendAppointmentNotification(appointment.PatientId, "Updated", id);
+
+            return Ok(new { success = true });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error updating appointment: {ex.Message}");
+            return StatusCode(500, new { error = "Failed to update appointment" });
+        }
     }
 
     /// <summary>
@@ -965,36 +996,45 @@ public class HospitalController : ControllerBase
     }
 
 
-    /// <summary>
-    /// Debug endpoint to check donation requests data
-    /// </summary>
-    [HttpGet("debug-donation-requests")]
-    public async Task<IActionResult> DebugDonationRequests()
+    private async Task SendAppointmentNotification(int patientId, string status, int appointmentId)
     {
         try
         {
-            var allRequests = await _context.DonationRequests
-                .Where(dr => dr.HospitalId == 1)
-                .Select(dr => new {
-                    dr.DonationId,
-                    dr.DonorId,
-                    dr.Status,
-                    dr.RequestedDate
-                })
-                .ToListAsync();
-            
-            return Ok(new { 
-                success = true, 
-                totalCount = allRequests.Count,
-                data = allRequests 
-            });
+            var patient = await _context.PatientProfiles
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.PatientId == patientId);
+
+            if (patient == null) return;
+
+            var message = status.ToLower() switch
+            {
+                "completed" => $"Your appointment #{appointmentId} has been completed.",
+                "cancelled" => $"Your appointment #{appointmentId} has been cancelled. Please contact the hospital for rescheduling.",
+                "updated" => $"Your appointment #{appointmentId} details have been updated. Please check your appointments.",
+                _ => $"Your appointment #{appointmentId} status has been updated to {status}."
+            };
+
+            // Send SNS email notification
+            await _snsService.SendAppointmentNotification(patient.User.Email, status, appointmentId, patient.UserId);
+
+            // Create in-app notification
+            var notification = new Notification
+            {
+                UserId = patient.UserId,
+                Title = $"Appointment {status}",
+                Message = message,
+                Type = "appointment_update",
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+                AppointmentId = appointmentId
+            };
+
+            _context.Notifications.Add(notification);
+            await _context.SaveChangesAsync();
         }
         catch (Exception ex)
         {
-            return Ok(new { 
-                error = ex.Message,
-                success = false 
-            });
+            _logger.LogError($"Error sending appointment notification: {ex.Message}");
         }
     }
 
@@ -1051,6 +1091,28 @@ public class CompleteDonorAppointmentDto
 public class CompleteAppointmentDto
 {
     public string? DoctorNotes { get; set; }
+}
+
+public class UpdateAppointmentDto
+{
+    public int DoctorId { get; set; }
+    public DateTime AppointmentDate { get; set; }
+    public string? DoctorNotes { get; set; }
+}
+
+public class AppointmentWithNamesDto
+{
+    public int AppointmentId { get; set; }
+    public int? RequestId { get; set; }
+    public string PatientName { get; set; } = "";
+    public string PatientPhone { get; set; } = "";
+    public string BloodType { get; set; } = "";
+    public string DoctorName { get; set; } = "";
+    public int? DoctorId { get; set; }
+    public DateTime AppointmentDate { get; set; }
+    public string Status { get; set; } = "";
+    public string DoctorNotes { get; set; } = "";
+    public DateTime CreatedAt { get; set; }
 }
 
 public class UpdateStaffProfileDto

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, Calendar, User, Stethoscope, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Search, Calendar, User, Stethoscope, Clock, CheckCircle, XCircle, Edit } from 'lucide-react';
 import { hospitalAPI } from '../services/hospitalAPI';
 import { useAuth } from '../../../context/AuthContext';
 
@@ -10,21 +10,34 @@ interface Appointment {
   patientPhone: string;
   bloodType: string;
   doctorName: string;
+  doctorId: number;
   appointmentDate: string;
   status: string;
   doctorNotes: string;
   createdAt: string;
 }
 
+interface Doctor {
+  doctorId: number;
+  doctorName: string;
+  specialization: string;
+  contactNumber: string;
+}
+
 export default function PatientAppointments() {
   const { user } = useAuth();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [completingAppointment, setCompletingAppointment] = useState<Appointment | null>(null);
+  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [doctorNotes, setDoctorNotes] = useState('');
+  const [selectedDoctorId, setSelectedDoctorId] = useState(0);
+  const [appointmentDate, setAppointmentDate] = useState('');
 
   const loadAppointments = async () => {
     if (!user?.id) return;
@@ -41,14 +54,35 @@ export default function PatientAppointments() {
     }
   };
 
+  const loadDoctors = async () => {
+    if (!user?.id) return;
+    try {
+      const response = await hospitalAPI.getDoctors(user.id);
+      if (response.success) {
+        setDoctors(response.data || []);
+      }
+    } catch (error) {
+      console.error('Failed to load doctors:', error);
+    }
+  };
+
   useEffect(() => {
     loadAppointments();
+    loadDoctors();
   }, []);
 
   const showCompleteDialog = (appointment: Appointment) => {
     setCompletingAppointment(appointment);
     setDoctorNotes(appointment.doctorNotes || '');
     setShowCompleteModal(true);
+  };
+
+  const showEditDialog = (appointment: Appointment) => {
+    setEditingAppointment(appointment);
+    setSelectedDoctorId(appointment.doctorId || 0);
+    setAppointmentDate(appointment.appointmentDate.substring(0, 16));
+    setDoctorNotes(appointment.doctorNotes || '');
+    setShowEditModal(true);
   };
 
   const completeAppointment = async () => {
@@ -69,6 +103,31 @@ export default function PatientAppointments() {
     } catch (error) {
       console.error('Failed to complete appointment:', error);
       alert('Failed to complete appointment');
+    }
+  };
+
+  const updateAppointment = async () => {
+    if (!editingAppointment) return;
+    try {
+      const result = await hospitalAPI.updateAppointment(editingAppointment.appointmentId, {
+        doctorId: selectedDoctorId,
+        appointmentDate: new Date(appointmentDate).toISOString(),
+        doctorNotes: doctorNotes
+      });
+      if (result.success) {
+        setShowEditModal(false);
+        setEditingAppointment(null);
+        setDoctorNotes('');
+        setSelectedDoctorId(0);
+        setAppointmentDate('');
+        loadAppointments();
+        alert('Appointment updated successfully!');
+      } else {
+        alert('Failed to update appointment');
+      }
+    } catch (error) {
+      console.error('Failed to update appointment:', error);
+      alert('Failed to update appointment');
     }
   };
 
@@ -223,6 +282,13 @@ export default function PatientAppointments() {
                         {appointment.status === 'Upcoming' && (
                           <>
                             <button
+                              onClick={() => showEditDialog(appointment)}
+                              className="text-blue-700 hover:text-blue-900 px-4 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 font-medium transition-all duration-200 hover:shadow-md flex items-center gap-1"
+                            >
+                              <Edit className="w-4 h-4" />
+                              Edit
+                            </button>
+                            <button
                               onClick={() => showCompleteDialog(appointment)}
                               className="text-green-700 hover:text-green-900 px-4 py-2 rounded-lg bg-green-50 hover:bg-green-100 border border-green-200 font-medium transition-all duration-200 hover:shadow-md flex items-center gap-1"
                             >
@@ -247,6 +313,80 @@ export default function PatientAppointments() {
           </div>
         )}
       </div>
+
+      {/* Edit Appointment Modal */}
+      {showEditModal && editingAppointment && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md transform transition-all">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Edit Appointment</h3>
+            <p className="text-gray-600 mb-6">
+              Patient: <strong>{editingAppointment.patientName}</strong>
+            </p>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Doctor</label>
+                <select
+                  id="edit-doctor"
+                  value={selectedDoctorId}
+                  onChange={(e) => setSelectedDoctorId(Number(e.target.value))}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value={0}>Select Doctor</option>
+                  {doctors.map(doctor => (
+                    <option key={doctor.doctorId} value={doctor.doctorId}>
+                      {doctor.doctorName} - {doctor.specialization}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Appointment Date & Time</label>
+                <input
+                  id="edit-appointment-date"
+                  type="datetime-local"
+                  value={appointmentDate}
+                  onChange={(e) => setAppointmentDate(e.target.value)}
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Doctor Notes</label>
+                <textarea
+                  id="edit-doctor-notes"
+                  placeholder="Add notes about the appointment..."
+                  value={doctorNotes}
+                  onChange={(e) => setDoctorNotes(e.target.value)}
+                  className="w-full p-4 border border-gray-300 rounded-xl h-32 resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-8">
+              <button
+                onClick={updateAppointment}
+                className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-xl hover:bg-blue-700 transition-colors font-medium"
+              >
+                Update Appointment
+              </button>
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingAppointment(null);
+                  setDoctorNotes('');
+                  setSelectedDoctorId(0);
+                  setAppointmentDate('');
+                }}
+                className="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Complete Appointment Modal */}
       {showCompleteModal && completingAppointment && (
