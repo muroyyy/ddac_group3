@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL, authenticatedFetch, parseJsonResponse } from '../../../api/client';
+import { useAuth } from '../../../context/AuthContext';
 
 interface Document {
   documentId: number;
@@ -13,11 +14,12 @@ interface Document {
 export default function MedicalDocuments() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [uploading, setUploading] = useState(false);
-  const userId = localStorage.getItem('userId');
+  const { user } = useAuth();
+  const userId = user?.id;
 
   useEffect(() => {
-    loadDocuments();
-  }, []);
+    if (userId) loadDocuments();
+  }, [userId]);
 
   const loadDocuments = async () => {
     try {
@@ -33,7 +35,7 @@ export default function MedicalDocuments() {
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !userId) return;
 
     setUploading(true);
     const formData = new FormData();
