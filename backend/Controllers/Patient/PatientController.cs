@@ -49,12 +49,19 @@ namespace BloodLine.Controllers
         /// <returns>Patient ID if found, null if user has no patient profile</returns>
         private async Task<int?> GetPatientIdFromUser(int userId)
         {
-            // QUERY patient_profile table to find patient record for this user
-            var profile = await _db.PatientProfiles
-                .FirstOrDefaultAsync(p => p.UserId == userId);
-
-            // RETURN patient ID or null if no profile exists
-            return profile?.PatientId;
+            try
+            {
+                var profile = await _db.PatientProfiles
+                    .FirstOrDefaultAsync(p => p.UserId == userId);
+                
+                Console.WriteLine($"User {userId} -> Patient {profile?.PatientId}");
+                return profile?.PatientId;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting patient ID: {ex.Message}");
+                return null;
+            }
         }
 
         /// <summary>
@@ -219,14 +226,14 @@ namespace BloodLine.Controllers
                 if (userId <= 0)
                     return BadRequest(new { success = false, message = "Invalid user ID." });
 
+                // Try both: patient profile mapping AND direct user_id as patient_id
                 var patientId = await GetPatientIdFromUser(userId);
-                if (patientId == null)
-                {
-                    return Ok(new { success = true, data = new List<object>() });
-                }
-
+                
+                // If no patient profile, try using userId directly as patientId
+                var searchPatientId = patientId ?? userId;
+                
                 var appointments = await _db.PatientAppointments
-                    .Where(pa => pa.PatientId == patientId.Value)
+                    .Where(pa => pa.PatientId == searchPatientId)
                     .Select(pa => new
                     {
                         appointmentId = pa.AppointmentId,
