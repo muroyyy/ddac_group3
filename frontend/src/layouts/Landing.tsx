@@ -15,7 +15,6 @@ import {
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import BloodTable from './BloodTable';
-import { useAuth } from '../context/AuthContext';
 
 const HeroSection: React.FC = () => {
   const navigate = useNavigate();
@@ -178,25 +177,6 @@ const FaqItem: React.FC<{ question: string; answer: string }> = ({ question, ans
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, isAuthenticated, isLoading } = useAuth();
-
-  // Redirect authenticated users to their dashboard
-  useEffect(() => {
-    // Wait for auth to finish loading before checking
-    if (!isLoading && isAuthenticated && user) {
-      const dashboardPaths: Record<string, string> = {
-        Admin: '/admin/dashboard',
-        Donor: '/donor/dashboard',
-        Patient: '/patient/dashboard',
-        Hospital: '/hospital/dashboard'
-      };
-
-      const redirectPath = dashboardPaths[user.role];
-      if (redirectPath) {
-        navigate(redirectPath, { replace: true });
-      }
-    }
-  }, [isLoading, isAuthenticated, user, navigate]);
 
   useEffect(() => {
     AOS.init({
@@ -214,15 +194,6 @@ const LandingPage: React.FC = () => {
     { q: "What are the requirements?", a: "Generally, you must be at least 17 years old, weigh at least 110 lbs (50 kg), and be in good general health. Some restrictions apply based on travel and medication." },
     { q: "What should I do before donating?", a: "Drink plenty of water, eat a healthy meal rich in iron, and get a good night's sleep. Avoid alcohol and fatty foods 24 hours prior." }
   ];
-
-  // Show loading spinner while checking authentication
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900">

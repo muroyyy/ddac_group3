@@ -15,7 +15,7 @@ import HospitalAppointments from '../modules/hospital/pages/Appointments';
 import TestPage from '../modules/hospital/pages/TestPage';
 import HospitalProfile from '../modules/hospital/pages/Profile';
 
-export const getHospitalRoutes = (user: { id: number; email: string; name: string; role: string } | null): RouteObject => ({
+export const getHospitalRoutes = (): RouteObject => ({
   element: <RoleProtected requiredRole="hospital" />,
   children: [
     {
@@ -23,7 +23,7 @@ export const getHospitalRoutes = (user: { id: number; email: string; name: strin
       element: <HospitalLayout />,
       children: [
         { index: true, element: <Navigate to="/hospital/dashboard" replace /> },
-        { path: 'dashboard', element: <HospitalDashboard user={user!} /> },
+        { path: 'dashboard', element: <HospitalDashboard /> },
         { path: 'test', element: <TestPage /> },
         { path: 'blood-requests', element: <BloodRequests /> },
         { path: 'donor-requests', element: <DonorRequests /> },

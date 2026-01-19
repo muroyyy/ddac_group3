@@ -1,24 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Droplet, Users, AlertTriangle, Calendar } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext';
 import { hospitalAPI } from '../services/hospitalAPI';
 import type { DashboardStats } from '../services/hospitalAPI';
 
-interface HospitalDashboardProps {
-  user: { id: number; name: string; email: string; role: string };
-}
-
-export default function HospitalDashboard({ user }: HospitalDashboardProps) {
+export default function HospitalDashboard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    hospitalAPI.getDashboardStats(user.id).then(data => {
-      setStats(data);
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  }, [user.id]);
+    if (user?.id) {
+      hospitalAPI.getDashboardStats(user.id).then(data => {
+        setStats(data);
+        setLoading(false);
+      }).catch(() => setLoading(false));
+    }
+  }, [user?.id]);
 
   const cards = [
     { title: 'Pending Blood Requests', value: stats?.pendingRequests || 0, icon: <Users className="w-6 h-6 text-red-600" />, onClick: () => navigate('/hospital/blood-requests') },
