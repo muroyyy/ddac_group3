@@ -30,6 +30,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<DonationRequest> DonationRequests { get; set; }
     public DbSet<DonorAppointment> DonorAppointments { get; set; }
     public DbSet<HospitalVerificationCode> HospitalVerificationCodes { get; set; }
+    public DbSet<UserRegistrationData> UserRegistrationData { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -130,6 +131,16 @@ public class ApplicationDbContext : DbContext
             entity.HasOne(e => e.Hospital)
                   .WithMany()
                   .HasForeignKey(e => e.HospitalId);
+        });
+        
+        modelBuilder.Entity<UserRegistrationData>(entity =>
+        {
+            entity.ToTable("user_registration_data");
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId).IsUnique();
+            entity.HasOne(e => e.User)
+                  .WithOne()
+                  .HasForeignKey<UserRegistrationData>(e => e.UserId);
         });
     }
 }

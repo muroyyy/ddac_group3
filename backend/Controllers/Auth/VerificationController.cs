@@ -81,8 +81,63 @@ public class VerificationController : ControllerBase
             }
 
             user.VerificationStatus = VerificationStatus.Approved;
+
+            // Get registration data
+            var registrationData = await _context.UserRegistrationData
+                .FirstOrDefaultAsync(r => r.UserId == userId);
+
+            // Create role-specific profile based on user role
+            if (user.Role == UserRole.Donor)
+            {
+                // Check if donor profile already exists
+                var existingDonor = await _context.DonorProfiles.FirstOrDefaultAsync(d => d.UserId == userId);
+                if (existingDonor == null)
+                {
+                    var donorProfile = new DonorProfile
+                    {
+                        UserId = userId,
+                        BloodType = registrationData?.BloodType ?? "O+",
+                        Location = registrationData?.Location ?? "",
+                        TotalDonations = 0,
+                        IsAvailable = true
+                    };
+                    _context.DonorProfiles.Add(donorProfile);
+                }
+            }
+            else if (user.Role == UserRole.Patient)
+            {
+                // Check if patient profile already exists
+                var existingPatient = await _context.PatientProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
+                if (existingPatient == null)
+                {
+                    var patientProfile = new PatientProfile
+                    {
+                        UserId = userId,
+                        BloodTypeNeeded = registrationData?.BloodType ?? "O+",
+                        UrgencyLevel = UrgencyLevel.Low
+                    };
+                    _context.PatientProfiles.Add(patientProfile);
+                }
+            }
+            else if (user.Role == UserRole.Hospital && registrationData?.HospitalId.HasValue == true)
+            {
+                // Check if hospital staff profile already exists
+                var existingStaff = await _context.HospitalStaff.FirstOrDefaultAsync(h => h.UserId == userId);
+                if (existingStaff == null)
+                {
+                    var hospitalStaff = new HospitalStaff
+                    {
+                        UserId = userId,
+                        HospitalId = registrationData.HospitalId.Value,
+                        Position = registrationData.Position ?? "Staff",
+                        VerificationCodeUsed = registrationData.VerificationCode
+                    };
+                    _context.HospitalStaff.Add(hospitalStaff);
+                }
+            }
+
             await _context.SaveChangesAsync();
-            await _auditLog.LogAsync($"User Verification Approved: {user.Email}");
+            await _auditLog.LogAsync($"User Verification Approved: {user.Email} - Profile Created");
 
             return Ok(new { success = true, message = "User approved successfully" });
         }
