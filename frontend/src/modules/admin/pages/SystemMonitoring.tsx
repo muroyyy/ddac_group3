@@ -52,7 +52,7 @@ const SystemMonitoring: React.FC = () => {
     );
   }
 
-  if (error || !metrics || !metrics.ec2 || !metrics.rds) {
+  if (error || !metrics) {
     return (
       <div className="p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
@@ -61,7 +61,7 @@ const SystemMonitoring: React.FC = () => {
           </div>
           <h3 className="text-lg font-semibold text-red-800 mb-2">Unable to Load Metrics</h3>
           <p className="text-red-600 mb-4">{error || 'Invalid data structure received'}</p>
-          <button 
+          <button
             onClick={fetchMetrics}
             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer"
           >
@@ -147,12 +147,8 @@ const SystemMonitoring: React.FC = () => {
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <span className="text-sm text-gray-600">Memory Usage</span>
-                    <p className="text-lg font-bold text-gray-900">68.5%</p>
-                  </div>
-                  <div>
-                    <span className="text-sm text-gray-600">Disk I/O</span>
-                    <p className="text-lg font-bold text-gray-900">245 IOPS</p>
+                    <span className="text-sm text-gray-600">Disk IOPS</span>
+                    <p className="text-lg font-bold text-gray-900">{(metrics.ec2.diskIOPS || 0).toFixed(0)}</p>
                   </div>
                 </div>
               </div>
@@ -211,19 +207,19 @@ const SystemMonitoring: React.FC = () => {
                     <p className="text-lg font-bold text-gray-900">{metrics.rds.connections || 0}</p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-600">Max Connections</span>
-                    <p className="text-lg font-bold text-gray-900">100</p>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
                     <span className="text-sm text-gray-600">Free Storage</span>
                     <p className="text-lg font-bold text-gray-900">{(metrics.rds.freeStorageGB || 0).toFixed(2)} GB</p>
                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <span className="text-sm text-gray-600">Read IOPS</span>
-                    <p className="text-lg font-bold text-gray-900">156</p>
+                    <p className="text-lg font-bold text-gray-900">{(metrics.rds.readIOPS || 0).toFixed(0)}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-600">Write IOPS</span>
+                    <p className="text-lg font-bold text-gray-900">{(metrics.rds.writeIOPS || 0).toFixed(0)}</p>
                   </div>
                 </div>
               </div>
@@ -254,11 +250,11 @@ const SystemMonitoring: React.FC = () => {
             <div className="mt-4 grid grid-cols-2 gap-4">
               <div>
                 <span className="text-sm text-gray-600">Total Storage</span>
-                <p className="text-xl font-bold text-gray-900">3.2 GB</p>
+                <p className="text-xl font-bold text-gray-900">{(metrics.s3.totalSizeGB || 0).toFixed(2)} GB</p>
               </div>
               <div>
                 <span className="text-sm text-gray-600">Objects</span>
-                <p className="text-xl font-bold text-gray-900">2,156</p>
+                <p className="text-xl font-bold text-gray-900">{(metrics.s3.totalObjects || 0).toLocaleString()}</p>
               </div>
             </div>
           </div>
@@ -270,35 +266,24 @@ const SystemMonitoring: React.FC = () => {
                   <h4 className="text-sm font-medium text-gray-700 mb-2">Bucket Breakdown</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">bloodline-frontend</span>
-                      <span className="font-medium">2.4 GB</span>
+                      <span className="text-gray-600">dev-bloodline-frontend</span>
+                      <span className="font-medium">{(metrics.s3.frontendBucket.sizeGB || 0).toFixed(2)} GB ({(metrics.s3.frontendBucket.objects || 0).toLocaleString()} objects)</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">bloodline-assets</span>
-                      <span className="font-medium">0.8 GB</span>
+                      <span className="text-gray-600">dev-bloodline-assets</span>
+                      <span className="font-medium">{(metrics.s3.assetsBucket.sizeGB || 0).toFixed(2)} GB ({(metrics.s3.assetsBucket.objects || 0).toLocaleString()} objects)</span>
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <span className="text-sm text-gray-600">GET Requests</span>
-                    <p className="text-lg font-bold text-gray-900">52,341</p>
+                    <span className="text-sm text-gray-600">Total Size</span>
+                    <p className="text-lg font-bold text-gray-900">{(metrics.s3.totalSizeGB || 0).toFixed(2)} GB</p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-600">PUT Requests</span>
-                    <p className="text-lg font-bold text-gray-900">4,127</p>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <span className="text-sm text-gray-600">Data Transfer Out</span>
-                    <p className="text-lg font-bold text-gray-900">15.3 GB</p>
-                  </div>
-                  <div>
-                    <span className="text-sm text-gray-600">Storage Class</span>
-                    <p className="text-lg font-bold text-gray-900">Standard</p>
+                    <span className="text-sm text-gray-600">Total Objects</span>
+                    <p className="text-lg font-bold text-gray-900">{(metrics.s3.totalObjects || 0).toLocaleString()}</p>
                   </div>
                 </div>
               </div>
@@ -329,11 +314,11 @@ const SystemMonitoring: React.FC = () => {
             <div className="mt-4 grid grid-cols-2 gap-4">
               <div>
                 <span className="text-sm text-gray-600">Cache Hit Rate</span>
-                <p className="text-xl font-bold text-gray-900">96.8%</p>
+                <p className="text-xl font-bold text-gray-900">{(metrics.cloudfront.cacheHitRate || 0).toFixed(1)}%</p>
               </div>
               <div>
-                <span className="text-sm text-gray-600">Requests</span>
-                <p className="text-xl font-bold text-gray-900">34.2K</p>
+                <span className="text-sm text-gray-600">Requests (24h)</span>
+                <p className="text-xl font-bold text-gray-900">{(metrics.cloudfront.requests || 0).toLocaleString()}</p>
               </div>
             </div>
           </div>
@@ -344,32 +329,32 @@ const SystemMonitoring: React.FC = () => {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-600">Cache Hit Rate</span>
-                    <span className="text-lg font-bold text-gray-900">96.8%</span>
+                    <span className="text-lg font-bold text-gray-900">{(metrics.cloudfront.cacheHitRate || 0).toFixed(1)}%</span>
                   </div>
                   <div className="bg-gray-200 rounded-full h-2">
-                    <div className="bg-purple-600 h-2 rounded-full" style={{ width: '96.8%' }}></div>
+                    <div className="bg-purple-600 h-2 rounded-full" style={{ width: `${metrics.cloudfront.cacheHitRate || 0}%` }}></div>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <span className="text-sm text-gray-600">Origin Latency</span>
-                    <p className="text-lg font-bold text-gray-900">38ms</p>
+                    <span className="text-sm text-gray-600">Total Requests (24h)</span>
+                    <p className="text-lg font-bold text-gray-900">{(metrics.cloudfront.requests || 0).toLocaleString()}</p>
                   </div>
                   <div>
                     <span className="text-sm text-gray-600">Error Rate</span>
-                    <p className="text-lg font-bold text-gray-900">0.01%</p>
+                    <p className="text-lg font-bold text-gray-900">{(metrics.cloudfront.errorRate || 0).toFixed(2)}%</p>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <span className="text-sm text-gray-600">Data Transfer</span>
-                    <p className="text-lg font-bold text-gray-900">11.4 GB</p>
+                    <span className="text-sm text-gray-600">Data Transfer (24h)</span>
+                    <p className="text-lg font-bold text-gray-900">{(metrics.cloudfront.dataTransferGB || 0).toFixed(2)} GB</p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-600">SSL Certificate</span>
-                    <p className="text-lg font-bold text-green-600">Valid</p>
+                    <span className="text-sm text-gray-600">Distribution</span>
+                    <p className="text-lg font-bold text-gray-900">E2YXSQ0ID9N5E0</p>
                   </div>
                 </div>
               </div>
@@ -399,12 +384,12 @@ const SystemMonitoring: React.FC = () => {
             
             <div className="mt-4 grid grid-cols-2 gap-4">
               <div>
-                <span className="text-sm text-gray-600">DNS Queries</span>
-                <p className="text-xl font-bold text-gray-900">18.7K</p>
+                <span className="text-sm text-gray-600">DNS Queries (24h)</span>
+                <p className="text-xl font-bold text-gray-900">{(metrics.route53.queryCount24h || 0).toLocaleString()}</p>
               </div>
               <div>
                 <span className="text-sm text-gray-600">Health Checks</span>
-                <p className="text-xl font-bold text-green-600">Healthy</p>
+                <p className="text-xl font-bold text-green-600">{metrics.route53.healthCheckStatus || 'Unknown'}</p>
               </div>
             </div>
           </div>
@@ -415,33 +400,22 @@ const SystemMonitoring: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <span className="text-sm text-gray-600">Query Count (24h)</span>
-                    <p className="text-lg font-bold text-gray-900">18,743</p>
+                    <p className="text-lg font-bold text-gray-900">{(metrics.route53.queryCount24h || 0).toLocaleString()}</p>
                   </div>
-                  <div>
-                    <span className="text-sm text-gray-600">Response Time</span>
-                    <p className="text-lg font-bold text-gray-900">12ms</p>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <span className="text-sm text-gray-600">Health Check Status</span>
-                    <p className="text-lg font-bold text-green-600">All Healthy</p>
-                  </div>
-                  <div>
-                    <span className="text-sm text-gray-600">Hosted Zone</span>
-                    <p className="text-lg font-bold text-gray-900">Active</p>
+                    <p className="text-lg font-bold text-green-600">{metrics.route53.healthCheckStatus || 'Unknown'}</p>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <span className="text-sm text-gray-600">Record Types</span>
-                    <p className="text-lg font-bold text-gray-900">A, CNAME, MX</p>
+                    <span className="text-sm text-gray-600">Hosted Zone</span>
+                    <p className="text-lg font-bold text-gray-900">bloodline.dev</p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-600">TTL Average</span>
-                    <p className="text-lg font-bold text-gray-900">300s</p>
+                    <span className="text-sm text-gray-600">Zone ID</span>
+                    <p className="text-sm font-bold text-gray-900">Z00220291FD80DV180XVJ</p>
                   </div>
                 </div>
               </div>
