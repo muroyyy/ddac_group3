@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, Calendar, User, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Search, Calendar, User, Clock } from 'lucide-react';
 import { hospitalAPI } from '../services/hospitalAPI';
 import { useAuth } from '../../../context/AuthContext';
 
