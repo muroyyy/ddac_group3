@@ -2,6 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { LayoutDashboard, Clipboard, User, LogOut, Droplets, Calendar, Heart } from 'lucide-react';
+import bloodlineLogo from '../assets/bloodline_logo.svg';
 
 export default function HospitalLayout() {
 	const { logout, user } = useAuth();
@@ -29,7 +30,11 @@ export default function HospitalLayout() {
 		<div className="min-h-screen flex bg-gray-50">
 			<aside className="w-64 bg-white border-r fixed left-0 top-0 h-full z-10">
 				<div className="h-16 flex items-center px-6 border-b">
-					<span className="text-lg font-semibold">🩸 BloodLine</span>
+					<img
+						src={bloodlineLogo}
+						alt="BloodLine Logo"
+						className="w-auto h-8"
+					/>
 				</div>
 				<nav className="p-4 h-full overflow-y-auto pb-32">
 					<div className="space-y-1">
@@ -107,4 +112,3 @@ export default function HospitalLayout() {
 	);
 
 }
-
