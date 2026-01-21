@@ -463,12 +463,29 @@ public class HospitalController : ControllerBase
     {
         try
         {
+            // First check if there are any patient appointments at all
+            var appointmentCount = await _context.PatientAppointments.CountAsync();
+            _logger.LogInformation($"Total patient appointments in database: {appointmentCount}");
+
+            if (appointmentCount == 0)
+            {
+                return Ok(new { success = true, data = new List<object>() });
+            }
+
             var hospitalId = await GetHospitalIdFromUser(userId);
+            _logger.LogInformation($"Hospital ID for user {userId}: {hospitalId}");
+            
             if (hospitalId == null)
                 return Ok(new { success = true, data = new List<object>() });
 
-            // Query patient_appointments table with proper joins to get real data
-            var appointments = await _context.PatientAppointments
+            // Get appointments for this hospital
+            var hospitalAppointments = await _context.PatientAppointments
+                .Where(pa => pa.HospitalId == hospitalId.Value)
+                .CountAsync();
+            _logger.LogInformation($"Patient appointments for hospital {hospitalId}: {hospitalAppointments}");
+
+            // Simplified query similar to working donor appointments
+            var rawAppointments = await _context.PatientAppointments
                 .Where(pa => pa.HospitalId == hospitalId.Value)
                 .GroupJoin(_context.BloodRequests, pa => pa.RequestId, br => br.RequestId, (pa, br) => new { pa, br })
                 .SelectMany(x => x.br.DefaultIfEmpty(), (x, br) => new { x.pa, br })
@@ -488,14 +505,33 @@ public class HospitalController : ControllerBase
                     bloodType = x.br != null ? x.br.BloodType : "Unknown",
                     doctorName = d != null ? d.DoctorName : "TBD",
                     doctorId = x.pa.DoctorId,
-                    appointmentDate = x.pa.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
+                    appointmentDate = x.pa.AppointmentDate,
                     status = x.pa.Status ?? "Upcoming",
                     doctorNotes = x.pa.DoctorNotes ?? "",
-                    createdAt = x.pa.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                    createdAt = x.pa.CreatedAt
                 })
                 .OrderByDescending(x => x.appointmentDate)
                 .ToListAsync();
 
+            // Format dates after query execution (like donor appointments)
+            var appointments = rawAppointments.Select(a => new
+            {
+                appointmentId = a.appointmentId,
+                requestId = a.requestId,
+                patientId = a.patientId,
+                hospitalId = a.hospitalId,
+                patientName = a.patientName,
+                patientPhone = a.patientPhone,
+                bloodType = a.bloodType,
+                doctorName = a.doctorName,
+                doctorId = a.doctorId,
+                appointmentDate = a.appointmentDate.ToString("yyyy-MM-dd HH:mm"),
+                status = a.status,
+                doctorNotes = a.doctorNotes,
+                createdAt = a.createdAt.ToString("yyyy-MM-dd HH:mm")
+            }).ToList();
+
+            _logger.LogInformation($"Successfully retrieved {appointments.Count} patient appointments");
             return Ok(new { success = true, data = appointments });
         }
         catch (Exception ex)
