@@ -25,10 +25,18 @@ export default function Appointments() {
     setLoading(true);
     try {
       const res = await hospitalAPI.getAppointments(user?.id || 1);
-      setAppointments(res);
+      // Safe array handling - ensure we always set an array
+      if (res && res.success && Array.isArray(res.data)) {
+        setAppointments(res.data);
+      } else if (Array.isArray(res)) {
+        setAppointments(res);
+      } else {
+        console.warn('API returned non-array data:', res);
+        setAppointments([]);
+      }
     } catch (error) {
       console.error('Failed to load appointments:', error);
-      alert('Failed to load appointments');
+      setAppointments([]); // Ensure appointments is always an array
     } finally {
       setLoading(false);
     }
@@ -63,9 +71,10 @@ export default function Appointments() {
     }
   };
 
-  const filteredAppointments = appointments.filter(apt => 
+  // Safe filtering - ensure appointments is always an array
+  const filteredAppointments = Array.isArray(appointments) ? appointments.filter(apt => 
     !statusFilter || apt.status.toLowerCase() === statusFilter.toLowerCase()
-  );
+  ) : [];
 
   return (
     <div className="p-6 bg-gradient-to-br from-blue-50 via-white to-blue-50 min-h-screen">
