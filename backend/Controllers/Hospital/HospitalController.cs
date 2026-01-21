@@ -549,19 +549,32 @@ public class HospitalController : ControllerBase
     {
         try
         {
+            _logger.LogInformation($"Attempting to delete appointment with ID: {id}");
+            
             var appointment = await _context.PatientAppointments.FindAsync(id);
             if (appointment == null)
+            {
+                _logger.LogWarning($"Appointment with ID {id} not found");
                 return NotFound(new { error = "Appointment not found" });
+            }
 
+            _logger.LogInformation($"Found appointment {id}: PatientId={appointment.PatientId}, HospitalId={appointment.HospitalId}, Status={appointment.Status}");
+            
             _context.PatientAppointments.Remove(appointment);
-            await _context.SaveChangesAsync();
-
+            var result = await _context.SaveChangesAsync();
+            
+            _logger.LogInformation($"Successfully deleted appointment {id}. Records affected: {result}");
             return Ok(new { success = true, message = "Appointment deleted successfully" });
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error deleting appointment: {ex.Message}");
-            return StatusCode(500, new { error = "Failed to delete appointment" });
+            _logger.LogError($"Error deleting appointment {id}: {ex.Message}");
+            _logger.LogError($"Stack trace: {ex.StackTrace}");
+            if (ex.InnerException != null)
+            {
+                _logger.LogError($"Inner exception: {ex.InnerException.Message}");
+            }
+            return StatusCode(500, new { error = $"Failed to delete appointment: {ex.Message}" });
         }
     }
 
