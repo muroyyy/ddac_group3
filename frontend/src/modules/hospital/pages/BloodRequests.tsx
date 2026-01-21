@@ -446,7 +446,7 @@ export default function BloodRequests() {
 
       {/* Approval Modal */}
       {showApprovalModal && approvingRequest && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-30 overflow-y-auto h-full w-full flex items-center justify-center">
           <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md transform transition-all">
             <h3 className="text-xl font-bold text-gray-900 mb-2">Approve Blood Request</h3>
             <p className="text-gray-600 mb-6">
