@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
+using Amazon;
 using Amazon.CloudWatch;
 using Amazon.CloudWatch.Model;
+using Amazon.S3;
+using Amazon.S3.Model;
 
 namespace BloodLine.Controllers.Admin;
 
@@ -9,6 +12,8 @@ namespace BloodLine.Controllers.Admin;
 public class MonitoringController : ControllerBase
 {
     private readonly IAmazonCloudWatch _cloudWatch;
+    private readonly IAmazonCloudWatch _cloudWatchGlobal;
+    private readonly IAmazonS3 _s3Client;
     private readonly ILogger<MonitoringController> _logger;
 
     // AWS Resource Identifiers
@@ -18,10 +23,16 @@ public class MonitoringController : ControllerBase
     private const string FRONTEND_BUCKET = "dev-bloodline-frontend-8826eb40";
     private const string ASSETS_BUCKET = "dev-bloodline-assets-8826eb40";
     private const string ROUTE53_HOSTED_ZONE_ID = "Z00220291FD80DV180XVJ";
+    private static readonly TimeSpan S3CacheTtl = TimeSpan.FromHours(6);
+    private static readonly object S3CacheLock = new();
+    private static DateTime? _s3CacheUpdatedAt;
+    private static object? _s3CacheValue;
 
-    public MonitoringController(IAmazonCloudWatch cloudWatch, ILogger<MonitoringController> logger)
+    public MonitoringController(IAmazonCloudWatch cloudWatch, IAmazonS3 s3Client, ILogger<MonitoringController> logger)
     {
         _cloudWatch = cloudWatch;
+        _cloudWatchGlobal = new AmazonCloudWatchClient(RegionEndpoint.USEast1);
+        _s3Client = s3Client;
         _logger = logger;
     }
 
@@ -37,7 +48,7 @@ public class MonitoringController : ControllerBase
             // Fetch all metrics in parallel
             var ec2Metrics = GetEC2Metrics(startTime, endTime);
             var rdsMetrics = GetRDSMetrics(startTime, endTime);
-            var s3Metrics = GetS3Metrics(startTime24h, endTime);
+        var s3Metrics = GetS3Metrics();
             var cloudfrontMetrics = GetCloudFrontMetrics(startTime24h, endTime);
             var route53Metrics = GetRoute53Metrics(startTime24h, endTime);
 
@@ -61,11 +72,11 @@ public class MonitoringController : ControllerBase
 
     private async Task<object> GetEC2Metrics(DateTime startTime, DateTime endTime)
     {
-        var cpuTask = GetMetricStatistics("AWS/EC2", "CPUUtilization", "InstanceId", EC2_INSTANCE_ID, startTime, endTime);
-        var networkInTask = GetMetricStatistics("AWS/EC2", "NetworkIn", "InstanceId", EC2_INSTANCE_ID, startTime, endTime);
-        var networkOutTask = GetMetricStatistics("AWS/EC2", "NetworkOut", "InstanceId", EC2_INSTANCE_ID, startTime, endTime);
-        var diskReadTask = GetMetricStatistics("AWS/EC2", "DiskReadOps", "InstanceId", EC2_INSTANCE_ID, startTime, endTime);
-        var diskWriteTask = GetMetricStatistics("AWS/EC2", "DiskWriteOps", "InstanceId", EC2_INSTANCE_ID, startTime, endTime);
+        var cpuTask = GetMetricStatistics(_cloudWatch, "AWS/EC2", "CPUUtilization", "InstanceId", EC2_INSTANCE_ID, startTime, endTime);
+        var networkInTask = GetMetricStatistics(_cloudWatch, "AWS/EC2", "NetworkIn", "InstanceId", EC2_INSTANCE_ID, startTime, endTime);
+        var networkOutTask = GetMetricStatistics(_cloudWatch, "AWS/EC2", "NetworkOut", "InstanceId", EC2_INSTANCE_ID, startTime, endTime);
+        var diskReadTask = GetMetricStatistics(_cloudWatch, "AWS/EC2", "DiskReadOps", "InstanceId", EC2_INSTANCE_ID, startTime, endTime);
+        var diskWriteTask = GetMetricStatistics(_cloudWatch, "AWS/EC2", "DiskWriteOps", "InstanceId", EC2_INSTANCE_ID, startTime, endTime);
 
         await Task.WhenAll(cpuTask, networkInTask, networkOutTask, diskReadTask, diskWriteTask);
 
@@ -80,11 +91,11 @@ public class MonitoringController : ControllerBase
 
     private async Task<object> GetRDSMetrics(DateTime startTime, DateTime endTime)
     {
-        var cpuTask = GetMetricStatistics("AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", RDS_INSTANCE_ID, startTime, endTime);
-        var connectionsTask = GetMetricStatistics("AWS/RDS", "DatabaseConnections", "DBInstanceIdentifier", RDS_INSTANCE_ID, startTime, endTime);
-        var freeStorageTask = GetMetricStatistics("AWS/RDS", "FreeStorageSpace", "DBInstanceIdentifier", RDS_INSTANCE_ID, startTime, endTime);
-        var readIOPSTask = GetMetricStatistics("AWS/RDS", "ReadIOPS", "DBInstanceIdentifier", RDS_INSTANCE_ID, startTime, endTime);
-        var writeIOPSTask = GetMetricStatistics("AWS/RDS", "WriteIOPS", "DBInstanceIdentifier", RDS_INSTANCE_ID, startTime, endTime);
+        var cpuTask = GetMetricStatistics(_cloudWatch, "AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", RDS_INSTANCE_ID, startTime, endTime);
+        var connectionsTask = GetMetricStatistics(_cloudWatch, "AWS/RDS", "DatabaseConnections", "DBInstanceIdentifier", RDS_INSTANCE_ID, startTime, endTime);
+        var freeStorageTask = GetMetricStatistics(_cloudWatch, "AWS/RDS", "FreeStorageSpace", "DBInstanceIdentifier", RDS_INSTANCE_ID, startTime, endTime);
+        var readIOPSTask = GetMetricStatistics(_cloudWatch, "AWS/RDS", "ReadIOPS", "DBInstanceIdentifier", RDS_INSTANCE_ID, startTime, endTime);
+        var writeIOPSTask = GetMetricStatistics(_cloudWatch, "AWS/RDS", "WriteIOPS", "DBInstanceIdentifier", RDS_INSTANCE_ID, startTime, endTime);
 
         await Task.WhenAll(cpuTask, connectionsTask, freeStorageTask, readIOPSTask, writeIOPSTask);
 
@@ -98,36 +109,42 @@ public class MonitoringController : ControllerBase
         };
     }
 
-    private async Task<object> GetS3Metrics(DateTime startTime, DateTime endTime)
+    private async Task<object> GetS3Metrics()
     {
         try
         {
-            // S3 metrics for bucket size and objects
-            var frontendBucketSizeTask = GetMetricStatistics("AWS/S3", "BucketSizeBytes", "BucketName", FRONTEND_BUCKET, startTime, endTime, "StorageType", "StandardStorage");
-            var frontendObjectCountTask = GetMetricStatistics("AWS/S3", "NumberOfObjects", "BucketName", FRONTEND_BUCKET, startTime, endTime, "StorageType", "AllStorageTypes");
-            var assetsBucketSizeTask = GetMetricStatistics("AWS/S3", "BucketSizeBytes", "BucketName", ASSETS_BUCKET, startTime, endTime, "StorageType", "StandardStorage");
-            var assetsObjectCountTask = GetMetricStatistics("AWS/S3", "NumberOfObjects", "BucketName", ASSETS_BUCKET, startTime, endTime, "StorageType", "AllStorageTypes");
+            var cached = GetCachedS3Metrics();
+            if (cached != null)
+            {
+                return cached;
+            }
 
-            await Task.WhenAll(frontendBucketSizeTask, frontendObjectCountTask, assetsBucketSizeTask, assetsObjectCountTask);
+            var frontendTask = GetBucketStats(FRONTEND_BUCKET);
+            var assetsTask = GetBucketStats(ASSETS_BUCKET);
 
-            var frontendSizeGB = frontendBucketSizeTask.Result / (1024 * 1024 * 1024);
-            var assetsSizeGB = assetsBucketSizeTask.Result / (1024 * 1024 * 1024);
+            await Task.WhenAll(frontendTask, assetsTask);
 
-            return new
+            var frontend = frontendTask.Result;
+            var assets = assetsTask.Result;
+
+            var payload = new
             {
                 frontendBucket = new
                 {
-                    sizeGB = Math.Round(frontendSizeGB, 2),
-                    objects = (int)frontendObjectCountTask.Result
+                    sizeGB = Math.Round(frontend.sizeGB, 2),
+                    objects = frontend.objects
                 },
                 assetsBucket = new
                 {
-                    sizeGB = Math.Round(assetsSizeGB, 2),
-                    objects = (int)assetsObjectCountTask.Result
+                    sizeGB = Math.Round(assets.sizeGB, 2),
+                    objects = assets.objects
                 },
-                totalSizeGB = Math.Round(frontendSizeGB + assetsSizeGB, 2),
-                totalObjects = (int)(frontendObjectCountTask.Result + assetsObjectCountTask.Result)
+                totalSizeGB = Math.Round(frontend.sizeGB + assets.sizeGB, 2),
+                totalObjects = frontend.objects + assets.objects
             };
+
+            SetCachedS3Metrics(payload);
+            return payload;
         }
         catch (Exception ex)
         {
@@ -142,14 +159,63 @@ public class MonitoringController : ControllerBase
         }
     }
 
+    private object? GetCachedS3Metrics()
+    {
+        lock (S3CacheLock)
+        {
+            if (_s3CacheUpdatedAt.HasValue && DateTime.UtcNow - _s3CacheUpdatedAt.Value < S3CacheTtl)
+            {
+                return _s3CacheValue;
+            }
+        }
+
+        return null;
+    }
+
+    private void SetCachedS3Metrics(object payload)
+    {
+        lock (S3CacheLock)
+        {
+            _s3CacheUpdatedAt = DateTime.UtcNow;
+            _s3CacheValue = payload;
+        }
+    }
+
+    private async Task<(double sizeGB, int objects)> GetBucketStats(string bucketName)
+    {
+        double totalBytes = 0;
+        int totalObjects = 0;
+        string? continuationToken = null;
+
+        do
+        {
+            var request = new ListObjectsV2Request
+            {
+                BucketName = bucketName,
+                ContinuationToken = continuationToken
+            };
+
+            var response = await _s3Client.ListObjectsV2Async(request);
+            foreach (var obj in response.S3Objects)
+            {
+                totalBytes += obj.Size;
+                totalObjects += 1;
+            }
+
+            continuationToken = response.IsTruncated ? response.NextContinuationToken : null;
+        } while (!string.IsNullOrEmpty(continuationToken));
+
+        return (totalBytes / (1024 * 1024 * 1024), totalObjects);
+    }
+
     private async Task<object> GetCloudFrontMetrics(DateTime startTime, DateTime endTime)
     {
         try
         {
-            var requestsTask = GetMetricSum("AWS/CloudFront", "Requests", "DistributionId", CLOUDFRONT_DISTRIBUTION_ID, startTime, endTime);
-            var bytesDownloadedTask = GetMetricSum("AWS/CloudFront", "BytesDownloaded", "DistributionId", CLOUDFRONT_DISTRIBUTION_ID, startTime, endTime);
-            var errorRate4xxTask = GetMetricStatistics("AWS/CloudFront", "4xxErrorRate", "DistributionId", CLOUDFRONT_DISTRIBUTION_ID, startTime, endTime);
-            var errorRate5xxTask = GetMetricStatistics("AWS/CloudFront", "5xxErrorRate", "DistributionId", CLOUDFRONT_DISTRIBUTION_ID, startTime, endTime);
+            var requestsTask = GetMetricSum(_cloudWatchGlobal, "AWS/CloudFront", "Requests", "DistributionId", CLOUDFRONT_DISTRIBUTION_ID, startTime, endTime);
+            var bytesDownloadedTask = GetMetricSum(_cloudWatchGlobal, "AWS/CloudFront", "BytesDownloaded", "DistributionId", CLOUDFRONT_DISTRIBUTION_ID, startTime, endTime);
+            var errorRate4xxTask = GetMetricStatistics(_cloudWatchGlobal, "AWS/CloudFront", "4xxErrorRate", "DistributionId", CLOUDFRONT_DISTRIBUTION_ID, startTime, endTime);
+            var errorRate5xxTask = GetMetricStatistics(_cloudWatchGlobal, "AWS/CloudFront", "5xxErrorRate", "DistributionId", CLOUDFRONT_DISTRIBUTION_ID, startTime, endTime);
 
             await Task.WhenAll(requestsTask, bytesDownloadedTask, errorRate4xxTask, errorRate5xxTask);
 
@@ -181,7 +247,7 @@ public class MonitoringController : ControllerBase
     {
         try
         {
-            var queryCountTask = GetMetricSum("AWS/Route53", "QueryCount", "HostedZoneId", ROUTE53_HOSTED_ZONE_ID, startTime, endTime);
+            var queryCountTask = GetMetricSum(_cloudWatchGlobal, "AWS/Route53", "QueryCount", "HostedZoneId", ROUTE53_HOSTED_ZONE_ID, startTime, endTime);
 
             await queryCountTask;
 
@@ -202,7 +268,7 @@ public class MonitoringController : ControllerBase
         }
     }
 
-    private async Task<double> GetMetricStatistics(string namespaceName, string metricName, string dimensionName, string dimensionValue, DateTime startTime, DateTime endTime, string? dimension2Name = null, string? dimension2Value = null)
+    private async Task<double> GetMetricStatistics(IAmazonCloudWatch cloudWatch, string namespaceName, string metricName, string dimensionName, string dimensionValue, DateTime startTime, DateTime endTime, string? dimension2Name = null, string? dimension2Value = null)
     {
         try
         {
@@ -227,7 +293,7 @@ public class MonitoringController : ControllerBase
                 Statistics = new List<string> { "Average" }
             };
 
-            var response = await _cloudWatch.GetMetricStatisticsAsync(request);
+            var response = await cloudWatch.GetMetricStatisticsAsync(request);
             return response.Datapoints.Count > 0
                 ? response.Datapoints.OrderByDescending(d => d.Timestamp).First().Average ?? 0.0
                 : 0.0;
@@ -239,7 +305,7 @@ public class MonitoringController : ControllerBase
         }
     }
 
-    private async Task<double> GetMetricSum(string namespaceName, string metricName, string dimensionName, string dimensionValue, DateTime startTime, DateTime endTime)
+    private async Task<double> GetMetricSum(IAmazonCloudWatch cloudWatch, string namespaceName, string metricName, string dimensionName, string dimensionValue, DateTime startTime, DateTime endTime)
     {
         try
         {
@@ -257,7 +323,7 @@ public class MonitoringController : ControllerBase
                 Statistics = new List<string> { "Sum" }
             };
 
-            var response = await _cloudWatch.GetMetricStatisticsAsync(request);
+            var response = await cloudWatch.GetMetricStatisticsAsync(request);
             return response.Datapoints.Count > 0
                 ? response.Datapoints.OrderByDescending(d => d.Timestamp).First().Sum ?? 0.0
                 : 0.0;

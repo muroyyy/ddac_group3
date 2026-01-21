@@ -59,6 +59,10 @@ resource "aws_iam_role_policy" "ec2_secrets_policy" {
       {
         Effect = "Allow"
         Action = [
+          "cloudwatch:GetMetricStatistics",
+          "cloudwatch:GetMetricData",
+          "cloudwatch:ListMetrics",
+          "cloudwatch:DescribeAlarms",
           "sns:Publish",
           "sns:Subscribe",
           "sns:ListTopics"
@@ -85,6 +89,8 @@ resource "aws_iam_role_policy" "ec2_secrets_policy" {
           "s3:DeleteObject"
         ]
         Resource = [
+          "arn:aws:s3:::dev-bloodline-frontend-8826eb40",
+          "arn:aws:s3:::dev-bloodline-frontend-8826eb40/*",
           "arn:aws:s3:::dev-bloodline-assets-8826eb40",
           "arn:aws:s3:::dev-bloodline-assets-8826eb40/*",
           "arn:aws:s3:::bloodline-schema-backups-sha",
