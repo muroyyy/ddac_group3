@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, Heart, Calendar, User, AlertCircle } from 'lucide-react';
+import { Search, Heart, Calendar, User, AlertCircle, ArrowUpDown } from 'lucide-react';
 import { hospitalAPI } from '../services/hospitalAPI';
 import { useAuth } from '../../../context/AuthContext';
 
@@ -21,6 +21,9 @@ export default function DonorRequests() {
   const [requests, setRequests] = useState<DonorRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [bloodTypeFilter, setBloodTypeFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedRequest, setSelectedRequest] = useState<DonorRequest | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
@@ -113,9 +116,20 @@ export default function DonorRequests() {
     }
   };
 
-  const filteredRequests = requests.filter(request => 
-    request.donorName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredRequests = requests
+    .filter(request => 
+      (!searchTerm || request.donorName.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      (!bloodTypeFilter || request.bloodType === bloodTypeFilter) &&
+      (!statusFilter || request.status.toLowerCase() === statusFilter.toLowerCase())
+    )
+    .sort((a, b) => {
+      const dateA = new Date(a.requestedDate).getTime();
+      const dateB = new Date(b.requestedDate).getTime();
+      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+
+  // Get unique blood types for filter
+  const uniqueBloodTypes = [...new Set(requests.map(req => req.bloodType))].sort();
 
   return (
     <div className="space-y-6 ml-6">
@@ -129,7 +143,7 @@ export default function DonorRequests() {
         </p>
       </div>
 
-      <div className="flex gap-4 mb-6">
+      <div className="flex flex-wrap gap-4 mb-6">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
@@ -140,6 +154,36 @@ export default function DonorRequests() {
             className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500"
           />
         </div>
+        
+        <select
+          value={bloodTypeFilter}
+          onChange={(e) => setBloodTypeFilter(e.target.value)}
+          className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500"
+        >
+          <option value="">All Blood Types</option>
+          {uniqueBloodTypes.map(type => (
+            <option key={type} value={type}>{type}</option>
+          ))}
+        </select>
+        
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500"
+        >
+          <option value="">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        
+        <button
+          onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+          className="flex items-center gap-2 px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50"
+        >
+          <ArrowUpDown className="w-4 h-4" />
+          Date {sortOrder === 'asc' ? '↑' : '↓'}
+        </button>
       </div>
 
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">

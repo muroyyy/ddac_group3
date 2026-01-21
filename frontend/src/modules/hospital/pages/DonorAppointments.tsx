@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Search, ArrowUpDown, Heart } from 'lucide-react';
 import { useAuth } from '../../../hooks/useAuth';
 import { hospitalAPI } from '../services/hospitalAPI';
 
@@ -16,6 +17,10 @@ const DonorAppointments: React.FC = () => {
   console.log('🚀 DonorAppointments component loaded');
   const [appointments, setAppointments] = useState<DonorAppointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [bloodTypeFilter, setBloodTypeFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const { user, isLoading: authLoading } = useAuth();
   
   console.log('👤 Current user:', user);
@@ -122,6 +127,22 @@ const DonorAppointments: React.FC = () => {
     );
   }
 
+  // Filter and sort appointments
+  const filteredAppointments = appointments
+    .filter(apt => 
+      (!searchTerm || apt.donorName.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      (!bloodTypeFilter || apt.bloodType === bloodTypeFilter) &&
+      (!statusFilter || apt.status.toLowerCase() === statusFilter.toLowerCase())
+    )
+    .sort((a, b) => {
+      const dateA = new Date(a.appointmentDate).getTime();
+      const dateB = new Date(b.appointmentDate).getTime();
+      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+
+  // Get unique blood types for filter
+  const uniqueBloodTypes = [...new Set(appointments.map(apt => apt.bloodType))].sort();
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'upcoming':
@@ -140,7 +161,10 @@ const DonorAppointments: React.FC = () => {
     <div className="p-6">
       <div className="mb-6 flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Donor Appointments</h1>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <Heart className="w-6 h-6 text-red-600" />
+            Donor Appointments
+          </h1>
           <p className="text-gray-600">Manage and view all donor appointments</p>
         </div>
         <button
@@ -148,6 +172,50 @@ const DonorAppointments: React.FC = () => {
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           Refresh
+        </button>
+      </div>
+
+      {/* Filters and Search */}
+      <div className="mb-6 flex flex-wrap gap-4">
+        <div className="relative">
+          <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search by donor name..."
+            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+          />
+        </div>
+        
+        <select
+          value={bloodTypeFilter}
+          onChange={(e) => setBloodTypeFilter(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+        >
+          <option value="">All Blood Types</option>
+          {uniqueBloodTypes.map(type => (
+            <option key={type} value={type}>{type}</option>
+          ))}
+        </select>
+        
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+        >
+          <option value="">All Status</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        
+        <button
+          onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+          className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+        >
+          <ArrowUpDown className="w-4 h-4" />
+          Date {sortOrder === 'asc' ? '↑' : '↓'}
         </button>
       </div>
 
@@ -180,14 +248,14 @@ const DonorAppointments: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {appointments.length === 0 ? (
+              {filteredAppointments.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
                     No donor appointments found
                   </td>
                 </tr>
               ) : (
-                appointments.map((appointment) => (
+                filteredAppointments.map((appointment) => (
                   <tr key={appointment.appointmentId} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {appointment.donorName}

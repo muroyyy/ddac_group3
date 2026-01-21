@@ -35,6 +35,9 @@ export default function BloodRequests() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [bloodTypeFilter, setBloodTypeFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedRequest, setSelectedRequest] = useState<BloodRequest | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
@@ -142,10 +145,22 @@ export default function BloodRequests() {
 
 
 
-  // Filter requests based on search term
-  const filteredRequests = requests.filter(request => 
-    request.patientName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter requests based on search term, blood type, and status
+  const filteredRequests = requests
+    .filter(request => 
+      (!searchTerm || request.patientName.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      (!bloodTypeFilter || request.bloodType === bloodTypeFilter) &&
+      (!statusFilter || request.urgencyLevel.toLowerCase() === statusFilter.toLowerCase())
+    )
+    .sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+
+  // Get unique blood types and urgency levels for filters
+  const uniqueBloodTypes = [...new Set(requests.map(req => req.bloodType))].sort();
+  const uniqueUrgencyLevels = [...new Set(requests.map(req => req.urgencyLevel))].sort();
 
   // Function to get urgency level styling
   const getUrgencyStyle = (urgency: string) => {
@@ -172,7 +187,7 @@ export default function BloodRequests() {
       </div>
 
       {/* Search controls */}
-      <div className="flex gap-4 mb-6">
+      <div className="flex flex-wrap gap-4 mb-6">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
@@ -184,6 +199,36 @@ export default function BloodRequests() {
             className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500"
           />
         </div>
+        
+        <select
+          value={bloodTypeFilter}
+          onChange={(e) => setBloodTypeFilter(e.target.value)}
+          className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500"
+        >
+          <option value="">All Blood Types</option>
+          {uniqueBloodTypes.map(type => (
+            <option key={type} value={type}>{type}</option>
+          ))}
+        </select>
+        
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500"
+        >
+          <option value="">All Urgency</option>
+          {uniqueUrgencyLevels.map(level => (
+            <option key={level} value={level}>{level}</option>
+          ))}
+        </select>
+        
+        <button
+          onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+          className="flex items-center gap-2 px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50"
+        >
+          <ArrowUpDown className="w-4 h-4" />
+          Date {sortOrder === 'asc' ? '↑' : '↓'}
+        </button>
       </div>
 
       {/* Blood requests table */}
