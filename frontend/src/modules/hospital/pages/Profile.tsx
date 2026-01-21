@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { User, Building2, Phone, Mail, MapPin, Save } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
+import { hospitalAPI } from '../services/hospitalAPI';
 
 interface HospitalProfile {
   hospitalName: string;
@@ -11,12 +12,6 @@ interface HospitalProfile {
   fullName: string;
   phone: string;
 }
-
-const getApiBaseUrl = () => {
-  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
-  if (import.meta.env.PROD) return 'https://bloodline.dev/api';
-  return 'http://localhost:5000/api';
-};
 
 export default function Profile() {
   const { user } = useAuth();
@@ -31,20 +26,23 @@ export default function Profile() {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const API_BASE_URL = getApiBaseUrl();
 
   useEffect(() => {
     const fetchProfile = async () => {
       if (user?.id) {
         try {
-          const response = await fetch(`${API_BASE_URL}/hospital/profile?userId=${user.id}`);
-          if (response.ok) {
-            const hospitalData = await response.json();
-            setProfile(prev => ({
-              ...prev,
-              hospitalName: hospitalData.hospital_name || '',
-              // Add other hospital fields when backend provides them
-            }));
+          const response = await hospitalAPI.getStaffProfile(user.id);
+          if (response?.success && response.data) {
+            const hospitalData = response.data;
+            setProfile({
+              hospitalName: hospitalData.hospitalName || '',
+              address: hospitalData.hospitalAddress || '',
+              contactPerson: hospitalData.contactPerson || '',
+              contactNumber: hospitalData.hospitalContact || '',
+              email: hospitalData.email || '',
+              fullName: hospitalData.fullName || '',
+              phone: hospitalData.phone || ''
+            });
           }
         } catch (e) {
           console.error('Failed to fetch hospital profile:', e);
@@ -60,31 +58,18 @@ export default function Profile() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Update user profile
-      const userResponse = await fetch(`${API_BASE_URL}/auth/profile`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fullName: profile.fullName,
-          email: profile.email,
-          phone: profile.phone
-        })
+      if (!user?.id) {
+        alert('Missing user session');
+        return;
+      }
+
+      const response = await hospitalAPI.updateStaffProfile(user.id, {
+        fullName: profile.fullName,
+        email: profile.email,
+        phone: profile.phone
       });
 
-      // Update hospital profile
-      const hospitalResponse = await fetch(`${API_BASE_URL}/hospital/profile`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user?.id,
-          hospitalName: profile.hospitalName,
-          address: profile.address,
-          contactPerson: profile.contactPerson,
-          contactNumber: profile.contactNumber
-        })
-      });
-
-      if (userResponse.ok && hospitalResponse.ok) {
+      if (response?.success) {
         alert('Profile updated successfully!');
       } else {
         alert('Failed to update profile');

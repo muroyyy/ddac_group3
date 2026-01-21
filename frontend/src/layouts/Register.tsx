@@ -165,6 +165,15 @@ const RegisterPage: React.FC = () => {
     return '';
   };
 
+  React.useEffect(() => {
+    if (formData.role === 'hospital' && !formData.phone) {
+      setFormData(prev => ({
+        ...prev,
+        phone: '+601'
+      }));
+    }
+  }, [formData.role, formData.phone]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;

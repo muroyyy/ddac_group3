@@ -1005,7 +1005,8 @@ public class HospitalController : ControllerBase
                     hospitalId = h.HospitalId,
                     hospitalName = h.HospitalName,
                     hospitalAddress = h.Address,
-                    hospitalContact = h.ContactNumber
+                    hospitalContact = h.ContactNumber,
+                    contactPerson = h.ContactPerson
                 })
                 .FirstOrDefaultAsync();
 
@@ -1191,5 +1192,4 @@ public class LinkHospitalRequest
     public int HospitalId { get; set; }
     public string? Position { get; set; }
 }
-
 
