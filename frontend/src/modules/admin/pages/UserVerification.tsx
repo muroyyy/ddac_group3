@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Check, X, Eye, FileText, Clock, User, Mail, Phone } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Check, X, Eye, FileText, Clock, User, Mail, Phone, ChevronDown } from 'lucide-react';
 import { verificationAPI } from '../../../api';
 
 interface PendingUser {
@@ -27,10 +27,42 @@ const UserVerification: React.FC = () => {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [viewingDocument, setViewingDocument] = useState<{ id: number; fileName: string; url: string } | null>(null);
   const [loadingDocument, setLoadingDocument] = useState(false);
+  const [expandedRole, setExpandedRole] = useState<string | null>(null);
+
+  const roleEntries = useMemo(() => {
+    const grouped = pendingUsers.reduce<Record<string, PendingUser[]>>((acc, user) => {
+      const roleKey = user.role?.trim() ? user.role : 'Unknown';
+      if (!acc[roleKey]) {
+        acc[roleKey] = [];
+      }
+      acc[roleKey].push(user);
+      return acc;
+    }, {});
+
+    const roleOrder = ['Hospital', 'Patient', 'Donor', 'Admin', 'Unknown'];
+    return Object.entries(grouped).sort(([roleA], [roleB]) => {
+      const indexA = roleOrder.indexOf(roleA);
+      const indexB = roleOrder.indexOf(roleB);
+      if (indexA === -1 && indexB === -1) return roleA.localeCompare(roleB);
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+      return indexA - indexB;
+    });
+  }, [pendingUsers]);
 
   useEffect(() => {
     fetchPendingUsers();
   }, []);
+
+  useEffect(() => {
+    if (roleEntries.length === 0) {
+      setExpandedRole(null);
+      return;
+    }
+    if (!expandedRole || !roleEntries.some(([role]) => role === expandedRole)) {
+      setExpandedRole(roleEntries[0][0]);
+    }
+  }, [expandedRole, roleEntries]);
 
   const fetchPendingUsers = async () => {
     try {
@@ -111,77 +143,107 @@ const UserVerification: React.FC = () => {
           <p className="text-gray-500">All users have been verified</p>
         </div>
       ) : (
-        <div className="grid gap-6">
-          {pendingUsers.map((user) => (
-            <div key={user.id} className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                    <User className="w-6 h-6 text-red-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{user.fullName}</h3>
-                    <p className="text-sm text-gray-500 capitalize">{user.role}</p>
-                  </div>
-                </div>
-                <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-full">
-                  Pending Verification
-                </span>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4 mb-4">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Mail className="w-4 h-4" />
-                  {user.email}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Phone className="w-4 h-4" />
-                  {user.phone}
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <h4 className="text-sm font-medium text-gray-900 mb-2">Uploaded Documents:</h4>
-                <div className="space-y-2">
-                  {user.documents.map((doc) => (
-                    <div key={doc.id} className="flex items-center justify-between bg-gray-50 p-3 rounded">
-                      <div className="flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm text-gray-700">{doc.fileName}</span>
-                      </div>
-                      <button 
-                        onClick={() => handleViewDocument({ id: doc.id, fileName: doc.fileName })}
-                        disabled={loadingDocument}
-                        className="text-red-600 hover:text-red-700 text-sm font-medium disabled:opacity-50"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
+        <div className="space-y-4">
+          {roleEntries.map(([role, users]) => {
+            const isExpanded = expandedRole === role;
+            return (
+              <div key={role} className="bg-white rounded-xl border border-gray-200 shadow-sm">
+                <button
+                  type="button"
+                  onClick={() => setExpandedRole(isExpanded ? null : role)}
+                  className="w-full flex items-center justify-between px-5 py-4"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center">
+                      <User className="w-5 h-5 text-red-600" />
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <div className="text-left">
+                      <div className="text-base font-semibold text-gray-900">{role}</div>
+                      <div className="text-sm text-gray-500">{users.length} pending</div>
+                    </div>
+                  </div>
+                  <ChevronDown
+                    className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                  />
+                </button>
 
-              <div className="flex gap-3">
-                <button
-                  onClick={() => handleApprove(user.id)}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  <Check className="w-4 h-4" />
-                  Approve
-                </button>
-                <button
-                  onClick={() => {
-                    setSelectedUser(user);
-                    setShowRejectModal(true);
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                  Reject
-                </button>
+                {isExpanded && (
+                  <div className="border-t border-gray-100 px-5 py-5 space-y-4">
+                    {users.map((user) => (
+                      <div key={user.id} className="bg-gray-50 rounded-lg border border-gray-100 p-4">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border">
+                              <User className="w-5 h-5 text-red-600" />
+                            </div>
+                            <div>
+                              <h3 className="text-base font-semibold text-gray-900">{user.fullName}</h3>
+                              <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+                            </div>
+                          </div>
+                          <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                            Pending Verification
+                          </span>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-3 mb-3">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Mail className="w-4 h-4" />
+                            {user.email}
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Phone className="w-4 h-4" />
+                            {user.phone}
+                          </div>
+                        </div>
+
+                        <div className="mb-3">
+                          <h4 className="text-xs font-medium text-gray-700 mb-2 uppercase tracking-wide">Documents</h4>
+                          <div className="space-y-2">
+                            {user.documents.map((doc) => (
+                              <div key={doc.id} className="flex items-center justify-between bg-white p-3 rounded border">
+                                <div className="flex items-center gap-2">
+                                  <FileText className="w-4 h-4 text-gray-500" />
+                                  <span className="text-sm text-gray-700">{doc.fileName}</span>
+                                </div>
+                                <button
+                                  onClick={() => handleViewDocument({ id: doc.id, fileName: doc.fileName })}
+                                  disabled={loadingDocument}
+                                  className="text-red-600 hover:text-red-700 text-sm font-medium disabled:opacity-50"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                          <button
+                            onClick={() => handleApprove(user.id)}
+                            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                          >
+                            <Check className="w-4 h-4" />
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setShowRejectModal(true);
+                            }}
+                            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                            Reject
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

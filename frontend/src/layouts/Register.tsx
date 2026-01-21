@@ -53,7 +53,7 @@ const RegisterPage: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0);
   const [hospitals, setHospitals] = useState<Array<{hospitalId: number; hospitalName: string}>>([]);
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
@@ -211,6 +211,17 @@ const RegisterPage: React.FC = () => {
     }));
   };
 
+  const validateStep0 = (): boolean => {
+    const newErrors: Partial<Record<keyof FormData, string>> = {};
+
+    if (!formData.role) {
+      newErrors.role = 'Please select a registration role';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const validateStep1 = (): boolean => {
     const newErrors: Partial<Record<keyof FormData, string>> = {};
 
@@ -286,13 +297,18 @@ const RegisterPage: React.FC = () => {
   };
 
   const handleNextStep = () => {
-    if (validateStep1()) {
+    if (currentStep === 0 && validateStep0()) {
+      setCurrentStep(1);
+      return;
+    }
+
+    if (currentStep === 1 && validateStep1()) {
       setCurrentStep(2);
     }
   };
 
   const handlePrevStep = () => {
-    setCurrentStep(1);
+    setCurrentStep(prev => Math.max(0, prev - 1));
   };
 
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -367,11 +383,20 @@ const RegisterPage: React.FC = () => {
 
           <div className="flex items-center justify-center mb-5">
             <div className="flex items-center gap-3">
+              <div className={`flex items-center gap-2 ${currentStep >= 0 ? 'text-red-600' : 'text-gray-400'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                  currentStep >= 0 ? 'bg-red-600 text-white' : 'bg-gray-200'
+                }`}>
+                  {currentStep > 0 ? <Check className="w-4 h-4" /> : '1'}
+                </div>
+                <span className="text-sm font-medium hidden sm:inline">Select Role</span>
+              </div>
+              <div className={`w-12 h-0.5 ${currentStep >= 1 ? 'bg-red-600' : 'bg-gray-300'}`}></div>
               <div className={`flex items-center gap-2 ${currentStep >= 1 ? 'text-red-600' : 'text-gray-400'}`}>
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
                   currentStep >= 1 ? 'bg-red-600 text-white' : 'bg-gray-200'
                 }`}>
-                  {currentStep > 1 ? <Check className="w-4 h-4" /> : '1'}
+                  {currentStep > 1 ? <Check className="w-4 h-4" /> : '2'}
                 </div>
                 <span className="text-sm font-medium hidden sm:inline">Basic Info</span>
               </div>
@@ -380,7 +405,7 @@ const RegisterPage: React.FC = () => {
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
                   currentStep >= 2 ? 'bg-red-600 text-white' : 'bg-gray-200'
                 }`}>
-                  2
+                  3
                 </div>
                 <span className="text-sm font-medium hidden sm:inline">Details & Security</span>
               </div>
@@ -388,6 +413,93 @@ const RegisterPage: React.FC = () => {
           </div>
 
           <div>
+            {currentStep === 0 && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    I am registering as *
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <label className={`relative flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                      formData.role === 'donor'
+                        ? 'border-red-600 bg-red-50'
+                        : 'border-gray-300 hover:border-red-300'
+                    }`}>
+                      <input
+                        type="radio"
+                        name="role"
+                        value="donor"
+                        checked={formData.role === 'donor'}
+                        onChange={handleChange}
+                        className="w-4 h-4 text-red-600"
+                      />
+                      <div className="ml-2.5">
+                        <div className="font-semibold text-sm text-gray-900">🩸 Donor</div>
+                        <div className="text-xs text-gray-600">I want to donate blood</div>
+                      </div>
+                    </label>
+
+                    <label className={`relative flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                      formData.role === 'patient'
+                        ? 'border-red-600 bg-red-50'
+                        : 'border-gray-300 hover:border-red-300'
+                    }`}>
+                      <input
+                        type="radio"
+                        name="role"
+                        value="patient"
+                        checked={formData.role === 'patient'}
+                        onChange={handleChange}
+                        className="w-4 h-4 text-red-600"
+                      />
+                      <div className="ml-2.5">
+                        <div className="font-semibold text-sm text-gray-900">🧍 Patient</div>
+                        <div className="text-xs text-gray-600">I need blood</div>
+                      </div>
+                    </label>
+
+                    <label className={`relative flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                      formData.role === 'hospital'
+                        ? 'border-red-600 bg-red-50'
+                        : 'border-gray-300 hover:border-red-300'
+                    }`}>
+                      <input
+                        type="radio"
+                        name="role"
+                        value="hospital"
+                        checked={formData.role === 'hospital'}
+                        onChange={handleChange}
+                        className="w-4 h-4 text-red-600"
+                      />
+                      <div className="ml-2.5">
+                        <div className="font-semibold text-sm text-gray-900">🏥 Hospital Staff</div>
+                        <div className="text-xs text-gray-600">Blood bank management</div>
+                      </div>
+                    </label>
+                  </div>
+                  {errors.role && (
+                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                      <AlertCircle className="w-4 h-4" />
+                      {errors.role}
+                    </p>
+                  )}
+                </div>
+
+                <p className="text-sm text-gray-500">
+                  Select a role to continue. We'll only show the fields you need next.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={handleNextStep}
+                  disabled={!formData.role}
+                  className="w-full py-2.5 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next Step
+                </button>
+              </div>
+            )}
+
             {currentStep === 1 && (
               <div className="space-y-4">
                 <div>
@@ -472,83 +584,22 @@ const RegisterPage: React.FC = () => {
                   )}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    I am registering as *
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <label className={`relative flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                      formData.role === 'donor'
-                        ? 'border-red-600 bg-red-50'
-                        : 'border-gray-300 hover:border-red-300'
-                    }`}>
-                      <input
-                        type="radio"
-                        name="role"
-                        value="donor"
-                        checked={formData.role === 'donor'}
-                        onChange={handleChange}
-                        className="w-4 h-4 text-red-600"
-                      />
-                      <div className="ml-2.5">
-                        <div className="font-semibold text-sm text-gray-900">🩸 Donor</div>
-                        <div className="text-xs text-gray-600">I want to donate blood</div>
-                      </div>
-                    </label>
-
-                    <label className={`relative flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                      formData.role === 'patient'
-                        ? 'border-red-600 bg-red-50'
-                        : 'border-gray-300 hover:border-red-300'
-                    }`}>
-                      <input
-                        type="radio"
-                        name="role"
-                        value="patient"
-                        checked={formData.role === 'patient'}
-                        onChange={handleChange}
-                        className="w-4 h-4 text-red-600"
-                      />
-                      <div className="ml-2.5">
-                        <div className="font-semibold text-sm text-gray-900">🧍 Patient</div>
-                        <div className="text-xs text-gray-600">I need blood</div>
-                      </div>
-                    </label>
-
-                    <label className={`relative flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                      formData.role === 'hospital'
-                        ? 'border-red-600 bg-red-50'
-                        : 'border-gray-300 hover:border-red-300'
-                    }`}>
-                      <input
-                        type="radio"
-                        name="role"
-                        value="hospital"
-                        checked={formData.role === 'hospital'}
-                        onChange={handleChange}
-                        className="w-4 h-4 text-red-600"
-                      />
-                      <div className="ml-2.5">
-                        <div className="font-semibold text-sm text-gray-900">🏥 Hospital Staff</div>
-                        <div className="text-xs text-gray-600">Blood bank management</div>
-                      </div>
-                    </label>
-                  </div>
-                  {errors.role && (
-                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="w-4 h-4" />
-                      {errors.role}
-                    </p>
-                  )}
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={handlePrevStep}
+                    className="flex-1 py-2.5 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleNextStep}
+                    className="flex-1 py-2.5 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 font-semibold transition-all"
+                  >
+                    Next Step
+                  </button>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={handleNextStep}
-                  className="w-full py-2.5 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 font-semibold transition-all cursor-pointer"
-                >
-                  Next Step
-                </button>
               </div>
             )}
 
