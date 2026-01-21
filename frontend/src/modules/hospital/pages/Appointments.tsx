@@ -213,75 +213,76 @@ export default function Appointments() {
               };
               
               return (
-              <div key={apt.appointmentId} className={`rounded-3xl shadow-2xl border-2 p-8 backdrop-blur-sm transition-all duration-300 hover:shadow-3xl transform hover:scale-[1.02] ${getCardColor(apt.status)}`}>
-              {/* Appointment Header */}
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-3">
-                  <User className="w-6 h-6 text-blue-600" />
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{apt.patientName}</h3>
-                    <p className="text-gray-600">Blood Type: {apt.bloodType}</p>
-                    <p className="text-xs text-gray-500">Request ID: {apt.requestId} | Patient ID: {apt.patientId}</p>
+                <div key={apt.appointmentId} className={`rounded-3xl shadow-2xl border-2 p-8 backdrop-blur-sm transition-all duration-300 hover:shadow-3xl transform hover:scale-[1.02] ${getCardColor(apt.status)}`}>
+                  {/* Appointment Header */}
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-3">
+                      <User className="w-6 h-6 text-blue-600" />
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">{apt.patientName}</h3>
+                        <p className="text-gray-600">Blood Type: {apt.bloodType}</p>
+                        <p className="text-xs text-gray-500">Request ID: {apt.requestId} | Patient ID: {apt.patientId}</p>
+                      </div>
+                    </div>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      apt.status === 'Upcoming' ? 'bg-yellow-100 text-yellow-700' :
+                      apt.status === 'Completed' ? 'bg-green-100 text-green-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                      {apt.status}
+                    </span>
+                  </div>
+
+                  {/* Appointment Details */}
+                  <div className="grid md:grid-cols-2 gap-4 mb-4">
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-700">Dr. {apt.doctorName}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-700">{new Date(apt.appointmentDate).toLocaleString()}</span>
+                    </div>
+                  </div>
+
+                  {/* Doctor Notes */}
+                  {apt.doctorNotes && (
+                    <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-700"><strong>Doctor Notes:</strong> {apt.doctorNotes}</p>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-3">
+                    {apt.status === 'Upcoming' && (
+                      <>
+                        <button
+                          onClick={() => setCompletingId(apt.appointmentId)}
+                          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                          Complete
+                        </button>
+                        <button
+                          onClick={() => cancelAppointment(apt.appointmentId)}
+                          className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                        >
+                          <XCircle className="w-4 h-4" />
+                          Cancel
+                        </button>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Database Info Footer */}
+                  <div className="mt-4 pt-3 border-t border-gray-100 text-xs text-gray-500">
+                    Created: {new Date(apt.createdAt).toLocaleString()} | ID: {apt.appointmentId}
                   </div>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  apt.status === 'Upcoming' ? 'bg-yellow-100 text-yellow-700' :
-                  apt.status === 'Completed' ? 'bg-green-100 text-green-700' :
-                  'bg-red-100 text-red-700'
-                }`}>
-                  {apt.status}
-                </span>
-              </div>
-
-              {/* Appointment Details */}
-              <div className="grid md:grid-cols-2 gap-4 mb-4">
-                <div className="flex items-center gap-2">
-                  <User className="w-4 h-4 text-gray-500" />
-                  <span className="text-gray-700">Dr. {apt.doctorName}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-gray-500" />
-                  <span className="text-gray-700">{new Date(apt.appointmentDate).toLocaleString()}</span>
-                </div>
-              </div>
-
-              {/* Doctor Notes */}
-              {apt.doctorNotes && (
-                <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-700"><strong>Doctor Notes:</strong> {apt.doctorNotes}</p>
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="flex gap-3">
-                {apt.status === 'Upcoming' && (
-                  <>
-                    <button
-                      onClick={() => setCompletingId(apt.appointmentId)}
-                      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                    >
-                      <CheckCircle className="w-4 h-4" />
-                      Complete
-                    </button>
-                    <button
-                      onClick={() => cancelAppointment(apt.appointmentId)}
-                      className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                    >
-                      <XCircle className="w-4 h-4" />
-                      Cancel
-                    </button>
-                  </>
-                )}
-              </div>
-
-              {/* Database Info Footer */}
-              <div className="mt-4 pt-3 border-t border-gray-100 text-xs text-gray-500">
-                Created: {new Date(apt.createdAt).toLocaleString()} | ID: {apt.appointmentId}
-              </div>
-            </div>
-            );
-          })
-        )}
+              );
+            })
+          )}
+        </div>
       </div>
 
       {/* Complete Appointment Modal */}
@@ -304,7 +305,7 @@ export default function Appointments() {
             </div>
             <div className="flex gap-3">
               <button
-                onClick={() => completeAppointment(completingId)}
+                onClick={() => completingId && completeAppointment(completingId)}
                 className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors"
               >
                 Complete Appointment

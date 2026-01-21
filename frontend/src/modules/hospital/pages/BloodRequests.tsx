@@ -368,6 +368,7 @@ export default function BloodRequests() {
           </div>
         )}
       </div>
+    </div>
 
       {/* Rejection Modal */}
       {showRejectModal && (
