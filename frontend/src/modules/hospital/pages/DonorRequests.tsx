@@ -329,6 +329,7 @@ export default function DonorRequests() {
           </div>
         )}
       </div>
+    </div>
 
       {/* Donor Details Modal */}
       {showDetails && selectedRequest && (
