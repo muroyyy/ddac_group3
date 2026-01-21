@@ -2,6 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { LayoutDashboard, Droplet, History, User, LogOut, Calendar, FileText, Clock } from 'lucide-react';
+import bloodlineLogo from '../assets/bloodline_logo.svg';
 
 export default function DonorLayout() {
   const { user, logout } = useAuth();
@@ -31,12 +32,13 @@ export default function DonorLayout() {
       <div className="w-64 bg-white shadow-lg flex flex-col fixed h-full">
         {/* Header */}
         <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center">
-            <span className="text-2xl">🩸</span>
-            <div className="ml-3">
-              <h1 className="text-lg font-bold text-gray-900">BloodLine</h1>
-              <p className="text-sm text-gray-500">Donor Portal</p>
-            </div>
+          <div className="flex flex-col items-start gap-2">
+            <img
+              src={bloodlineLogo}
+              alt="BloodLine Logo"
+              className="w-auto h-8"
+            />
+            <p className="text-sm text-gray-500">Donor Portal</p>
           </div>
         </div>
 
