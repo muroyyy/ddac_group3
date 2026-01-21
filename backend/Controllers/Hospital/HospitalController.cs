@@ -456,7 +456,7 @@ public class HospitalController : ControllerBase
 
 
     /// <summary>
-    /// Get hospital appointments with patient data
+    /// Get hospital appointments with patient data from patient_appointments table
     /// </summary>
     [HttpGet("appointments/{userId}")]
     public async Task<IActionResult> GetAppointments(int userId)
@@ -467,22 +467,31 @@ public class HospitalController : ControllerBase
             if (hospitalId == null)
                 return Ok(new { success = true, data = new List<object>() });
 
-            // Use Entity Framework instead of raw SQL to avoid potential issues
+            // Query patient_appointments table with proper joins to get real data
             var appointments = await _context.PatientAppointments
                 .Where(pa => pa.HospitalId == hospitalId.Value)
-                .Select(pa => new
+                .GroupJoin(_context.BloodRequests, pa => pa.RequestId, br => br.RequestId, (pa, br) => new { pa, br })
+                .SelectMany(x => x.br.DefaultIfEmpty(), (x, br) => new { x.pa, br })
+                .GroupJoin(_context.PatientProfiles, x => x.pa.PatientId, pp => pp.PatientId, (x, pp) => new { x.pa, x.br, pp })
+                .SelectMany(x => x.pp.DefaultIfEmpty(), (x, pp) => new { x.pa, x.br, pp })
+                .GroupJoin(_context.Users, x => x.pp != null ? x.pp.UserId : 0, u => u.Id, (x, u) => new { x.pa, x.br, x.pp, u })
+                .SelectMany(x => x.u.DefaultIfEmpty(), (x, u) => new { x.pa, x.br, x.pp, u })
+                .GroupJoin(_context.Doctors, x => x.pa.DoctorId ?? 0, d => d.DoctorId, (x, d) => new { x.pa, x.br, x.pp, x.u, d })
+                .SelectMany(x => x.d.DefaultIfEmpty(), (x, d) => new
                 {
-                    appointmentId = pa.AppointmentId,
-                    requestId = pa.RequestId,
-                    patientName = "Patient " + pa.PatientId,
-                    patientPhone = "N/A",
-                    bloodType = "Unknown",
-                    doctorName = "Dr. TBD",
-                    doctorId = pa.DoctorId,
-                    appointmentDate = pa.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
-                    status = pa.Status ?? "Upcoming",
-                    doctorNotes = pa.DoctorNotes ?? "",
-                    createdAt = pa.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                    appointmentId = x.pa.AppointmentId,
+                    requestId = x.pa.RequestId,
+                    patientId = x.pa.PatientId,
+                    hospitalId = x.pa.HospitalId,
+                    patientName = x.u != null ? x.u.FullName : "Unknown Patient",
+                    patientPhone = x.u != null ? x.u.Phone : "N/A",
+                    bloodType = x.br != null ? x.br.BloodType : "Unknown",
+                    doctorName = d != null ? d.DoctorName : "TBD",
+                    doctorId = x.pa.DoctorId,
+                    appointmentDate = x.pa.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
+                    status = x.pa.Status ?? "Upcoming",
+                    doctorNotes = x.pa.DoctorNotes ?? "",
+                    createdAt = x.pa.CreatedAt.ToString("yyyy-MM-dd HH:mm")
                 })
                 .OrderByDescending(x => x.appointmentDate)
                 .ToListAsync();
@@ -491,8 +500,32 @@ public class HospitalController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error fetching appointments: {ex.Message}");
+            _logger.LogError($"Error fetching appointments from patient_appointments table: {ex.Message}");
             return Ok(new { success = true, data = new List<object>() });
+        }
+    }
+
+    /// <summary>
+    /// Delete appointment from patient_appointments table
+    /// </summary>
+    [HttpDelete("appointments/{id}")]
+    public async Task<IActionResult> DeleteAppointment(int id)
+    {
+        try
+        {
+            var appointment = await _context.PatientAppointments.FindAsync(id);
+            if (appointment == null)
+                return NotFound(new { error = "Appointment not found" });
+
+            _context.PatientAppointments.Remove(appointment);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, message = "Appointment deleted successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error deleting appointment: {ex.Message}");
+            return StatusCode(500, new { error = "Failed to delete appointment" });
         }
     }
 
