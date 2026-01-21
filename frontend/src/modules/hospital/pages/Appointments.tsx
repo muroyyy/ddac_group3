@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Calendar, User, Clock, CheckCircle, XCircle, Trash2 } from 'lucide-react';
+import { Calendar, User, Clock, CheckCircle, XCircle, Search, ArrowUpDown } from 'lucide-react';
 import { hospitalAPI } from '../services/hospitalAPI';
 import { useAuth } from '../../../context/AuthContext';
 
@@ -39,6 +39,8 @@ export default function Appointments() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [completingId, setCompletingId] = useState<number | null>(null);
   const [doctorNotes, setDoctorNotes] = useState('');
 
@@ -144,10 +146,17 @@ export default function Appointments() {
     }
   };
 
-  // Safe filtering - ensure appointments is always an array
-  const filteredAppointments = Array.isArray(appointments) ? appointments.filter(apt => 
-    !statusFilter || apt.status.toLowerCase() === statusFilter.toLowerCase()
-  ) : [];
+  // Safe filtering and sorting
+  const filteredAppointments = Array.isArray(appointments) ? appointments
+    .filter(apt => 
+      (!statusFilter || apt.status.toLowerCase() === statusFilter.toLowerCase()) &&
+      (!searchTerm || apt.patientName.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+    .sort((a, b) => {
+      const dateA = new Date(a.appointmentDate).getTime();
+      const dateB = new Date(b.appointmentDate).getTime();
+      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    }) : [];
 
   return (
     <div className="p-6 bg-gradient-to-br from-blue-50 via-white to-blue-50 min-h-screen">
@@ -159,8 +168,8 @@ export default function Appointments() {
         <p className="text-gray-600">Manage patient appointments from bloodline database</p>
       </div>
 
-      {/* Status Filter */}
-      <div className="mb-6">
+      {/* Filters and Search */}
+      <div className="mb-6 flex flex-wrap gap-4">
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -171,6 +180,25 @@ export default function Appointments() {
           <option value="completed">Completed</option>
           <option value="cancelled">Cancelled</option>
         </select>
+        
+        <div className="relative">
+          <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search by patient name..."
+            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        
+        <button
+          onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+          className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+        >
+          <ArrowUpDown className="w-4 h-4" />
+          Date {sortOrder === 'asc' ? '↑' : '↓'}
+        </button>
       </div>
 
       {/* Appointments Grid - Card-based layout */}
@@ -186,8 +214,18 @@ export default function Appointments() {
             No appointments found in database
           </div>
         ) : (
-          filteredAppointments.map((apt) => (
-            <div key={apt.appointmentId} className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+          filteredAppointments.map((apt) => {
+            const getCardColor = (status: string) => {
+              switch (status.toLowerCase()) {
+                case 'completed': return 'bg-green-50 border-green-200';
+                case 'cancelled': return 'bg-red-50 border-red-200';
+                case 'upcoming': return 'bg-purple-50 border-purple-200';
+                default: return 'bg-white border-gray-100';
+              }
+            };
+            
+            return (
+            <div key={apt.appointmentId} className={`rounded-xl shadow-lg border p-6 ${getCardColor(apt.status)}`}>
               {/* Appointment Header */}
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
@@ -246,14 +284,6 @@ export default function Appointments() {
                     </button>
                   </>
                 )}
-                {/* Delete button available for all statuses */}
-                <button
-                  onClick={() => deleteAppointment(apt.appointmentId)}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Delete
-                </button>
               </div>
 
               {/* Database Info Footer */}
@@ -261,7 +291,8 @@ export default function Appointments() {
                 Created: {new Date(apt.createdAt).toLocaleString()} | ID: {apt.appointmentId}
               </div>
             </div>
-          ))
+            );
+          })
         )}
       </div>
 
