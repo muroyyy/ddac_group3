@@ -123,29 +123,6 @@ export default function Appointments() {
     }
   };
 
-  /**
-   * Delete appointment - Removes record from patient_appointments table
-   * Permanent deletion from database
-   */
-  const deleteAppointment = async (id: number) => {
-    if (!confirm('Are you sure you want to permanently delete this appointment? This action cannot be undone.')) return;
-    
-    try {
-      // API call to delete from patient_appointments table
-      const result = await hospitalAPI.deleteAppointment(id);
-      
-      if (result.success) {
-        alert('Appointment deleted successfully.');
-        loadAppointments(); // Refresh from database
-      } else {
-        alert('Failed to delete appointment');
-      }
-    } catch (error) {
-      console.error('Failed to delete appointment from database:', error);
-      alert('Failed to delete appointment');
-    }
-  };
-
   // Safe filtering and sorting
   const filteredAppointments = Array.isArray(appointments) ? appointments
     .filter(apt => 
