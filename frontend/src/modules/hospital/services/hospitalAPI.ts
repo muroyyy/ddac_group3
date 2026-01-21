@@ -97,6 +97,14 @@ export const hospitalAPI = {
     return response.json();
   },
 
+  deleteAppointment: async (id: number): Promise<{ success: boolean }> => {
+    const response = await fetch(`${API_BASE_URL}/hospital/appointments/${id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return response.json();
+  },
+
   // Doctors Management
   getDoctors: async (userId: number): Promise<any> => {
     const response = await fetch(`${API_BASE_URL}/hospital/doctors/${userId}`);
