@@ -136,73 +136,84 @@ export default function Appointments() {
     }) : [];
 
   return (
-    <div className="p-6 bg-gradient-to-br from-blue-50 via-white to-blue-50 min-h-screen">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-          <Calendar className="w-8 h-8 text-blue-600" />
-          Appointment Management
-        </h2>
-        <p className="text-gray-600">Manage patient appointments from bloodline database</p>
-      </div>
-
-      {/* Filters and Search */}
-      <div className="mb-6 flex flex-wrap gap-4">
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">All Appointments</option>
-          <option value="upcoming">Upcoming</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-        
-        <div className="relative">
-          <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by patient name..."
-            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          />
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
+      <div className="p-8">
+        {/* Enhanced page header */}
+        <div className="bg-gradient-to-r from-purple-500 to-blue-600 rounded-3xl p-8 text-white shadow-2xl mb-8">
+          <h2 className="text-4xl font-bold mb-2 flex items-center gap-3">
+            <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+              <Calendar className="w-8 h-8" />
+            </div>
+            Appointment Management
+          </h2>
+          <p className="text-purple-100 text-lg">Manage patient appointments from bloodline database</p>
         </div>
-        
-        <button
-          onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-          className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-        >
-          <ArrowUpDown className="w-4 h-4" />
-          Date {sortOrder === 'asc' ? '↑' : '↓'}
-        </button>
-      </div>
 
-      {/* Appointments Grid - Card-based layout */}
-      <div className="grid gap-6">
-        {loading ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            Loading appointments from database...
-          </div>
-        ) : filteredAppointments.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            No appointments found in database
-          </div>
-        ) : (
-          filteredAppointments.map((apt) => {
-            const getCardColor = (status: string) => {
-              switch (status.toLowerCase()) {
-                case 'completed': return 'bg-green-100 border-green-300';
-                case 'cancelled': return 'bg-red-100 border-red-300';
-                case 'upcoming': return 'bg-purple-100 border-purple-300';
-                default: return 'bg-white border-gray-100';
-              }
-            };
+        {/* Enhanced filters and search */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/50 mb-8">
+          <div className="flex flex-wrap gap-4">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-6 py-4 border-2 border-purple-200 rounded-2xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 bg-white/90 backdrop-blur-sm shadow-lg font-medium"
+            >
+              <option value="">All Appointments</option>
+              <option value="upcoming">Upcoming</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
             
-            return (
-            <div key={apt.appointmentId} className={`rounded-xl shadow-lg border p-6 ${getCardColor(apt.status)}`}>
+            <div className="relative flex-1 min-w-[300px]">
+              <Search className="w-5 h-5 absolute left-4 top-4 text-purple-400" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by patient name..."
+                className="w-full pl-12 pr-4 py-4 border-2 border-purple-200 rounded-2xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 bg-white/90 backdrop-blur-sm shadow-lg"
+              />
+            </div>
+            
+            <button
+              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+              className="flex items-center gap-3 px-6 py-4 border-2 border-purple-200 rounded-2xl hover:bg-purple-50 hover:border-purple-300 transition-all duration-300 bg-white/90 backdrop-blur-sm shadow-lg font-medium hover:shadow-xl transform hover:scale-105"
+            >
+              <ArrowUpDown className="w-5 h-5 text-purple-500" />
+              Date {sortOrder === 'asc' ? '↑' : '↓'}
+            </button>
+          </div>
+        </div>
+
+        {/* Enhanced appointments grid */}
+        <div className="grid gap-8">
+          {loading ? (
+            <div className="text-center py-20">
+              <div className="relative">
+                <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600 mx-auto mb-6"></div>
+                <div className="absolute inset-0 rounded-full bg-purple-100/20 animate-pulse"></div>
+              </div>
+              <p className="text-lg font-medium text-gray-500">Loading appointments from database...</p>
+            </div>
+          ) : filteredAppointments.length === 0 ? (
+            <div className="text-center py-20 text-gray-500">
+              <div className="p-6 bg-purple-50 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                <Calendar className="w-12 h-12 text-purple-300" />
+              </div>
+              <p className="text-xl font-medium">No appointments found in database</p>
+            </div>
+          ) : (
+            filteredAppointments.map((apt) => {
+              const getCardColor = (status: string) => {
+                switch (status.toLowerCase()) {
+                  case 'completed': return 'bg-gradient-to-br from-green-100 to-emerald-100 border-green-300 shadow-green-200/50';
+                  case 'cancelled': return 'bg-gradient-to-br from-red-100 to-pink-100 border-red-300 shadow-red-200/50';
+                  case 'upcoming': return 'bg-gradient-to-br from-purple-100 to-indigo-100 border-purple-300 shadow-purple-200/50';
+                  default: return 'bg-white/90 border-gray-200 shadow-gray-200/50';
+                }
+              };
+              
+              return (
+              <div key={apt.appointmentId} className={`rounded-3xl shadow-2xl border-2 p-8 backdrop-blur-sm transition-all duration-300 hover:shadow-3xl transform hover:scale-[1.02] ${getCardColor(apt.status)}`}>
               {/* Appointment Header */}
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">

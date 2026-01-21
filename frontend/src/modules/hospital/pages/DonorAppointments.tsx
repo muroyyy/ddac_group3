@@ -158,105 +158,117 @@ const DonorAppointments: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Heart className="w-6 h-6 text-red-600" />
-            Donor Appointments
-          </h1>
-          <p className="text-gray-600">Manage and view all donor appointments</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <div className="p-8">
+        {/* Enhanced page header */}
+        <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-3xl p-8 text-white shadow-2xl mb-8">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-4xl font-bold flex items-center gap-3 mb-2">
+                <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                  <Heart className="w-8 h-8" />
+                </div>
+                Donor Appointments
+              </h1>
+              <p className="text-blue-100 text-lg">Manage and view all donor appointments</p>
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-2xl hover:bg-white/30 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              Refresh
+            </button>
+          </div>
         </div>
-        <button
-          onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          Refresh
-        </button>
-      </div>
 
-      {/* Filters and Search */}
-      <div className="mb-6 flex flex-wrap gap-4">
-        <div className="relative">
-          <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by donor name..."
-            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
-          />
+        {/* Enhanced filters */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/50 mb-8">
+          <div className="flex flex-wrap gap-4">
+            <div className="relative flex-1 min-w-[300px]">
+              <Search className="w-5 h-5 absolute left-4 top-4 text-blue-400" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by donor name..."
+                className="w-full pl-12 pr-4 py-4 border-2 border-blue-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/90 backdrop-blur-sm shadow-lg"
+              />
+            </div>
+            
+            <select
+              value={bloodTypeFilter}
+              onChange={(e) => setBloodTypeFilter(e.target.value)}
+              className="px-6 py-4 border-2 border-blue-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/90 backdrop-blur-sm shadow-lg font-medium"
+            >
+              <option value="">All Blood Types</option>
+              {uniqueBloodTypes.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+            
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-6 py-4 border-2 border-blue-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/90 backdrop-blur-sm shadow-lg font-medium"
+            >
+              <option value="">All Status</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            
+            <button
+              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+              className="flex items-center gap-3 px-6 py-4 border-2 border-blue-200 rounded-2xl hover:bg-blue-50 hover:border-blue-300 transition-all duration-300 bg-white/90 backdrop-blur-sm shadow-lg font-medium hover:shadow-xl transform hover:scale-105"
+            >
+              <ArrowUpDown className="w-5 h-5 text-blue-500" />
+              Date {sortOrder === 'asc' ? '↑' : '↓'}
+            </button>
+          </div>
         </div>
-        
-        <select
-          value={bloodTypeFilter}
-          onChange={(e) => setBloodTypeFilter(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
-        >
-          <option value="">All Blood Types</option>
-          {uniqueBloodTypes.map(type => (
-            <option key={type} value={type}>{type}</option>
-          ))}
-        </select>
-        
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
-        >
-          <option value="">All Status</option>
-          <option value="scheduled">Scheduled</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-        
-        <button
-          onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-          className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-        >
-          <ArrowUpDown className="w-4 h-4" />
-          Date {sortOrder === 'asc' ? '↑' : '↓'}
-        </button>
-      </div>
 
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Donor Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Blood Type
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Time
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Created
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredAppointments.length === 0 ? (
+        {/* Enhanced appointments table */}
+        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/50 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-blue-200">
+              <thead className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
                 <tr>
-                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
-                    No donor appointments found
-                  </td>
+                  <th className="px-8 py-6 text-left text-sm font-bold uppercase tracking-wider">
+                    Donor Name
+                  </th>
+                  <th className="px-8 py-6 text-left text-sm font-bold uppercase tracking-wider">
+                    Blood Type
+                  </th>
+                  <th className="px-8 py-6 text-left text-sm font-bold uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-8 py-6 text-left text-sm font-bold uppercase tracking-wider">
+                    Time
+                  </th>
+                  <th className="px-8 py-6 text-left text-sm font-bold uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-8 py-6 text-left text-sm font-bold uppercase tracking-wider">
+                    Created
+                  </th>
+                  <th className="px-8 py-6 text-left text-sm font-bold uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              ) : (
-                filteredAppointments.map((appointment) => (
-                  <tr key={appointment.appointmentId} className="hover:bg-gray-50">
+              </thead>
+              <tbody className="bg-white/80 backdrop-blur-sm divide-y divide-blue-100">
+                {filteredAppointments.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-16 text-center text-gray-500">
+                      <div className="p-6 bg-blue-50 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                        <Heart className="w-12 h-12 text-blue-300" />
+                      </div>
+                      <p className="text-xl font-medium">No donor appointments found</p>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredAppointments.map((appointment, index) => (
+                    <tr key={appointment.appointmentId} className={`${index % 2 === 0 ? 'bg-white/60' : 'bg-blue-25/60'} hover:bg-blue-50/80 transition-all duration-300 hover:shadow-lg transform hover:scale-[1.01]`}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {appointment.donorName}
                     </td>
