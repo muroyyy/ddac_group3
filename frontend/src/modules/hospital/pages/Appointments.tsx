@@ -194,9 +194,9 @@ export default function Appointments() {
           filteredAppointments.map((apt) => {
             const getCardColor = (status: string) => {
               switch (status.toLowerCase()) {
-                case 'completed': return 'bg-green-50 border-green-200';
-                case 'cancelled': return 'bg-red-50 border-red-200';
-                case 'upcoming': return 'bg-purple-50 border-purple-200';
+                case 'completed': return 'bg-green-100 border-green-300';
+                case 'cancelled': return 'bg-red-100 border-red-300';
+                case 'upcoming': return 'bg-purple-100 border-purple-300';
                 default: return 'bg-white border-gray-100';
               }
             };
