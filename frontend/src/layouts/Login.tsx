@@ -29,14 +29,33 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const REMEMBER_KEY = 'bloodline_remember_me';
+  const CREDENTIALS_KEY = 'bloodline_saved_credentials';
+  const LAST_EMAIL_KEY = 'bloodline_last_email';
 
   // Load saved credentials on component mount
   useEffect(() => {
-    const savedCredentials = localStorage.getItem('bloodline_remember_me');
+    const savedCredentials = localStorage.getItem(REMEMBER_KEY);
+    const savedMapRaw = localStorage.getItem(CREDENTIALS_KEY);
+    const savedMap = savedMapRaw ? JSON.parse(savedMapRaw) : {};
+    const lastEmail = localStorage.getItem(LAST_EMAIL_KEY);
+
+    if (lastEmail && savedMap[lastEmail]) {
+      setFormData({ email: lastEmail, password: savedMap[lastEmail] });
+      setRememberMe(true);
+      return;
+    }
+
     if (savedCredentials) {
       const { email, password } = JSON.parse(savedCredentials);
       setFormData({ email, password });
       setRememberMe(true);
+
+      if (email && password) {
+        const nextMap = { ...savedMap, [email]: password };
+        localStorage.setItem(CREDENTIALS_KEY, JSON.stringify(nextMap));
+        localStorage.setItem(LAST_EMAIL_KEY, email);
+      }
     }
   }, []);
 
@@ -44,10 +63,24 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    if (name === 'email') {
+      const savedMapRaw = localStorage.getItem(CREDENTIALS_KEY);
+      const savedMap = savedMapRaw ? JSON.parse(savedMapRaw) : {};
+      const savedPassword = savedMap[value];
+      setFormData(prev => ({
+        ...prev,
+        email: value,
+        password: savedPassword ?? prev.password
+      }));
+      if (savedPassword) {
+        setRememberMe(true);
+      }
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
     if (errors[name as keyof FormData]) {
       setErrors(prev => ({
         ...prev,
@@ -93,12 +126,30 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           
           // Handle remember me functionality
           if (rememberMe) {
-            localStorage.setItem('bloodline_remember_me', JSON.stringify({
+            const savedMapRaw = localStorage.getItem(CREDENTIALS_KEY);
+            const savedMap = savedMapRaw ? JSON.parse(savedMapRaw) : {};
+            const nextMap = { ...savedMap, [formData.email]: formData.password };
+            localStorage.setItem(CREDENTIALS_KEY, JSON.stringify(nextMap));
+            localStorage.setItem(LAST_EMAIL_KEY, formData.email);
+            localStorage.setItem(REMEMBER_KEY, JSON.stringify({
               email: formData.email,
               password: formData.password
             }));
           } else {
-            localStorage.removeItem('bloodline_remember_me');
+            const savedMapRaw = localStorage.getItem(CREDENTIALS_KEY);
+            const savedMap = savedMapRaw ? JSON.parse(savedMapRaw) : {};
+            if (savedMap[formData.email]) {
+              delete savedMap[formData.email];
+              if (Object.keys(savedMap).length > 0) {
+                localStorage.setItem(CREDENTIALS_KEY, JSON.stringify(savedMap));
+              } else {
+                localStorage.removeItem(CREDENTIALS_KEY);
+              }
+            }
+            if (localStorage.getItem(LAST_EMAIL_KEY) === formData.email) {
+              localStorage.removeItem(LAST_EMAIL_KEY);
+            }
+            localStorage.removeItem(REMEMBER_KEY);
           }
           
           // Normalize role to lowercase for internal checks and storage
