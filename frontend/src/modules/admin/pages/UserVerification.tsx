@@ -27,7 +27,7 @@ const UserVerification: React.FC = () => {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [viewingDocument, setViewingDocument] = useState<{ id: number; fileName: string; url: string } | null>(null);
   const [loadingDocument, setLoadingDocument] = useState(false);
-  const [expandedRole, setExpandedRole] = useState<string | null>(null);
+  const [expandedRoles, setExpandedRoles] = useState<Set<string>>(new Set());
 
   const roleEntries = useMemo(() => {
     const grouped = pendingUsers.reduce<Record<string, PendingUser[]>>((acc, user) => {
@@ -56,13 +56,39 @@ const UserVerification: React.FC = () => {
 
   useEffect(() => {
     if (roleEntries.length === 0) {
-      setExpandedRole(null);
+      setExpandedRoles(new Set());
       return;
     }
-    if (!expandedRole || !roleEntries.some(([role]) => role === expandedRole)) {
-      setExpandedRole(roleEntries[0][0]);
-    }
-  }, [expandedRole, roleEntries]);
+
+    setExpandedRoles(prev => {
+      const next = new Set(prev);
+      const availableRoles = new Set(roleEntries.map(([role]) => role));
+
+      Array.from(next).forEach(role => {
+        if (!availableRoles.has(role)) {
+          next.delete(role);
+        }
+      });
+
+      if (next.size === 0) {
+        next.add(roleEntries[0][0]);
+      }
+
+      return next;
+    });
+  }, [roleEntries]);
+
+  const toggleRole = (role: string) => {
+    setExpandedRoles(prev => {
+      const next = new Set(prev);
+      if (next.has(role)) {
+        next.delete(role);
+      } else {
+        next.add(role);
+      }
+      return next;
+    });
+  };
 
   const fetchPendingUsers = async () => {
     try {
@@ -145,12 +171,12 @@ const UserVerification: React.FC = () => {
       ) : (
         <div className="space-y-4">
           {roleEntries.map(([role, users]) => {
-            const isExpanded = expandedRole === role;
+            const isExpanded = expandedRoles.has(role);
             return (
               <div key={role} className="bg-white rounded-xl border border-gray-200 shadow-sm">
                 <button
                   type="button"
-                  onClick={() => setExpandedRole(isExpanded ? null : role)}
+                  onClick={() => toggleRole(role)}
                   className="w-full flex items-center justify-between px-5 py-4"
                 >
                   <div className="flex items-center gap-3">
@@ -200,21 +226,27 @@ const UserVerification: React.FC = () => {
                         <div className="mb-3">
                           <h4 className="text-xs font-medium text-gray-700 mb-2 uppercase tracking-wide">Documents</h4>
                           <div className="space-y-2">
-                            {user.documents.map((doc) => (
-                              <div key={doc.id} className="flex items-center justify-between bg-white p-3 rounded border">
-                                <div className="flex items-center gap-2">
-                                  <FileText className="w-4 h-4 text-gray-500" />
-                                  <span className="text-sm text-gray-700">{doc.fileName}</span>
-                                </div>
-                                <button
-                                  onClick={() => handleViewDocument({ id: doc.id, fileName: doc.fileName })}
-                                  disabled={loadingDocument}
-                                  className="text-red-600 hover:text-red-700 text-sm font-medium disabled:opacity-50"
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </button>
+                            {user.documents.length === 0 ? (
+                              <div className="text-sm text-gray-500 bg-white p-3 rounded border">
+                                No documents uploaded.
                               </div>
-                            ))}
+                            ) : (
+                              user.documents.map((doc) => (
+                                <div key={doc.id} className="flex items-center justify-between bg-white p-3 rounded border">
+                                  <div className="flex items-center gap-2">
+                                    <FileText className="w-4 h-4 text-gray-500" />
+                                    <span className="text-sm text-gray-700">{doc.fileName}</span>
+                                  </div>
+                                  <button
+                                    onClick={() => handleViewDocument({ id: doc.id, fileName: doc.fileName })}
+                                    disabled={loadingDocument}
+                                    className="text-red-600 hover:text-red-700 text-sm font-medium disabled:opacity-50"
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              ))
+                            )}
                           </div>
                         </div>
 
