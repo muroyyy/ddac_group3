@@ -105,7 +105,7 @@ export default function Appointments() {
         {loading ? (
           <div className="text-center py-8">Loading appointments...</div>
         ) : filteredAppointments.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">No appointments found</div>
+          <div className="text-center py-8 text-gray-500">No appointments found 2</div>
         ) : (
           filteredAppointments.map((apt) => (
             <div key={apt.appointmentId} className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
