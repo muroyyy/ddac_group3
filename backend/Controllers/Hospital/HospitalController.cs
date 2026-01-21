@@ -703,18 +703,22 @@ public class HospitalController : ControllerBase
             // Show all pending requests regardless of hospital_id for testing
             var requests = await _context.DonationRequests
                 .Where(dr => string.IsNullOrEmpty(dr.Status) || dr.Status == "Pending")
-                .Select(dr => new
+                .GroupJoin(_context.DonorProfiles, dr => dr.DonorId, dp => dp.DonorId, (dr, dp) => new { dr, dp })
+                .SelectMany(x => x.dp.DefaultIfEmpty(), (x, dp) => new { x.dr, dp })
+                .GroupJoin(_context.Users, x => x.dp != null ? x.dp.UserId : 0, u => u.Id, (x, u) => new { x.dr, x.dp, u })
+                .SelectMany(x => x.u.DefaultIfEmpty(), (x, u) => new { x.dr, x.dp, u })
+                .Select(x => new
                 {
-                    donationId = dr.DonationId,
-                    donorName = "Donor " + dr.DonorId,
-                    donorEmail = "donor@example.com",
-                    donorPhone = "123-456-7890",
-                    bloodType = "O+",
-                    unitsRequested = dr.UnitsRequired,
-                    status = dr.Status ?? "Pending",
-                    requestedDate = dr.RequestedDate.ToString("yyyy-MM-dd"),
+                    donationId = x.dr.DonationId,
+                    donorName = x.u != null ? x.u.FullName : $"Donor {x.dr.DonorId}",
+                    donorEmail = x.u != null ? x.u.Email : "N/A",
+                    donorPhone = x.u != null ? x.u.Phone : "N/A",
+                    bloodType = x.dp != null ? x.dp.BloodType : "Unknown",
+                    unitsRequested = x.dr.UnitsRequired,
+                    status = x.dr.Status ?? "Pending",
+                    requestedDate = x.dr.RequestedDate.ToString("yyyy-MM-dd"),
                     notes = "",
-                    hospitalId = dr.HospitalId // Keep for debugging
+                    hospitalId = x.dr.HospitalId // Keep for debugging
                 })
                 .ToListAsync();
 
@@ -1192,4 +1196,3 @@ public class LinkHospitalRequest
     public int HospitalId { get; set; }
     public string? Position { get; set; }
 }
-
