@@ -25,11 +25,9 @@ import Analytics from '../modules/admin/pages/Analytics';
 import Security from '../modules/admin/pages/Security';
 import SystemMonitoring from '../modules/admin/pages/SystemMonitoring';
 import BloodInventory from '../modules/admin/pages/BloodInventory';
-import Notifications from '../modules/admin/pages/Notifications';
 import AuditLogs from '../modules/admin/pages/AuditLogs';
 import ProfileSettings from '../modules/admin/pages/ProfileSettings';
 import UserVerification from '../modules/admin/pages/UserVerification';
-import SystemAlerts from '../modules/admin/pages/SystemAlerts';
 import HospitalCodes from '../modules/admin/pages/HospitalCodes';
 
 const AdminLayout: React.FC = () => {
@@ -43,12 +41,10 @@ const AdminLayout: React.FC = () => {
     { id: 'users', icon: <Users className="w-5 h-5" />, label: 'User Management' },
     { id: 'verification', icon: <CheckCircle className="w-5 h-5" />, label: 'User Verification' },
     { id: 'hospital-codes', icon: <Shield className="w-5 h-5" />, label: 'Hospital Codes' },
-    { id: 'alerts', icon: <Bell className="w-5 h-5" />, label: 'System Alerts' },
     { id: 'analytics', icon: <TrendingUp className="w-5 h-5" />, label: 'Analytics & Reports' },
     { id: 'security', icon: <Shield className="w-5 h-5" />, label: 'Security & Compliance' },
     { id: 'monitoring', icon: <Server className="w-5 h-5" />, label: 'System Monitoring' },
     { id: 'inventory', icon: <Droplet className="w-5 h-5" />, label: 'Blood Inventory' },
-    { id: 'notifications', icon: <Bell className="w-5 h-5" />, label: 'Notifications' },
     { id: 'audit', icon: <FileText className="w-5 h-5" />, label: 'Audit Logs' },
     { id: 'profile', icon: <Settings className="w-5 h-5" />, label: 'Profile Settings' }
   ];
@@ -63,8 +59,6 @@ const AdminLayout: React.FC = () => {
         return <UserVerification />;
       case 'hospital-codes':
         return <HospitalCodes />;
-      case 'alerts':
-        return <SystemAlerts />;
       case 'analytics':
         return <Analytics />;
       case 'security':
@@ -73,8 +67,6 @@ const AdminLayout: React.FC = () => {
         return <SystemMonitoring />;
       case 'inventory':
         return <BloodInventory />;
-      case 'notifications':
-        return <Notifications />;
       case 'audit':
         return <AuditLogs />;
       case 'profile':
