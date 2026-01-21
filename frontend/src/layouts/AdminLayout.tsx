@@ -7,7 +7,6 @@ import {
   TrendingUp,
   Server,
   Shield,
-  Bell,
   FileText,
   Menu,
   CheckCircle,
