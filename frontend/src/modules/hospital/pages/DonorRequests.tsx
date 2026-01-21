@@ -132,7 +132,7 @@ export default function DonorRequests() {
   const uniqueBloodTypes = [...new Set(requests.map(req => req.bloodType))].sort();
 
   return (
-    <div className="space-y-6 ml-6">
+    <div className="space-y-6 ml-6 mr-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <Heart className="w-6 h-6 text-red-600" />

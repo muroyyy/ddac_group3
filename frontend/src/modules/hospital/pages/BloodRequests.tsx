@@ -174,7 +174,7 @@ export default function BloodRequests() {
   };
 
   return (
-    <div className="space-y-6 ml-6">
+    <div className="space-y-6 ml-6 mr-6">
       {/* Page header matching patient module style */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
