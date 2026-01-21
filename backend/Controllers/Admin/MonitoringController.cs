@@ -198,11 +198,11 @@ public class MonitoringController : ControllerBase
             var response = await _s3Client.ListObjectsV2Async(request);
             foreach (var obj in response.S3Objects)
             {
-                totalBytes += obj.Size;
+                totalBytes += obj.Size ?? 0;
                 totalObjects += 1;
             }
 
-            continuationToken = response.IsTruncated ? response.NextContinuationToken : null;
+            continuationToken = response.IsTruncated == true ? response.NextContinuationToken : null;
         } while (!string.IsNullOrEmpty(continuationToken));
 
         return (totalBytes / (1024 * 1024 * 1024), totalObjects);
