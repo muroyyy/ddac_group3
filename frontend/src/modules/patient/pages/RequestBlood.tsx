@@ -61,7 +61,7 @@ export default function RequestBlood() {
   const [urgency, setUrgency] = useState("");            // Urgency level (Low/Medium/High/Critical)
   const [hospital, setHospital] = useState("");          // Selected hospital ID
   const [notes, setNotes] = useState("");                // Optional additional notes
-  const [hospitals, setHospitals] = useState([]);         // Real hospitals from database
+  const [hospitals, setHospitals] = useState<any[]>([]);         // Real hospitals from database
   
   // UI STATE MANAGEMENT
   const [submitted, setSubmitted] = useState(false);      // Success message visibility
@@ -254,6 +254,45 @@ export default function RequestBlood() {
         {/* HOSPITAL SELECTION FIELD */}
         <div>
           <label className="block mb-1">Hospital</label>
+          <select
+            value={hospital}
+            onChange={(e) => setHospital(e.target.value)}  // Update state on change
+            required  // HTML5 validation
+            className="border rounded-lg p-2 w-full"
+          >
+            <option value="">Select hospital</option>
+            {/* DYNAMIC OPTIONS - Map through real hospital list */}
+            {hospitals.map((h) => (
+              <option key={h.hospitalId} value={h.hospitalId}>
+                {h.hospitalName}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* OPTIONAL NOTES FIELD */}
+        <div>
+          <label className="block mb-1">Notes (Optional)</label>
+          <textarea
+            rows={4}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}  // Update state on change
+            className="border rounded-lg p-2 w-full"
+          />
+        </div>
+
+        {/* SUBMIT BUTTON - Disabled if blood type not set */}
+        <button
+          type="submit"
+          disabled={!bloodType}  // Disable if no blood type
+          className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer"
+        >
+          Submit Request
+        </button>
+      </form>
+    </div>
+  );
+}abel className="block mb-1">Hospital</label>
           <select
             value={hospital}
             onChange={(e) => setHospital(e.target.value)}  // Update state on change
