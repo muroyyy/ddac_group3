@@ -193,25 +193,34 @@ export default function MedicalDocuments() {
             Upload New Document
           </h2>
 
-          {/* FILE INPUT */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            onChange={handleFileSelect}
-            disabled={uploading}
-          />
+          <div className="flex items-center gap-4">
+            {/* STYLED FILE INPUT BUTTON */}
+            <label className="bg-red-600 text-white px-4 py-2 rounded-lg cursor-pointer hover:bg-red-700 transition">
+              Choose File
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={handleFileSelect}
+                disabled={uploading}
+                className="hidden"
+              />
+            </label>
+
+            {/* SHOW SELECTED FILE NAME */}
+            {selectedFile && (
+              <span className="text-sm text-gray-600">
+                Selected: {selectedFile.name}
+              </span>
+            )}
+          </div>
 
           {/* SHOW UPLOAD BUTTON ONLY WHEN FILE IS SELECTED */}
           {selectedFile && (
-            <div className="mt-4 flex items-center gap-4">
-              <span className="text-sm">
-                Selected: {selectedFile.name}
-              </span>
-
+            <div className="mt-4">
               <button
                 onClick={handleUpload}
                 disabled={uploading}
-                className="bg-red-600 text-white px-6 py-2 rounded-lg"
+                className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition disabled:opacity-50"
               >
                 {uploading ? 'Uploading...' : 'Upload Document'}
               </button>
@@ -221,54 +230,81 @@ export default function MedicalDocuments() {
 
         {/* DOCUMENT LIST */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <table className="w-full">
+          <div className="overflow-x-auto">
+            <table className="w-full">
 
-            {/* TABLE HEADER */}
-            <thead className="bg-red-600 text-white">
-              <tr>
-                <th>Document Name</th>
-                <th>Size</th>
-                <th>Uploaded</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            {/* TABLE BODY */}
-            <tbody>
-
-              {/* If no documents exist */}
-              {documents.length === 0 ? (
+              {/* TABLE HEADER */}
+              <thead className="bg-red-600 text-white">
                 <tr>
-                  <td colSpan={4} className="text-center text-gray-500">
-                    No documents uploaded yet
-                  </td>
+                  <th className="px-6 py-4 text-left font-semibold">Document Name</th>
+                  <th className="px-6 py-4 text-left font-semibold">Size</th>
+                  <th className="px-6 py-4 text-left font-semibold">Uploaded</th>
+                  <th className="px-6 py-4 text-center font-semibold">Actions</th>
                 </tr>
-              ) : (
-                // Show each document
-                documents.map((doc) => (
-                  <tr key={doc.documentId}>
-                    <td>{doc.documentName}</td>
-                    <td>{formatFileSize(doc.fileSize)}</td>
-                    <td>{doc.uploadedAt}</td>
-                    <td className="text-center">
+              </thead>
 
-                      {/* VIEW DOCUMENT */}
-                      <a href={doc.url} target="_blank">
-                        View
-                      </a>
+              {/* TABLE BODY */}
+              <tbody className="divide-y divide-gray-200">
 
-                      {/* DELETE DOCUMENT */}
-                      <button onClick={() => handleDelete(doc.documentId)}>
-                        Delete
-                      </button>
-
+                {/* If no documents exist */}
+                {documents.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                      No documents uploaded yet
                     </td>
                   </tr>
-                ))
-              )}
+                ) : (
+                  // Show each document
+                  documents.map((doc) => (
+                    <tr key={doc.documentId} className="hover:bg-gray-50 transition">
+                      {/* DOCUMENT NAME WITH TRUNCATION */}
+                      <td className="px-6 py-4">
+                        <div 
+                          className="max-w-xs truncate" 
+                          title={doc.documentName}
+                        >
+                          {doc.documentName}
+                        </div>
+                      </td>
+                      
+                      {/* FILE SIZE */}
+                      <td className="px-6 py-4 text-gray-600">
+                        {formatFileSize(doc.fileSize)}
+                      </td>
+                      
+                      {/* UPLOAD DATE */}
+                      <td className="px-6 py-4 text-gray-600">
+                        {doc.uploadedAt}
+                      </td>
+                      
+                      {/* ACTIONS WITH PROPER SPACING */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-center gap-3">
+                          {/* VIEW DOCUMENT */}
+                          <a 
+                            href={doc.url} 
+                            target="_blank"
+                            className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition"
+                          >
+                            View
+                          </a>
 
-            </tbody>
-          </table>
+                          {/* DELETE DOCUMENT */}
+                          <button 
+                            onClick={() => handleDelete(doc.documentId)}
+                            className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
