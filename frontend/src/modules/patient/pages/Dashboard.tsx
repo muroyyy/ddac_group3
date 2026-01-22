@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../context/AuthContext";
-import { patientAPI } from '../../../api';
+
+import { useState, useEffect } from "react";    //acts like a temporary memory, fetches data when page loads or a variable changes
+import { useNavigate } from "react-router-dom";         //navigation between pages
+import { useAuth } from "../../../context/AuthContext";   //user logged-in info 
+import { patientAPI } from '../../../api';   //connected to the backend 
 import { Calendar, HeartPulse, ListChecks, CheckCircle } from "lucide-react";
 
 // -----------------------------------------------------------------------------
@@ -47,14 +48,15 @@ const patientNews = [
   },
 ];
 
-
+//describes components used in this page 
 export default function PatientDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [expandedId, setExpandedId] = useState<number | null>(null); //checks if any UI cards are expanded
   const [stats, setStats] = useState({ pending: 0, upcoming: 0, completed: 0 });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); //Tracks whether data is still being fetched
 
+  //If a user logs in or changes → dashboard reloads
   useEffect(() => {
     const loadDashboard = async () => {
       if (!user?.id) return;
@@ -109,13 +111,13 @@ export default function PatientDashboard() {
             <HeartPulse className="w-5 h-5 text-red-600" />
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mt-2">
-            {stats.pending}
+            {stats.pending} //calls backend to get number of pending requests
           </h2>
         </div>
 
         {/* Upcoming Appointments */}
         <div onClick={() => navigate('/patient/appointments')} className="bg-white rounded-lg shadow p-6 border hover:shadow-md transition cursor-pointer">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center"> //
             <p className="text-sm text-gray-500">Upcoming Appointments</p>
             <Calendar className="w-5 h-5 text-red-600" />
           </div>
@@ -201,7 +203,7 @@ export default function PatientDashboard() {
                       Open PDF – Click here
                     </a>
                   ) : (
-                    <iframe
+                    <iframe //embeds webpage within the current pag 
                       src={news.url}
                       className="w-full h-96 rounded border"
                       title={`Article-${news.id}`}

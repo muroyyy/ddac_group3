@@ -61,6 +61,7 @@ export default function RequestBlood() {
   const [urgency, setUrgency] = useState("");            // Urgency level (Low/Medium/High/Critical)
   const [hospital, setHospital] = useState("");          // Selected hospital ID
   const [notes, setNotes] = useState("");                // Optional additional notes
+  const [hospitals, setHospitals] = useState([]);         // Real hospitals from database
   
   // UI STATE MANAGEMENT
   const [submitted, setSubmitted] = useState(false);      // Success message visibility
@@ -76,34 +77,39 @@ export default function RequestBlood() {
    * 4. If no blood type set, shows warning message
    */
   useEffect(() => {
-    const loadProfile = async () => {
+    const loadData = async () => {
       // Security check - ensure user is authenticated
       if (!user?.id) return;
       
       try {
-        // API CALL - Get patient profile data
-        const result = await patientAPI.getProfile(user.id);
-        if (result.success && result.data.bloodTypeNeeded) {
-          // SUCCESS - Pre-fill blood type from profile
-          setBloodType(result.data.bloodTypeNeeded);
+        // Load patient profile and hospitals in parallel
+        const [profileResult, hospitalsResult] = await Promise.all([
+          patientAPI.getProfile(user.id),
+          patientAPI.getHospitals()
+        ]);
+        
+        // Set blood type from profile
+        if (profileResult.success && profileResult.data.bloodTypeNeeded) {
+          setBloodType(profileResult.data.bloodTypeNeeded);
+        }
+        
+        // Set hospitals list
+        if (hospitalsResult.success) {
+          setHospitals(hospitalsResult.data);
         }
       } catch (error) {
         // ERROR HANDLING - Log but don't crash the form
-        console.error("Failed to load profile:", error);
+        console.error("Failed to load data:", error);
       } finally {
         // Always clear loading state
         setLoading(false);
       }
     };
     
-    loadProfile();
+    loadData();
   }, [user]);
 
-  const mockHospitals = [
-    { id: 1, name: "City General Hospital" },
-    { id: 2, name: "Sunway Medical Centre" },
-    { id: 3, name: "Gleneagles KL" },
-  ];
+
 
   /**
    * FORM SUBMISSION HANDLER
@@ -255,10 +261,10 @@ export default function RequestBlood() {
             className="border rounded-lg p-2 w-full"
           >
             <option value="">Select hospital</option>
-            {/* DYNAMIC OPTIONS - Map through hospital list */}
-            {mockHospitals.map((h) => (
-              <option key={h.id} value={h.id}>
-                {h.name}
+            {/* DYNAMIC OPTIONS - Map through real hospital list */}
+            {hospitals.map((h) => (
+              <option key={h.hospitalId} value={h.hospitalId}>
+                {h.hospitalName}
               </option>
             ))}
           </select>

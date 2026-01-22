@@ -204,4 +204,25 @@ export const patientAPI = {
     );
     return parseJsonResponse(response);
   },
+
+  /**
+   * GET HOSPITALS LIST API CALL
+   * 
+   * PURPOSE: Retrieves all hospitals for blood request form dropdown
+   * 
+   * FLOW:
+   * 1. Sends GET request to backend
+   * 2. Backend queries hospitals table
+   * 3. Returns list of hospitals with ID and name
+   * 4. Frontend uses this to populate hospital dropdown
+   * 
+   * @returns Promise with hospitals list data
+   */
+  getHospitals: async (): Promise<any> => {
+    const response = await authenticatedFetch(
+      `${API_BASE_URL}/hospital/list`,  // URL: GET /api/hospital/list
+      { method: 'GET' }  // HTTP GET method to retrieve data
+    );
+    return parseJsonResponse(response);  // Convert response to JSON and handle errors
+  },
 };
