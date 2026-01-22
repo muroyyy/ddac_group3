@@ -111,13 +111,13 @@ export default function PatientDashboard() {
             <HeartPulse className="w-5 h-5 text-red-600" />
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mt-2">
-            {stats.pending} //calls backend to get number of pending requests
+            {stats.pending}
           </h2>
         </div>
 
         {/* Upcoming Appointments */}
         <div onClick={() => navigate('/patient/appointments')} className="bg-white rounded-lg shadow p-6 border hover:shadow-md transition cursor-pointer">
-          <div className="flex justify-between items-center"> //
+          <div className="flex justify-between items-center">
             <p className="text-sm text-gray-500">Upcoming Appointments</p>
             <Calendar className="w-5 h-5 text-red-600" />
           </div>
