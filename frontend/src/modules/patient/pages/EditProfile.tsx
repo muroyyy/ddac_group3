@@ -152,7 +152,162 @@ export default function EditProfile() {
       {/* Form starts here */}
       <form onSubmit={handleSave} className="space-y-6">
 
-        {/* All inputs are connected to state (what user types is stored) */}
+        {/* Personal Information Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          {/* Full Name */}
+          <div>
+            <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
+              Full Name
+            </label>
+            <input
+              id="fullName"
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              placeholder="Enter your full name"
+            />
+          </div>
+
+          {/* Email */}
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              placeholder="Enter your email"
+            />
+          </div>
+
+          {/* Phone */}
+          <div>
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+              Phone Number
+            </label>
+            <input
+              id="phone"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              placeholder="Enter your phone number"
+            />
+          </div>
+
+          {/* Date of Birth */}
+          <div>
+            <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 mb-2">
+              Date of Birth
+            </label>
+            <input
+              id="dateOfBirth"
+              type="date"
+              value={dateOfBirth}
+              onChange={(e) => setDateOfBirth(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+            />
+          </div>
+
+        </div>
+
+        {/* Medical Information Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          {/* Blood Type Needed */}
+          <div>
+            <label htmlFor="bloodTypeNeeded" className="block text-sm font-medium text-gray-700 mb-2">
+              Blood Type Needed
+            </label>
+            <select
+              id="bloodTypeNeeded"
+              value={bloodTypeNeeded}
+              onChange={(e) => setBloodTypeNeeded(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+            >
+              <option value="">Select blood type</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+            </select>
+          </div>
+
+          {/* Emergency Contact */}
+          <div>
+            <label htmlFor="emergencyContact" className="block text-sm font-medium text-gray-700 mb-2">
+              Emergency Contact
+            </label>
+            <input
+              id="emergencyContact"
+              type="tel"
+              value={emergencyContact}
+              onChange={(e) => setEmergencyContact(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              placeholder="Emergency contact number"
+            />
+          </div>
+
+        </div>
+
+        {/* Full Width Fields */}
+        <div className="space-y-6">
+          
+          {/* Address */}
+          <div>
+            <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
+              Address
+            </label>
+            <textarea
+              id="address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              rows={3}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              placeholder="Enter your full address"
+            />
+          </div>
+
+          {/* Medical Condition */}
+          <div>
+            <label htmlFor="medicalCondition" className="block text-sm font-medium text-gray-700 mb-2">
+              Medical Condition
+            </label>
+            <textarea
+              id="medicalCondition"
+              value={medicalCondition}
+              onChange={(e) => setMedicalCondition(e.target.value)}
+              rows={3}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              placeholder="Describe your medical condition"
+            />
+          </div>
+
+          {/* Allergies */}
+          <div>
+            <label htmlFor="allergies" className="block text-sm font-medium text-gray-700 mb-2">
+              Allergies
+            </label>
+            <textarea
+              id="allergies"
+              value={allergies}
+              onChange={(e) => setAllergies(e.target.value)}
+              rows={3}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              placeholder="List any allergies"
+            />
+          </div>
+
+        </div>
 
       
         <div className="flex justify-end">
